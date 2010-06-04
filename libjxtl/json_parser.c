@@ -9,7 +9,7 @@
 
 int json_file_parse( const char *json_file, json_writer_t *writer )
 {
-  lex_extra_t *lex_extra = NULL;
+  lex_extra_t lex_extra;
   yyscan_t json_scanner;
   apr_pool_t *json_mp;
   int parse_result;
@@ -30,10 +30,10 @@ int json_file_parse( const char *json_file, json_writer_t *writer )
 
   apr_pool_create( &json_mp, NULL );
   json_lex_init( &json_scanner );
-  lex_extra = create_lex_extra( json_mp, json_file );
-  json_set_extra( lex_extra, json_scanner );
+  lex_extra_init( &lex_extra, json_file );
+  json_set_extra( &lex_extra, json_scanner );
   parse_result = json_parse( json_scanner, &callbacks );
-  destroy_lex_extra( lex_extra );
+  lex_extra_destroy( &lex_extra );
   json_lex_destroy( json_scanner );
 
   return parse_result;

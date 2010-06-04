@@ -7,18 +7,17 @@
 
 /*
 ** When creating a scanner, this is the object that gets stored in it's
-** "extra" slot.  It has to be unique per scanner because we implement an
-** evaluate function.
+** "extra" slot.  It handles 
 */
 typedef struct lex_extra_t {
   apr_status_t status; /* Status variable used when reading from in_file */
-  apr_pool_t *mp; /* Memory pool used to allocate str_array */
+  apr_pool_t *mp; /* Memory pool for opening file and allocating str_array */
   apr_array_header_t *str_array;
   apr_file_t *in_file;
   apr_size_t bytes;
 }lex_extra_t;
 
-lex_extra_t *create_lex_extra( apr_pool_t *mp, const char *filename );
-void destroy_lex_extra( lex_extra_t *lex_extra );
+void lex_extra_init( lex_extra_t *lex_extra, const char *filename );
+void lex_extra_destroy( lex_extra_t *lex_extra );
 
 #endif

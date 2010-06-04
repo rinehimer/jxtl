@@ -446,7 +446,7 @@ int main( int argc, char const * const *argv )
 {
   apr_pool_t *mp;
   int parse_result;
-  lex_extra_t *lex_extra;
+  lex_extra_t lex_extra;
   yyscan_t jxtl_scanner;
   jxtl_data_t jxtl_data;
   const char *template_file = NULL;
@@ -489,10 +489,10 @@ int main( int argc, char const * const *argv )
   if ( jxtl_load_data( json_file, xml_file, skip_root, &writer ) == 0 ) {
     jxtl_data.json = writer.json;
     jxtl_lex_init( &jxtl_scanner );
-    lex_extra = create_lex_extra( mp, template_file );
-    jxtl_set_extra( lex_extra, jxtl_scanner );
+    lex_extra_init( &lex_extra, template_file );
+    jxtl_set_extra( &lex_extra, jxtl_scanner );
     parse_result = jxtl_parse( jxtl_scanner, &callbacks );
-    destroy_lex_extra( lex_extra );
+    lex_extra_destroy( &lex_extra );
     jxtl_lex_destroy( jxtl_scanner );
   }
 
