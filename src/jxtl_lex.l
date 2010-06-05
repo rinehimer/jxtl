@@ -23,7 +23,7 @@
 #define LEX_EXTRA_BYTES LEX_EXTRA->bytes
 
 #define jxtl_error( ... ) \
-  jxtl_error( yylloc, yyscanner, __VA_ARGS__ )
+  jxtl_error( yylloc, yyscanner, NULL, __VA_ARGS__ )
 
 #define YY_INPUT( buf, result, max_size ) {				\
     LEX_EXTRA_BYTES = max_size;                                         \
@@ -70,7 +70,7 @@
       * return that now and put the the directive start text back so that it
       * can be returned next time after the array is cleared.
       */
-     if ( LEX_EXTRA_STR_ARRAY->nelts > 0 ) {
+     if ( LEX_EXTRA_STR_ARRAY->nelts > 0 )  {
        yylval->string = apr_pstrndup( LEX_EXTRA_MP,
                                       LEX_EXTRA_STR_ARRAY->elts,
                                       LEX_EXTRA_STR_ARRAY->nelts );
@@ -137,16 +137,35 @@
   "\\r" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\r'; }
   "\\t" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\t'; }
   "\\\"" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '"'; }
-  [^\"\\]+ {
+  [^\"\\\n]+ {
     STRING_COPY;
+  }
+  "\n" {
+    jxtl_error( "unterminated string constant" );
+    BEGIN( INITIAL );
   }
 }
 
 <unmatched>{
   [^ \t\r\n,}]+ {
-    jxtl_error( "bad option '%s'\n", yytext );
+    jxtl_error( "bad option '%s'", yytext );
     BEGIN( options );
   }
+}
+
+<INITIAL><<EOF>> {
+  if ( LEX_EXTRA_STR_ARRAY->nelts > 0 )  {
+    yylval->string = apr_pstrndup( LEX_EXTRA_MP,
+				   LEX_EXTRA_STR_ARRAY->elts,
+				   LEX_EXTRA_STR_ARRAY->nelts );
+    APR_ARRAY_CLEAR( LEX_EXTRA_STR_ARRAY );
+    return T_TEXT;
+  }
+  yyterminate();
+}
+
+<str><<EOF>> {
+  
 }
 
 %%

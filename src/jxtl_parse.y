@@ -12,8 +12,8 @@
 #include "json.h"
 
 /*
- * Define YY_DECL before including json_lex.h so that it knows we are doing a
- * custom declaration of json_lex.
+ * Define YY_DECL before including jxtl_lex.h so that it knows we are doing a
+ * custom declaration of jxtl_lex.
  */
 #define YY_DECL
 
