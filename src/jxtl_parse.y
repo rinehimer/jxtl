@@ -25,6 +25,7 @@
 #define section_end_handler callbacks->section_end_handler
 #define separator_start_handler callbacks->separator_start_handler
 #define separator_end_handler callbacks->separator_end_handler
+#define test_handler callbacks->test_handler
 #define value_handler callbacks->value_handler
 #define user_data callbacks->user_data
 
@@ -44,12 +45,15 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, jxtl_callback_t *callbacks,
 %lex-param { yyscan_t scanner }
 
 %union {
+  int ival;
   unsigned char *string;
 }
 
 %token T_DIRECTIVE_START "{{" T_DIRECTIVE_END "}}" T_SECTION "section"
-       T_SEPARATOR "separator" T_END "end"
+       T_SEPARATOR "separator" T_TEST "test" T_END "end"
 %token <string> T_TEXT "text" T_IDENTIFIER "identifier" T_STRING "string"
+
+%type <ival> negate
 
 %%
 
@@ -99,7 +103,17 @@ option
       text_handler( user_data, $<string>3 );
       separator_end_handler( user_data );
     }
+  | T_TEST '=' '(' negate T_IDENTIFIER ')'
+    {
+      test_handler( user_data, $<string>5, $<ival>4 );
+    }
 ;
+
+negate
+  : /* empty */ { $$ = 0; }
+  | '!' { $$ = 1; }
+;
+
 
 %%
 

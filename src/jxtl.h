@@ -7,6 +7,7 @@ typedef struct {
   void ( *section_end_handler )( void *user_data, unsigned char *name );
   void ( *separator_start_handler )( void *user_data );
   void ( *separator_end_handler )( void *user_data );
+  void ( *test_handler )( void *user_data, unsigned char *name, int negate );
   void ( *value_handler )( void *user_data, unsigned char *name );
   void *user_data;
 } jxtl_callback_t;

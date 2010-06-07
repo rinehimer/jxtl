@@ -27,6 +27,11 @@ typedef enum jxtl_content_type {
   JXTL_VALUE
 } jxtl_content_type;
 
+typedef struct jxtl_test_t {
+  unsigned char *name;
+  int negate;
+} jxtl_test_t;
+
 typedef struct jxtl_section_t {
   /** Name of the section. */
   unsigned char *name; 
@@ -36,6 +41,8 @@ typedef struct jxtl_section_t {
   apr_array_header_t *separator;
   /** A pointer to the content or separator array. */
   apr_array_header_t *current_array;
+  /** A test to run when iterating over a section */
+  jxtl_test_t *test;
 } jxtl_section_t;
 
 typedef struct jxtl_content_t {
@@ -130,14 +137,57 @@ void text_print( char *text, jxtl_content_t *prev_content,
 }
 
 /**
+ * Evaluate whether or not to expand "section" for "json".
+ */
+int section_test( jxtl_section_t *section, json_t *json )
+{
+  int result;
+  jxtl_test_t *test = section->test;
+
+  /* No test, return true */
+  if ( !test )
+    return 1;
+  
+  if ( json->type == JSON_OBJECT ) {
+    result = ( apr_hash_get( json->value.object, test->name,
+                             APR_HASH_KEY_STRING ) != NULL );
+  }
+
+  result = ( test->negate ) ? !result : result;
+
+  return result;
+}
+
+/**
+ * Count up the number of array items that pass the test for "section".  This
+ * is necessary so we know if the separator should be printed or not.
+ */
+int num_true_array_items( jxtl_section_t *section, json_t *json )
+{
+  int i;
+  int num = 0;
+  json_t *json_value;
+
+  for ( i = 0; i < json->value.array->nelts; i++ ) {
+    json_value = APR_ARRAY_IDX( json->value.array, i, json_t * );
+    if ( section_test( section, json_value ) ) {
+      num++;
+    }
+  }
+
+  return num;
+}
+
+/**
  * Print a saved section
  */
 void jxtl_section_print( jxtl_section_t *section,
-			   apr_array_header_t *json_array,
-			   section_print_type print_type )
+                         apr_array_header_t *json_array,
+                         section_print_type print_type )
 {
   int i;
-  int j;
+  int num_items;
+  int num_printed;
   jxtl_content_t *prev_content, *content, *next_content;
   jxtl_section_t *tmp_section;
   json_t *json;
@@ -155,17 +205,26 @@ void jxtl_section_print( jxtl_section_t *section,
   else
     content_array = section->separator;
 
+  /*
+   * When we have an array, just loop over the items in it and call
+   * jxtl_section_print() for each item.
+   */
   if ( json->type == JSON_ARRAY ) {
+    num_items = num_true_array_items( section, json );
+    num_printed = 0;
     for ( i = 0; i < json->value.array->nelts; i++ ) {
       json_value = APR_ARRAY_IDX( json->value.array, i, json_t * );
-      APR_ARRAY_PUSH( json_array, json_t * ) = json_value;
-      jxtl_section_print( section, json_array, PRINT_SECTION );
-      
-      /* Only print the separator if it's not the last one */
-      if ( i + 1 < json->value.array->nelts )
-	jxtl_section_print( section, json_array, PRINT_SEPARATOR );
+      if ( section_test( section, json_value ) ) {
+        APR_ARRAY_PUSH( json_array, json_t * ) = json_value;
+        jxtl_section_print( section, json_array, PRINT_SECTION );
 
-      APR_ARRAY_POP( json_array, json_t * );
+        num_printed++;
+        /* Only print the separator if it's not the last one */
+        if ( num_printed < num_items )
+          jxtl_section_print( section, json_array, PRINT_SEPARATOR );
+
+        APR_ARRAY_POP( json_array, json_t * );
+      }
     }
     return;
   }
@@ -267,6 +326,7 @@ void jxtl_section_start( void *user_data, unsigned char *name )
   section->separator = apr_array_make( data->mp, 1024,
 				       sizeof( jxtl_content_t * ) );
   section->current_array = section->content;
+  section->test = NULL;
   jxtl_content_push( data, JXTL_SECTION, section );
   data->depth++;
 }
@@ -344,7 +404,7 @@ void jxtl_value_func( void *user_data, unsigned char *name )
 
   if ( data->depth > 0 ) {
     jxtl_content_push( data, JXTL_VALUE,
-			 apr_pstrdup( data->mp, (char *) name ) );
+                       apr_pstrdup( data->mp, (char *) name ) );
   }
   else {
     json_value = apr_hash_get( data->json->value.object, name,
@@ -353,8 +413,29 @@ void jxtl_value_func( void *user_data, unsigned char *name )
   }
 }
 
+/**
+ * Parser callback function for when it encounters a test expression.
+ * @param user_data The jxtl_data
+ * @param name The name to lookup when doing the test
+ * @param negate Whether or not to negate the result of the lookup.
+ */
+void jxtl_test_func( void *user_data, unsigned char *name, int negate )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  jxtl_test_t *test;
+  jxtl_section_t *section;
+
+  section = APR_ARRAY_IDX( data->section, data->section->nelts - 1,
+			   jxtl_section_t * );
+
+  test = apr_palloc( data->mp, sizeof( jxtl_test_t ) );
+  test->name = apr_pstrdup( data->mp, (char *) name );
+  test->negate = negate;
+  section->test = test;
+}
+
 void jxtl_usage( const char *prog_name,
-		   const apr_getopt_option_t *options )
+                 const apr_getopt_option_t *options )
 {
   int i;
 
@@ -459,7 +540,7 @@ int main( int argc, char const * const *argv )
   apr_pool_create( &mp, NULL );
 
   jxtl_init( argc, argv, mp, &template_file, &json_file, &xml_file,
-	       &skip_root );
+             &skip_root );
 
   /*
    * Setup our callback object.  Note that the stack is created using this
@@ -480,6 +561,7 @@ int main( int argc, char const * const *argv )
     jxtl_section_end,
     jxtl_separator_start,
     jxtl_separator_end,
+    jxtl_test_func,
     jxtl_value_func,
     &jxtl_data
   };

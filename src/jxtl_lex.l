@@ -58,7 +58,9 @@
 %option bison-locations
 %option case-insensitive
 
-%x directive options str unmatched
+%x directive options str unmatched expression
+
+identifier [^#{} \t\r\n;,()!]+
 
 %%
 
@@ -91,7 +93,7 @@
     "#section" { return T_SECTION; }
     "#end" { return T_END; }
     ";" { BEGIN( options ); }
-    [^#} \t\r\n;]+ {
+    {identifier} {
       yylval->string = apr_pstrdup( LEX_EXTRA_MP, yytext );
       return T_IDENTIFIER;
     }
@@ -99,16 +101,16 @@
     [ \t\r]+
     "\n"
    . {
-      /* '#' or '}' used as part of identifier.  This could be fixed in the
-       * future to allow it.  Probably not that important though.
-       */
+      jxtl_error( "illegal character '%c' found in identifier", yytext[0] );
    }
 }
 
 <options>{
   "separator" { return T_SEPARATOR; }
+  "test" { return T_TEST; }
   "=" { return '='; }
   "," { return ','; }
+  "(" { BEGIN( expression ); return '('; }
   "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
   "\"" {
     APR_ARRAY_CLEAR( LEX_EXTRA_STR_ARRAY );
@@ -143,6 +145,15 @@
   "\n" {
     jxtl_error( "unterminated string constant" );
     BEGIN( INITIAL );
+  }
+}
+
+<expression>{
+  "!" { return '!'; }
+  ")" { BEGIN( options ); return ')'; }
+  {identifier} {
+    yylval->string = apr_pstrdup( LEX_EXTRA_MP, yytext );
+    return T_IDENTIFIER;
   }
 }
 
