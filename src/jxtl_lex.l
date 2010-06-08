@@ -92,6 +92,7 @@ identifier [^#{} \t\r\n;,()!]+
 <directive>{
     "#section" { return T_SECTION; }
     "#end" { return T_END; }
+    "#if" { BEGIN( expression ); return T_IF; }
     ";" { BEGIN( options ); }
     {identifier} {
       yylval->string = apr_pstrdup( LEX_EXTRA_MP, yytext );
@@ -150,6 +151,7 @@ identifier [^#{} \t\r\n;,()!]+
 
 <expression>{
   "!" { return '!'; }
+  "(" { return '('; }
   ")" { BEGIN( options ); return ')'; }
   {identifier} {
     yylval->string = apr_pstrdup( LEX_EXTRA_MP, yytext );

@@ -45,9 +45,10 @@
      T_SEPARATOR = 261,
      T_TEST = 262,
      T_END = 263,
-     T_TEXT = 264,
-     T_IDENTIFIER = 265,
-     T_STRING = 266
+     T_IF = 264,
+     T_TEXT = 265,
+     T_IDENTIFIER = 266,
+     T_STRING = 267
    };
 #endif
 /* Tokens.  */
@@ -57,22 +58,23 @@
 #define T_SEPARATOR 261
 #define T_TEST 262
 #define T_END 263
-#define T_TEXT 264
-#define T_IDENTIFIER 265
-#define T_STRING 266
+#define T_IF 264
+#define T_TEXT 265
+#define T_IDENTIFIER 266
+#define T_STRING 267
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 47 "jxtl_parse.y"
+#line 49 "jxtl_parse.y"
 {
   int ival;
   unsigned char *string;
 }
 /* Line 1529 of yacc.c.  */
-#line 76 "jxtl_parse.h"
+#line 78 "jxtl_parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
