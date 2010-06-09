@@ -7,7 +7,7 @@ LIBJXTL = ${top_srcdir}/libjxtl/libjxtl.la
 
 YFLAGS =
 jxtl_CFLAGS = -g ${APR_CFLAGS} ${XML2_CFLAGS}
-jxtl_LDFLAGS = ${APR_LIBS} ${XML2_LIBS} -Wl,--rpath -Wl,${libdir}
+jxtl_LDFLAGS = ${APR_LIBS} ${XML2_LIBS} -Wl,-rpath -Wl,${libdir}
 jxtl_LDADD = ${LIBJXTL}
 
 xml2json_CFLAGS = -g ${APR_CFLAGS} ${XML2_CFLAGS}
