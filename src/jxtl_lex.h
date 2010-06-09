@@ -225,6 +225,7 @@ void jxtl_free (void * ,yyscan_t yyscanner );
 #define str 3
 #define unmatched 4
 #define expression 5
+#define comment 6
 
 #endif
 
@@ -342,9 +343,9 @@ extern int jxtl_lex \
 #undef YY_DECL
 #endif
 
-#line 184 "jxtl_lex.l"
+#line 188 "jxtl_lex.l"
 
 
-#line 349 "jxtl_lex.h"
+#line 350 "jxtl_lex.h"
 #undef jxtl_IN_HEADER
 #endif /* jxtl_HEADER_H */

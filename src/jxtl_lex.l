@@ -58,7 +58,7 @@
 %option bison-locations
 %option case-insensitive
 
-%x directive options str unmatched expression
+%x directive options str unmatched expression comment
 
 identifier [^#{} \t\r\n;,()!]+
 
@@ -85,6 +85,9 @@ identifier [^#{} \t\r\n;,()!]+
        return T_DIRECTIVE_START;
      }
    }
+   "{{!" {
+     BEGIN( comment );
+   }
    "{"|"\n" { STRING_COPY; }
    [^{\n]+ { STRING_COPY; }
 }
@@ -101,9 +104,7 @@ identifier [^#{} \t\r\n;,()!]+
     "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
     [ \t\r]+
     "\n"
-   . {
-      jxtl_error( "illegal character '%c' found in identifier", yytext[0] );
-   }
+   . { jxtl_error( "illegal character '%c' found in identifier", yytext[0] ); }
 }
 
 <options>{
@@ -177,8 +178,11 @@ identifier [^#{} \t\r\n;,()!]+
   yyterminate();
 }
 
-<str><<EOF>> {
-  
+<comment>{
+  "!}}" { BEGIN( INITIAL ); }
+  [^!\n]+
+  "!"
+  "\n"
 }
 
 %%
