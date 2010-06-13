@@ -101,33 +101,30 @@ static void json_value_print( json_t *json )
   }
 }
 
-static json_t *json_lookup( apr_array_header_t *json_array,
-                            char *name )
+static json_t *json_lookup( json_t *root, unsigned char *exp )
 {
-  int i;
-  json_t *json_value;
-  json_t *json_value2;
+  json_t *json = root;
+  char *last;
+  char *token;
 
-  for ( i = json_array->nelts - 1; i >= 0; i-- ) {
-    json_value = APR_ARRAY_IDX( json_array, i, json_t * );
-    if ( json_value->type == JSON_OBJECT ) {
-      json_value2 = apr_hash_get( json_value->value.object, name,
-				  APR_HASH_KEY_STRING );
-      if ( json_value2 ) {
-	return json_value2;
-      }
+  token = apr_strtok( (char *) exp, ".", &last );
+  while ( token ) {
+    if ( json && json->type == JSON_OBJECT ) {
+      json = apr_hash_get( json->value.object, token, APR_HASH_KEY_STRING );
     }
-    else if ( ( json_value->type != JSON_ARRAY ) &&
-	      ( apr_strnatcasecmp( name, "." ) == 0 ) ) {
-      return json_value;
+    else if ( apr_strnatcasecmp( (char *) token, "@" ) != 0 ) {
+      json = NULL;
+      break;
     }
+    token = apr_strtok( NULL, ".", &last );
   }
-  return NULL;
+
+  return json;
 }
 
 static void text_print( char *text, jxtl_content_t *prev_content,
-                 jxtl_content_t *next_content,
-                 section_print_type print_type )
+			jxtl_content_t *next_content,
+			section_print_type print_type )
 {
   char *text_ptr = text;
   int len = strlen( text_ptr );
@@ -156,8 +153,7 @@ static int jxtl_test( jxtl_test_t *test, json_t *json )
     return 1;
   
   if ( json->type == JSON_OBJECT ) {
-    result = ( apr_hash_get( json->value.object, test->name,
-                             APR_HASH_KEY_STRING ) != NULL );
+    result = ( json_lookup( json, test->name ) != NULL );
   }
 
   result = ( test->negate ) ? !result : result;
@@ -231,14 +227,11 @@ static void jxtl_content_print( apr_array_header_t *content_array,
 
     case JXTL_SECTION:
       tmp_section = (jxtl_section_t *) content->value;
-      if ( json->type == JSON_OBJECT ) {
-	json_value = apr_hash_get( json->value.object, tmp_section->name,
-				   APR_HASH_KEY_STRING );
-	if ( json_value ) {
-	  APR_ARRAY_PUSH( json_array, json_t * ) = json_value;
-	  jxtl_section_print( tmp_section, json_array, PRINT_SECTION );
-	  APR_ARRAY_POP( json_array, json_t * );
-	}
+      json_value = json_lookup( json, tmp_section->name );
+      if ( json_value ) {
+	APR_ARRAY_PUSH( json_array, json_t * ) = json_value;
+	jxtl_section_print( tmp_section, json_array, PRINT_SECTION );
+	APR_ARRAY_POP( json_array, json_t * );
       }
       break;
 
@@ -250,7 +243,7 @@ static void jxtl_content_print( apr_array_header_t *content_array,
       break;
 
     case JXTL_VALUE:
-      json_value_print( json_lookup( json_array, (char *) content->value ) );
+      json_value_print( json_lookup( json, content->value ) );
       break;
     }
     prev_content = content;
@@ -409,8 +402,7 @@ void jxtl_section_end( void *user_data, unsigned char *name )
 
   if ( data->section_depth == 0 ) {
     /* Process saved document fragment */
-    json = apr_hash_get( data->json->value.object, section->name,
-			 APR_HASH_KEY_STRING );
+    json = json_lookup( data->json, section->name );
     APR_ARRAY_CLEAR( data->json_array );
     APR_ARRAY_PUSH( data->json_array, json_t * ) = json;
 
@@ -530,8 +522,7 @@ void jxtl_value_func( void *user_data, unsigned char *name )
                        apr_pstrdup( data->mp, (char *) name ) );
   }
   else {
-    json_value = apr_hash_get( data->json->value.object, name,
-			       APR_HASH_KEY_STRING );
+    json_value = json_lookup( data->json, name );
     json_value_print( json_value );
   }
 }
@@ -578,8 +569,8 @@ void jxtl_usage( const char *prog_name,
  * data_file.
  */
 void jxtl_init( int argc, char const * const *argv , apr_pool_t *mp,
-		  const char **template_file, const char **json_file,
-		  const char **xml_file, int *skip_root )
+		const char **template_file, const char **json_file,
+		const char **xml_file, int *skip_root )
 {
   int i;
   apr_getopt_t *options;
@@ -635,7 +626,7 @@ void jxtl_init( int argc, char const * const *argv , apr_pool_t *mp,
  * non-null.
  */
 int jxtl_load_data( const char *json_file, const char *xml_file,
-                      int skip_root, json_writer_t *writer )
+		    int skip_root, json_writer_t *writer )
 {
   int ret = 1;
 
