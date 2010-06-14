@@ -104,20 +104,27 @@ static void json_value_print( json_t *json )
 static json_t *json_lookup( json_t *root, unsigned char *exp )
 {
   json_t *json = root;
-  char *last;
+  char *exp_ptr = exp;
+  char *last = exp;
   char *token;
+  int token_len;
 
-  token = apr_strtok( (char *) exp, ".", &last );
-  while ( token ) {
-    if ( json && json->type == JSON_OBJECT ) {
-      json = apr_hash_get( json->value.object, token, APR_HASH_KEY_STRING );
+  do {
+    exp_ptr = strchr( last, '.' );
+    token_len = ( exp_ptr ) ? exp_ptr - last : strlen( last );
+    token = last;
+    if ( token_len == 1 && token[0] == '@' ) {
+      /* No action, leave json alone */
     }
-    else if ( apr_strnatcasecmp( (char *) token, "@" ) != 0 ) {
+    else if ( json && json->type == JSON_OBJECT ) {
+      json = apr_hash_get( json->value.object, token, token_len );
+    }
+    else {
       json = NULL;
       break;
     }
-    token = apr_strtok( NULL, ".", &last );
-  }
+    last = exp_ptr + 1;
+  }while ( exp_ptr );
 
   return json;
 }
