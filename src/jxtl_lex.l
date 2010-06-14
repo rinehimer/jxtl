@@ -179,9 +179,10 @@ identifier ([a-zA-Z][a-zA-Z_.]+)|"@"
 }
 
 <comment>{
+  "-}}"[\n]? { BEGIN( INITIAL ); }
   "!}}" { BEGIN( INITIAL ); }
-  [^!\n]+
-  "!"
+  [^!\-\n]+
+  "!"|"-"
   "\n"
 }
 
