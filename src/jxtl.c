@@ -116,6 +116,9 @@ static json_t *json_lookup( json_t *root, unsigned char *exp )
     if ( token_len == 1 && token[0] == '@' ) {
       /* No action, leave json alone */
     }
+    else if ( token_len == 2 && token[0] == '@' & token[1] == '@' ) {
+      json = json->parent;
+    }
     else if ( json && json->type == JSON_OBJECT ) {
       json = apr_hash_get( json->value.object, token, token_len );
     }

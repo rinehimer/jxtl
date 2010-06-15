@@ -60,7 +60,7 @@
 
 %x directive options str unmatched expression comment
 
-identifier [a-zA-Z@][a-zA-Z0-9_.@]+
+identifier [a-zA-Z_@][a-zA-Z0-9_.@]*
 
 %%
 

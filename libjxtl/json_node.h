@@ -20,6 +20,7 @@ typedef enum json_type {
 typedef struct json_t {
   unsigned char *name;
   json_type type;
+  struct json_t *parent;
   union {
     unsigned char *string;
     int integer;

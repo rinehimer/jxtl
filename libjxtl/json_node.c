@@ -7,7 +7,8 @@
 
 #define JSON_CREATE( mp, json )					   \
   json = apr_palloc( mp, sizeof( json_t ) );                       \
-  json->name = NULL
+  json->name = NULL;						   \
+  json->parent = NULL
 
 json_t *json_string_create( apr_pool_t *mp, unsigned char *string )
 {

@@ -161,6 +161,8 @@ static void json_add( json_writer_t *writer, json_t *json )
       JSON_NAME( new_array ) = JSON_NAME( json );
       JSON_NAME( json ) = NULL;
       JSON_NAME( tmp_json ) = NULL;
+      json->parent = new_array;
+      tmp_json->parent = new_array;
       APR_ARRAY_PUSH( new_array->value.array, json_t * ) = tmp_json;
       APR_ARRAY_PUSH( new_array->value.array, json_t * ) = json;
       apr_hash_set( obj->value.object, JSON_NAME( new_array ),
@@ -168,16 +170,19 @@ static void json_add( json_writer_t *writer, json_t *json )
     }
     else if ( tmp_json && tmp_json->type == JSON_ARRAY ) {
       /* Exists, but we already converted it to an array */
+      json->parent = tmp_json;
       APR_ARRAY_PUSH( tmp_json->value.array, json_t * ) = json;
     }
     else {
       /* Standard insertion */
+      json->parent = obj;
       apr_hash_set( obj->value.object, JSON_NAME( json ),
 		    APR_HASH_KEY_STRING, json );
     }
     break;
 
   case JSON_ARRAY:
+    json->parent = obj;
     APR_ARRAY_PUSH( obj->value.array, json_t * ) = json;
     break;
 
