@@ -163,6 +163,7 @@ static void json_add( json_writer_t *writer, json_t *json )
       JSON_NAME( tmp_json ) = NULL;
       json->parent = new_array;
       tmp_json->parent = new_array;
+      new_array->parent = obj;
       APR_ARRAY_PUSH( new_array->value.array, json_t * ) = tmp_json;
       APR_ARRAY_PUSH( new_array->value.array, json_t * ) = json;
       apr_hash_set( obj->value.object, JSON_NAME( new_array ),
