@@ -96,6 +96,7 @@ identifier [a-zA-Z_@][a-zA-Z0-9_.@]*
     "#section" { return T_SECTION; }
     "#end" { return T_END; }
     "#if" { BEGIN( expression ); return T_IF; }
+    "#else" { return T_ELSE; }
     ";" { BEGIN( options ); }
     {identifier} {
       yylval->string = apr_pstrdup( LEX_EXTRA_MP, yytext );

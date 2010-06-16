@@ -51,8 +51,9 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, jxtl_callback_t *callbacks,
   unsigned char *string;
 }
 
-%token T_DIRECTIVE_START "{{" T_DIRECTIVE_END "}}" T_SECTION "section"
-       T_SEPARATOR "separator" T_TEST "test" T_END "end" T_IF "if"
+%token T_DIRECTIVE_START "{{" T_DIRECTIVE_END "}}"
+       T_SECTION "section" T_SEPARATOR "separator" T_TEST "test"
+       T_END "end" T_IF "if" T_ELSE "else"
 %token <string> T_TEXT "text" T_IDENTIFIER "identifier" T_STRING "string"
 
 %type <ival> negate
@@ -92,7 +93,17 @@ if_directive
       if_start_handler( user_data, $<string>5, $<ival>4 );
     }
     section_content
+    end_if
+;
+
+end_if
+  : T_DIRECTIVE_START T_ELSE T_DIRECTIVE_END
+    {
+      /* Need to handle the else here. */
+    }
+    section_content
     T_DIRECTIVE_START T_END T_DIRECTIVE_END
+  | T_DIRECTIVE_START T_END T_DIRECTIVE_END
     {
       if_end_handler( user_data );
     }
