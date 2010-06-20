@@ -7,6 +7,7 @@ typedef struct {
   void ( *section_end_handler )( void *user_data, unsigned char *name );
   void ( *if_start_handler )( void *user_data, unsigned char *name,
                               int negate );
+  void ( *else_handler )( void *user_data );
   void ( *if_end_handler )( void *user_data );
   void ( *separator_start_handler )( void *user_data );
   void ( *separator_end_handler )( void *user_data );

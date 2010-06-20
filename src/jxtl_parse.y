@@ -26,6 +26,7 @@
 #define separator_start_handler callbacks->separator_start_handler
 #define separator_end_handler callbacks->separator_end_handler
 #define if_start_handler callbacks->if_start_handler
+#define else_handler callbacks->else_handler
 #define if_end_handler callbacks->if_end_handler
 #define test_handler callbacks->test_handler
 #define value_handler callbacks->value_handler
@@ -99,10 +100,13 @@ if_directive
 end_if
   : T_DIRECTIVE_START T_ELSE T_DIRECTIVE_END
     {
-      /* Need to handle the else here. */
+      else_handler( user_data );
     }
     section_content
     T_DIRECTIVE_START T_END T_DIRECTIVE_END
+    {
+      if_end_handler( user_data );
+    }
   | T_DIRECTIVE_START T_END T_DIRECTIVE_END
     {
       if_end_handler( user_data );

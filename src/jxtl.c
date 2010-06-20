@@ -35,7 +35,7 @@ typedef struct jxtl_test_t {
 
 typedef struct jxtl_if_t {
   apr_array_header_t *content;
-  jxtl_test_t test;
+  jxtl_test_t *test;
 } jxtl_if_t;
 
 typedef struct jxtl_section_t {
@@ -209,13 +209,12 @@ static void jxtl_content_print( apr_array_header_t *content_array,
                                 apr_array_header_t *json_array,
                                 section_print_type print_type )
 {
-  int i;
+  int i, j;
   jxtl_content_t *content, *prev_content, *next_content;
   jxtl_section_t *tmp_section;
-  json_t *json;
-  json_t *json_value;
-  json_t *json_value2;
+  json_t *json, *json_value, *json_value2;
   jxtl_if_t *jxtl_if;
+  apr_array_header_t *if_block;
 
   json = APR_ARRAY_IDX( json_array, json_array->nelts - 1, json_t * );
 
@@ -246,9 +245,18 @@ static void jxtl_content_print( apr_array_header_t *content_array,
       break;
 
     case JXTL_IF:
-      jxtl_if = (jxtl_if_t *) content->value;
-      if ( jxtl_test( &jxtl_if->test, json ) ) {
-        jxtl_content_print( jxtl_if->content, json_array, print_type );
+      /*
+       * Loop through all of the ifs until we find a true one and then break
+       * the loop.
+       */
+
+      if_block = (apr_array_header_t *) content->value;
+      for ( j = 0; j < if_block->nelts; j++ ) {
+        jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
+        if ( jxtl_test( jxtl_if->test, json ) ) {
+          jxtl_content_print( jxtl_if->content, json_array, print_type );
+          break;
+        }
       }
       break;
 
@@ -433,12 +441,6 @@ void jxtl_if_start( void *user_data, unsigned char *name, int negate )
   jxtl_if_t *jxtl_if;
   json_t *json;
 
-  if ( !in_true_if( data ) ) {
-    /* If we're not in a true if, push another false on. */
-    APR_ARRAY_PUSH( data->if_array, int ) = 0;
-    return;
-  }
-
   if ( data->section_depth == 0 ) {
     /* No nested sections so evaluate this now and push the result. */
     jxtl_test_t tmp_test;
@@ -450,15 +452,71 @@ void jxtl_if_start( void *user_data, unsigned char *name, int negate )
     /* Create the if, will be tested later. */
     section = APR_ARRAY_IDX( data->section, data->section->nelts - 1,
                              jxtl_section_t * );
+    apr_array_header_t *if_block = apr_array_make( data->mp, 8,
+                                                   sizeof( jxtl_if_t * ) );
     jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
-    jxtl_if->test.name = apr_pstrdup( data->mp, (char *) name );
-    jxtl_if->test.negate = negate;
+    jxtl_if->test = apr_palloc( data->mp, sizeof( jxtl_test_t ) );
+    jxtl_if->test->name = apr_pstrdup( data->mp, (char *) name );
+    jxtl_if->test->negate = negate;
     jxtl_if->content = apr_array_make( data->mp, 1024,
                                        sizeof( jxtl_content_t * ) );
-    jxtl_content_push( data, JXTL_IF, jxtl_if );
+    APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
+    jxtl_content_push( data, JXTL_IF, if_block );
     APR_ARRAY_PUSH( section->current_array,
                     apr_array_header_t * ) = jxtl_if->content;
   }
+}
+
+void jxtl_else( void *user_data )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+
+  /*
+   * If we are not in a true if and are not nested, check to make sure the
+   * previous one is true, if it is then we should output the content of
+   * this else.
+   */
+  if ( data->section_depth == 0 ) {
+    APR_ARRAY_POP( data->if_array, int );
+    if ( in_true_if( data ) ) {
+      APR_ARRAY_PUSH( data->if_array, int ) = 1;
+    }
+    else {
+      APR_ARRAY_PUSH( data->if_array, int ) = 0;
+    }
+  }
+  else {
+    jxtl_section_t *section;
+    apr_array_header_t *content_array, *if_block;
+    jxtl_if_t *jxtl_if;
+    jxtl_content_t *content;
+
+    section = APR_ARRAY_IDX( data->section, data->section->nelts - 1,
+                             jxtl_section_t * );
+    APR_ARRAY_POP( section->current_array, apr_array_header_t * );
+    content_array = APR_ARRAY_IDX( section->current_array, 
+                                   section->current_array->nelts - 1,
+                                   apr_array_header_t * );
+    content = APR_ARRAY_IDX( content_array,
+                             content_array->nelts - 1,
+                             jxtl_content_t * );
+    if_block = (apr_array_header_t *) content->value;
+
+    /*
+     * Create a new if with a null test.  Push that if onto the if_block which
+     * should be the last content in the section.  Pop the current array of the
+     * section, and push on the array of this else.  No need to push content
+     * onto the actual section itself, because the if_block is already there.
+     */
+    jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
+    jxtl_if->test = NULL;
+    jxtl_if->content = apr_array_make( data->mp, 1024,
+                                       sizeof( jxtl_content_t * ) );
+    APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
+    APR_ARRAY_PUSH( section->current_array,
+                    apr_array_header_t * ) = jxtl_if->content;
+  }
+
 }
 
 void jxtl_if_end( void *user_data )
@@ -468,9 +526,9 @@ void jxtl_if_end( void *user_data )
 
   APR_ARRAY_POP( data->if_array, int );
 
-  if ( data->section_depth > 0 && in_true_if( data ) ) {
+  if ( data->section_depth > 0 ) {
     section = APR_ARRAY_IDX( data->section, data->section->nelts - 1,
-			   jxtl_section_t * );
+                             jxtl_section_t * );
     APR_ARRAY_POP( section->current_array, apr_array_header_t * );
   }
 }
@@ -688,6 +746,7 @@ int main( int argc, char const * const *argv )
     jxtl_section_start,
     jxtl_section_end,
     jxtl_if_start,
+    jxtl_else,
     jxtl_if_end,
     jxtl_separator_start,
     jxtl_separator_end,
