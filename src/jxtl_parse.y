@@ -26,6 +26,7 @@
 #define separator_start_handler callbacks->separator_start_handler
 #define separator_end_handler callbacks->separator_end_handler
 #define if_start_handler callbacks->if_start_handler
+#define elseif_handler callbacks->elseif_handler
 #define else_handler callbacks->else_handler
 #define if_end_handler callbacks->if_end_handler
 #define test_handler callbacks->test_handler
@@ -54,9 +55,10 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, jxtl_callback_t *callbacks,
 
 %token T_DIRECTIVE_START "{{" T_DIRECTIVE_END "}}"
        T_SECTION "section" T_SEPARATOR "separator" T_TEST "test"
-       T_END "end" T_IF "if" T_ELSE "else"
+       T_END "end" T_IF "if" T_ELSEIF "elseif" T_ELSE "else"
 %token <string> T_TEXT "text" T_IDENTIFIER "identifier" T_STRING "string"
 
+%left T_ELSEIF T_ELSE
 %type <ival> negate
 
 %%
@@ -94,24 +96,29 @@ if_directive
       if_start_handler( user_data, $<string>5, $<ival>4 );
     }
     section_content
-    end_if
+    rest_of_if
+
 ;
 
-end_if
-  : T_DIRECTIVE_START T_ELSE T_DIRECTIVE_END
+rest_of_if
+  : T_DIRECTIVE_START T_ELSEIF '(' negate T_IDENTIFIER ')' T_DIRECTIVE_END
+    {
+      elseif_handler( user_data, $<string>5, $<ival>4 );
+    }
+    section_content rest_of_if
+  | T_DIRECTIVE_START T_ELSE T_DIRECTIVE_END
     {
       else_handler( user_data );
     }
-    section_content
-    T_DIRECTIVE_START T_END T_DIRECTIVE_END
+    section_content endif
+  | endif
+  ;
+
+endif
+  : T_DIRECTIVE_START T_END T_DIRECTIVE_END
     {
       if_end_handler( user_data );
     }
-  | T_DIRECTIVE_START T_END T_DIRECTIVE_END
-    {
-      if_end_handler( user_data );
-    }
-;
 
 section_content
   : /* empty */

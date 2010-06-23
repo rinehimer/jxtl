@@ -467,6 +467,46 @@ void jxtl_if_start( void *user_data, unsigned char *name, int negate )
   }
 }
 
+void jxtl_elseif( void *user_data, unsigned char *name, int negate )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+
+  if ( data->section_depth == 0 ) {
+    APR_ARRAY_POP( data->if_array, int );
+    jxtl_test_t tmp_test;
+    tmp_test.name = name;
+    tmp_test.negate = negate;
+    APR_ARRAY_PUSH( data->if_array, int ) = jxtl_test( &tmp_test, data->json );
+  }
+  else {
+    jxtl_section_t *section;
+    apr_array_header_t *content_array, *if_block;
+    jxtl_if_t *jxtl_if;
+    jxtl_content_t *content;
+
+    section = APR_ARRAY_IDX( data->section, data->section->nelts - 1,
+                             jxtl_section_t * );
+    APR_ARRAY_POP( section->current_array, apr_array_header_t * );
+    content_array = APR_ARRAY_IDX( section->current_array, 
+                                   section->current_array->nelts - 1,
+                                   apr_array_header_t * );
+    content = APR_ARRAY_IDX( content_array,
+                             content_array->nelts - 1,
+                             jxtl_content_t * );
+    if_block = (apr_array_header_t *) content->value;
+
+    jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
+    jxtl_if->test = apr_palloc( data->mp, sizeof( jxtl_test_t ) );
+    jxtl_if->test->name = apr_pstrdup( data->mp, (char *) name );
+    jxtl_if->test->negate = negate;
+    jxtl_if->content = apr_array_make( data->mp, 1024,
+                                       sizeof( jxtl_content_t * ) );
+    APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
+    APR_ARRAY_PUSH( section->current_array,
+                    apr_array_header_t * ) = jxtl_if->content;
+  }
+}
+
 void jxtl_else( void *user_data )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
@@ -746,6 +786,7 @@ int main( int argc, char const * const *argv )
     jxtl_section_start,
     jxtl_section_end,
     jxtl_if_start,
+    jxtl_elseif,
     jxtl_else,
     jxtl_if_end,
     jxtl_separator_start,
