@@ -11,6 +11,15 @@
 #include "json_path_lex.h"
 #include "json_path.h"
 
+#define identifier_handler callbacks->identifier_handler
+#define root_object_handler callbacks->root_object_handler
+#define current_object_handler callbacks->current_object_handler
+#define all_children_handler callbacks->all_children_handler
+#define test_start_handler callbacks->test_start_handler
+#define test_end_handler callbacks->test_end_handler
+#define negate_handler callbacks->negate_handler
+#define user_data callbacks->user_data
+
 void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
 		      json_path_callback_t *callbacks,
 		      const char *error_string, ... );
@@ -41,11 +50,13 @@ void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
 %%
 
 path_expr
-  : T_IDENTIFIER
-  | '$'
-  | '@'
-  | '(' path_expr ')'
-  | '!' path_expr
+  : T_IDENTIFIER { identifier_handler( user_data, $<string>1 ); }
+  | '$' { root_object_handler( user_data ); }
+  | '@' { current_object_handler( user_data ); }
+  | '*' { all_children_handler( user_data ); }
+  | '(' { test_start_handler( user_data ); } path_expr ')'
+        { test_end_handler( user_data ); }
+  | '!' { negate_handler( user_data ); } path_expr
   | path_expr '.' path_expr
 ;
 
