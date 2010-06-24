@@ -32,6 +32,7 @@ typedef struct json_path_callback_t {
   void *user_data;
 } json_path_callback_t;
 
-extern int json_path_compile( const char *json_file );
-
+extern json_path_expr_t *json_path_compile( const char *json_file );
+extern apr_array_header_t *json_path_evaluate( const char *path,
+                                               json_t *json );
 #endif
