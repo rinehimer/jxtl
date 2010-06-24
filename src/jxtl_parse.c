@@ -108,17 +108,7 @@
 /* Copy the first part of user declarations.  */
 #line 1 "jxtl_parse.y"
 
-#include <apr_hash.h>
-#include <apr_pools.h>
-#include <apr_tables.h>
 #include <stdarg.h>
-
-#include "apr_macros.h"
-
-#include "jxtl.h"
-#include "json_node.h"
-#include "json_writer.h"
-#include "json.h"
 
 /*
  * Define YY_DECL before including jxtl_lex.h so that it knows we are doing a
@@ -128,6 +118,7 @@
 
 #include "jxtl_parse.h"
 #include "jxtl_lex.h"
+#include "jxtl.h"
 
 #define text_handler callbacks->text_handler
 #define section_start_handler callbacks->section_start_handler
@@ -166,13 +157,13 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, jxtl_callback_t *callbacks,
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 51 "jxtl_parse.y"
+#line 42 "jxtl_parse.y"
 {
   int ival;
   unsigned char *string;
 }
-/* Line 193 of yacc.c.  */
-#line 176 "jxtl_parse.c"
+/* Line 187 of yacc.c.  */
+#line 167 "jxtl_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -197,7 +188,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 201 "jxtl_parse.c"
+#line 192 "jxtl_parse.c"
 
 #ifdef short
 # undef short
@@ -494,10 +485,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    67,    67,    70,    72,    73,    74,    75,    79,    85,
-      84,    95,    94,   105,   104,   110,   109,   114,   118,   123,
-     125,   126,   127,   128,   131,   133,   134,   138,   144,   151,
-     152
+       0,    58,    58,    61,    63,    64,    65,    66,    70,    76,
+      75,    86,    85,    96,    95,   101,   100,   105,   109,   114,
+     116,   117,   118,   119,   122,   124,   125,   129,   135,   142,
+     143
 };
 #endif
 
@@ -1472,60 +1463,60 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 72 "jxtl_parse.y"
+#line 63 "jxtl_parse.y"
     { text_handler( user_data, (yyvsp[(2) - (2)].string) ); }
     break;
 
   case 8:
-#line 80 "jxtl_parse.y"
+#line 71 "jxtl_parse.y"
     { value_handler( user_data, (yyvsp[(2) - (3)].string) ); }
     break;
 
   case 9:
-#line 85 "jxtl_parse.y"
+#line 76 "jxtl_parse.y"
     { section_start_handler( user_data, (yyvsp[(3) - (3)].string) ); }
     break;
 
   case 10:
-#line 90 "jxtl_parse.y"
+#line 81 "jxtl_parse.y"
     { section_end_handler( user_data, (yyvsp[(3) - (10)].string) ); }
     break;
 
   case 11:
-#line 95 "jxtl_parse.y"
+#line 86 "jxtl_parse.y"
     {
       if_start_handler( user_data, (yyvsp[(5) - (7)].string), (yyvsp[(4) - (7)].ival) );
     }
     break;
 
   case 13:
-#line 105 "jxtl_parse.y"
+#line 96 "jxtl_parse.y"
     {
       elseif_handler( user_data, (yyvsp[(5) - (7)].string), (yyvsp[(4) - (7)].ival) );
     }
     break;
 
   case 15:
-#line 110 "jxtl_parse.y"
+#line 101 "jxtl_parse.y"
     {
       else_handler( user_data );
     }
     break;
 
   case 18:
-#line 119 "jxtl_parse.y"
+#line 110 "jxtl_parse.y"
     {
       if_end_handler( user_data );
     }
     break;
 
   case 20:
-#line 125 "jxtl_parse.y"
+#line 116 "jxtl_parse.y"
     { text_handler( user_data, (yyvsp[(2) - (2)].string) ); }
     break;
 
   case 27:
-#line 139 "jxtl_parse.y"
+#line 130 "jxtl_parse.y"
     {
       separator_start_handler( user_data );
       text_handler( user_data, (yyvsp[(3) - (3)].string) );
@@ -1534,25 +1525,25 @@ yyreduce:
     break;
 
   case 28:
-#line 145 "jxtl_parse.y"
+#line 136 "jxtl_parse.y"
     {
       test_handler( user_data, (yyvsp[(5) - (6)].string), (yyvsp[(4) - (6)].ival) );
     }
     break;
 
   case 29:
-#line 151 "jxtl_parse.y"
+#line 142 "jxtl_parse.y"
     { (yyval.ival) = 0; }
     break;
 
   case 30:
-#line 152 "jxtl_parse.y"
+#line 143 "jxtl_parse.y"
     { (yyval.ival) = 1; }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1556 "jxtl_parse.c"
+#line 1547 "jxtl_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1772,7 +1763,7 @@ yyreturn:
 }
 
 
-#line 156 "jxtl_parse.y"
+#line 147 "jxtl_parse.y"
 
 
 void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, jxtl_callback_t *callbacks,

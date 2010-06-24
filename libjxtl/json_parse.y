@@ -1,14 +1,5 @@
 %{
-#include <apr_hash.h>
-#include <apr_pools.h>
-#include <apr_tables.h>
 #include <stdarg.h>
-
-#include "apr_macros.h"
-
-#include "json_node.h"
-#include "json_writer.h"
-#include "json.h"
 
 /*
  * Define YY_DECL before including json_lex.h so that it knows we are doing a

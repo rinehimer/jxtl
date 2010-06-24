@@ -60,13 +60,13 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 52 "json_parse.y"
+#line 43 "json_parse.y"
 {
   int integer;
   unsigned char *string;
   double number;
 }
-/* Line 1529 of yacc.c.  */
+/* Line 1489 of yacc.c.  */
 #line 71 "json_parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

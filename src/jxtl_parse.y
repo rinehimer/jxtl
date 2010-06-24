@@ -1,15 +1,5 @@
 %{
-#include <apr_hash.h>
-#include <apr_pools.h>
-#include <apr_tables.h>
 #include <stdarg.h>
-
-#include "apr_macros.h"
-
-#include "jxtl.h"
-#include "json_node.h"
-#include "json_writer.h"
-#include "json.h"
 
 /*
  * Define YY_DECL before including jxtl_lex.h so that it knows we are doing a
@@ -19,6 +9,7 @@
 
 #include "jxtl_parse.h"
 #include "jxtl_lex.h"
+#include "jxtl.h"
 
 #define text_handler callbacks->text_handler
 #define section_start_handler callbacks->section_start_handler

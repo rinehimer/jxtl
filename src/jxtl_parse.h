@@ -72,12 +72,12 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 51 "jxtl_parse.y"
+#line 42 "jxtl_parse.y"
 {
   int ival;
   unsigned char *string;
 }
-/* Line 1529 of yacc.c.  */
+/* Line 1489 of yacc.c.  */
 #line 82 "jxtl_parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
