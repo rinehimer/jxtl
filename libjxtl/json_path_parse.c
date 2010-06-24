@@ -94,11 +94,9 @@
  */
 #define YY_DECL
 
-#define YYSTYPE char *
-
 #include "json_path_parse.h"
 #include "json_path_lex.h"
-#include "json_path_parser.h"
+#include "json_path.h"
 
 void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
 		      json_path_callback_t *callbacks,
@@ -125,13 +123,13 @@ void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 33 "json_path_parse.y"
+#line 31 "json_path_parse.y"
 {
   int ival;
   unsigned char *string;
 }
-/* Line 187 of yacc.c.  */
-#line 135 "json_path_parse.c"
+/* Line 193 of yacc.c.  */
+#line 133 "json_path_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -156,7 +154,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 160 "json_path_parse.c"
+#line 158 "json_path_parse.c"
 
 #ifdef short
 # undef short
@@ -440,7 +438,7 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    46,    46,    47,    48,    49,    50,    51
+       0,    44,    44,    45,    46,    47,    48,    49
 };
 #endif
 
@@ -1378,7 +1376,7 @@ yyreduce:
     {
       
 /* Line 1267 of yacc.c.  */
-#line 1382 "json_path_parse.c"
+#line 1380 "json_path_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1598,7 +1596,7 @@ yyreturn:
 }
 
 
-#line 54 "json_path_parse.y"
+#line 52 "json_path_parse.y"
 
 
 void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,

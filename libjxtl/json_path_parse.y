@@ -7,11 +7,9 @@
  */
 #define YY_DECL
 
-#define YYSTYPE char *
-
 #include "json_path_parse.h"
 #include "json_path_lex.h"
-#include "json_path_parser.h"
+#include "json_path.h"
 
 void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
 		      json_path_callback_t *callbacks,

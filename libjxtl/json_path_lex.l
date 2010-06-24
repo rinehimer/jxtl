@@ -22,13 +22,6 @@
 #define json_path_error( ... ) \
   json_path_error( yylloc, yyscanner, NULL, __VA_ARGS__ )
 
-#define YY_INPUT( buf, result, max_size ) {				\
-    LEX_EXTRA_BYTES = max_size;                                         \
-    LEX_EXTRA_STATUS = apr_file_read( LEX_EXTRA_IN_FILE, buf,           \
-                                      &LEX_EXTRA_BYTES );               \
-    result = ( LEX_EXTRA_STATUS == APR_SUCCESS ) ? LEX_EXTRA_BYTES : YY_NULL; \
- }
-
 #define YY_USER_ACTION {						\
     yylloc->first_line = yylineno;                                      \
     yylloc->first_column = yycolumn;                                    \
@@ -62,6 +55,8 @@ identifier [a-zA-Z][a-zA-Z0-9_]*
   yylval->string = apr_pstrdup( LEX_EXTRA_MP, yytext );
   return T_IDENTIFIER;
 }
+[ \t\r]+
+"\n"
 . {
   json_path_error( "illegal character '%c' found in path expression",
 		   yytext[0] );
