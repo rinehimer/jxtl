@@ -10,18 +10,20 @@
 #include "json_path_lex.h"
 #include "lex_extra.h"
 
-/*
- * Data used while parsing
- */
-typedef struct jsp_data {
-  apr_pool_t *mp;
-  /** Array to store the current expression.  */
-  apr_array_header_t *expr_array;
-  /** Root of the path expression. */
-  json_path_expr_t *root;
-  /** The current expression. */ 
-  json_path_expr_t *curr;
-}jsp_data;
+void json_path_obj_init( json_path_obj_t *json_path_obj )
+{
+  apr_pool_create( &json_path_obj->mp, NULL );
+  json_path_obj->expr = NULL;
+  json_path_obj->nodes = apr_array_make( json_path_obj->mp, 128,
+                                         sizeof(json_t *) );
+}
+
+void json_path_obj_destroy( json_path_obj_t *json_path_obj )
+{
+  apr_pool_destroy( json_path_obj->mp );
+  json_path_obj->expr = NULL;
+  json_path_obj->nodes = NULL;
+}
 
 static void expr_add( jsp_data *data, json_path_expr_t *expr )
 {
@@ -133,40 +135,51 @@ void json_path_negate( void *user_data )
  * End of parser callback functions.
  *****************************************************************************/
 
+void json_path_builder_init( json_path_builder_t *path_builder )
+{
+  apr_pool_create( &path_builder->mp, NULL );
+  path_builder->data.expr_array = apr_array_make( path_builder->mp, 32,
+                                                  sizeof(json_path_expr_t *) );
+  path_builder->data.mp = path_builder->mp;
+  path_builder->data.root = NULL;
+  path_builder->data.curr = NULL;
+
+  path_builder->callbacks.identifier_handler = json_path_identifier;
+  path_builder->callbacks.root_object_handler = json_path_root_object;
+  path_builder->callbacks.current_object_handler = json_path_current_object;
+  path_builder->callbacks.all_children_handler = json_path_all_children;
+  path_builder->callbacks.test_start_handler = json_path_test_start;
+  path_builder->callbacks.test_end_handler = json_path_test_end;
+  path_builder->callbacks.negate_handler = json_path_negate;
+  path_builder->callbacks.user_data = &path_builder->data;
+
+  json_path_lex_init( &path_builder->scanner );
+  lex_extra_init( &path_builder->lex_extra, NULL );
+  json_path_set_extra( &path_builder->lex_extra, path_builder->scanner );
+}
+
+void json_path_builder_destroy( json_path_builder_t *path_builder )
+{
+  lex_extra_destroy( &path_builder->lex_extra );
+  json_path_lex_destroy( path_builder->scanner );
+  apr_pool_destroy( path_builder->mp );
+}
+
 /**
  * Compile a JSON Path expression.
  */
-json_path_expr_t *json_path_compile( const char *path )
+json_path_expr_t *json_path_compile( json_path_builder_t *path_builder,
+                                     const char *path )
 {
-  yyscan_t scanner;
-  lex_extra_t lex_extra;
   YY_BUFFER_STATE buffer_state;
   int parse_result;
   char *eval_str;
   int eval_str_len;
   jsp_data data;
 
-
-  /**
-   * Fix this -- this function should should probably take a json_path_t or
-   * something that contains a pool.
-   */
-  apr_pool_create( &data.mp, NULL );
-  data.expr_array = apr_array_make( data.mp, 32,
-                                    sizeof( json_path_expr_t * ) );
-  data.root = NULL;
-  data.curr = NULL;
-
-  json_path_callback_t callbacks = {
-    json_path_identifier,
-    json_path_root_object,
-    json_path_current_object,
-    json_path_all_children,
-    json_path_test_start,
-    json_path_test_end,
-    json_path_negate,
-    &data
-  };
+  APR_ARRAY_CLEAR( path_builder->data.expr_array );
+  path_builder->data.root = NULL;
+  path_builder->data.curr = NULL;
 
   /*
    * Set up eval_str for flex.  Flex requires the last two bytes of a string
@@ -177,25 +190,23 @@ json_path_expr_t *json_path_compile( const char *path )
   apr_cpystrn( eval_str, path, eval_str_len - 1 );
   eval_str[eval_str_len - 1] = '\0';
 
-  json_path_lex_init( &scanner );
-  buffer_state = json_path__scan_buffer( eval_str, eval_str_len, scanner );
-  lex_extra_init( &lex_extra, NULL );
-  json_path_set_extra( &lex_extra, scanner );
-  parse_result = json_path_parse( scanner, &callbacks );
-  lex_extra_destroy( &lex_extra );
-  json_path_lex_destroy( scanner );
+  buffer_state = json_path__scan_buffer( eval_str, eval_str_len,
+                                         path_builder->scanner );
+  parse_result = json_path_parse( path_builder->scanner,
+                                  &path_builder->callbacks );
+  json_path__delete_buffer( buffer_state, path_builder->scanner );
   
   free( eval_str );
 
-  return data.root;
+  return path_builder->data.root;
 }
 
-static void json_path_evaluate_internal( json_path_expr_t *expr,
+static void json_path_eval_internal( json_path_expr_t *expr,
                                          json_t *json,
                                          apr_array_header_t *nodes )
 {
   int i;
-  json_t *json_value = NULL;
+  json_t *tmp_json = NULL, *tmp_json2 = NULL;
   int test_result = 1;
 
   if ( !json )
@@ -206,8 +217,8 @@ static void json_path_evaluate_internal( json_path_expr_t *expr,
    */
   if ( json->type == JSON_ARRAY ) {
     for ( i = 0; i < json->value.array->nelts; i++ ) {
-      json_value = APR_ARRAY_IDX( json->value.array, i, json_t * );
-      json_path_evaluate_internal( expr, json_value, nodes );
+      tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
+      json_path_eval_internal( expr, tmp_json, nodes );
     }
     return;
   }
@@ -224,65 +235,89 @@ static void json_path_evaluate_internal( json_path_expr_t *expr,
     
   case JSON_PATH_LOOKUP:
     if ( json && json->type == JSON_OBJECT ) {
-      json_value = apr_hash_get( json->value.object, expr->identifier,
-                                 APR_HASH_KEY_STRING );
+      tmp_json = apr_hash_get( json->value.object, expr->identifier,
+                               APR_HASH_KEY_STRING );
     }
     break;
   default:
     break;
   }
 
-  if ( json_value && expr->test ) {
-    apr_pool_t *mp;
-    apr_pool_create( &mp, NULL );
-    apr_array_header_t *test_nodes = apr_array_make( mp, 128,
-                                                     sizeof(json_t *) );
-    json_path_evaluate_internal( expr->test, json_value, test_nodes );
-    test_result = test_nodes->nelts > 0;
-    apr_pool_destroy( mp );
+  if ( tmp_json ) {
+    if ( expr->test ) {
+      /*
+       * The expression has a a test.  If our current node is an array we need
+       * to loop here and run the test on each node to see what should be
+       * pushed or recursively evaluated.
+       */
+      apr_pool_t *mp;
+      apr_pool_create( &mp, NULL );
+      apr_array_header_t *test_nodes = apr_array_make( mp, 128,
+                                                       sizeof(json_t *) );
+      if ( tmp_json->type == JSON_ARRAY ) {
+        for ( i = 0; i < tmp_json->value.array->nelts; i++ ) {
+          APR_ARRAY_CLEAR( test_nodes );
+          tmp_json2 = APR_ARRAY_IDX( tmp_json->value.array, i, json_t * );
+          json_path_eval_internal( expr->test, tmp_json2, test_nodes );
+          test_result = test_nodes->nelts > 0;
+          if ( test_result && !expr->next ) {
+            APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json2;
+          }
+          else if ( test_result && expr->next ) {
+            json_path_eval_internal( expr->next, tmp_json2, nodes );
+          }
+        }
+      }
+      else {
+        json_path_eval_internal( expr->test, tmp_json, test_nodes );
+        test_result = test_nodes->nelts > 0;
+        if ( test_result && !expr->next ) {
+          APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
+        }
+        else if ( test_result && expr->next ) {
+          json_path_eval_internal( expr->next, tmp_json, nodes );
+        }
+      }
+      apr_pool_destroy( mp );
+    }
+    else {
+      if ( expr->next ) {
+        json_path_eval_internal( expr->next, tmp_json, nodes );
+      }
+      else {
+        APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
+      }
+    }
   }
-
-  if ( json_value && test_result == 1 && !expr->next ) {
-    /*
-     * Looked something up, test was successful (or no test) and its the end
-     * of the expression.
-     */
-    APR_ARRAY_PUSH( nodes, json_t * ) = json_value;
-  }
-  else if ( json_value && test_result == 1 && expr->next ) {
-    /*
-     * Looked something up, test was successful (or no test) and its not
-     * the end of the expression.
-     */
-    json_path_evaluate_internal( expr->next, json_value, nodes );
-  }
-
 }
 
 /**
  * Evaluate the given path expression in the context of json.
- * Returns an array of nodes.
+ * Returns the number of nodes selected.
  */
-apr_array_header_t *json_path_evaluate( const char *path, json_t *json )
+int json_path_eval( const char *path, json_t *json, json_path_obj_t *obj )
 {
-  json_path_expr_t *expr = json_path_compile( path );
-  apr_array_header_t *nodes;
-  apr_pool_t *mp;
-  apr_pool_create( &mp, NULL );
+  json_path_builder_t path_builder;
 
-  nodes = apr_array_make( mp, 128, sizeof(json_t *) );
-  
-  json_path_evaluate_internal( expr, json, nodes );
+  APR_ARRAY_CLEAR( obj->nodes );
+  apr_pool_clear( obj->mp );
 
-  int i;
-  json_t *tmp_json;
-  for ( i = 0; i < nodes->nelts; i++ ) {
-    tmp_json = APR_ARRAY_IDX( nodes, i, json_t * );
-    fprintf( stderr, "here is an object\n" );
-    fprintf( stderr, "--------------------------------\n" );
-    json_object_print( tmp_json, 1 );
-    fprintf( stderr, "--------------------------------\n" );
-  }
+  json_path_builder_init( &path_builder );
+  obj->expr = json_path_compile( &path_builder, path );
+  json_path_eval_internal( obj->expr, json, obj->nodes );
 
-  return nodes;
+  return obj->nodes->nelts;
+}
+
+/**
+ * Evaluate a pre-compiled expression.
+ */
+int json_path_compiled_eval( json_path_expr_t *expr,
+                             json_t *json,
+                             json_path_obj_t *obj )
+{
+  APR_ARRAY_CLEAR( obj->nodes );
+  apr_pool_clear( obj->mp );
+  json_path_eval_internal( obj->expr, json, obj->nodes );
+  return obj->nodes->nelts;
 }
