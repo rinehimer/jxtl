@@ -52,6 +52,7 @@ static json_path_expr_t *json_path_expr_create( jsp_data *data,
   expr->root = ( data->root ) ? data->root : expr;
   expr->next = NULL;
   expr->test = NULL;
+  expr->negate = 0;
   expr_add( data, expr );
 }
 
@@ -129,6 +130,7 @@ void json_path_test_end( void *user_data )
 void json_path_negate( void *user_data )
 {
   jsp_data *data = (jsp_data *) user_data;
+  data->root->negate = 1;
 }
 
 /*****************************************************************************
@@ -202,12 +204,75 @@ json_path_expr_t *json_path_compile( json_path_builder_t *path_builder,
 }
 
 static void json_path_eval_internal( json_path_expr_t *expr,
-                                         json_t *json,
-                                         apr_array_header_t *nodes )
+                                     json_t *json,
+                                     apr_array_header_t *nodes );
+
+static void json_path_test_node( json_path_expr_t *expr,
+                                 json_t *json,
+                                 apr_array_header_t *nodes )
+{
+  int test_result;
+
+  if ( json ) {
+    if ( expr && expr->test ) {
+      /*
+       * The expression has a a test.  If our current node is an array we need
+       * to loop here and run the test on each node to see what should be
+       * pushed or recursively evaluated.
+       */
+      apr_pool_t *mp;
+      apr_pool_create( &mp, NULL );
+      apr_array_header_t *test_nodes = apr_array_make( mp, 128,
+                                                       sizeof(json_t *) );
+      if ( json->type == JSON_ARRAY ) {
+        int i;
+        json_t *tmp_json;
+        for ( i = 0; i < json->value.array->nelts; i++ ) {
+          APR_ARRAY_CLEAR( test_nodes );
+          tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
+          json_path_eval_internal( expr->test, tmp_json, test_nodes );
+          test_result = test_nodes->nelts;
+          test_result = ( expr->test->negate ) ? !test_result : test_result;
+          if ( test_result && !expr->next ) {
+            APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
+          }
+          else if ( test_result && expr->next ) {
+            json_path_eval_internal( expr->next, tmp_json, nodes );
+          }
+        }
+      }
+      else {
+        json_path_eval_internal( expr->test, json, test_nodes );
+        test_result = test_nodes->nelts > 0;
+        test_result = ( expr->test->negate ) ? !test_result : test_result;
+        if ( test_result && !expr->next ) {
+          APR_ARRAY_PUSH( nodes, json_t * ) = json;
+        }
+        else if ( test_result && expr->next ) {
+          json_path_eval_internal( expr->next, json, nodes );
+        }
+      }
+      apr_pool_destroy( mp );
+    }
+    else {
+      if ( expr && expr->next ) {
+        json_path_eval_internal( expr->next, json, nodes );
+      }
+      else {
+        APR_ARRAY_PUSH( nodes, json_t * ) = json;
+      }
+    }
+  }
+}
+
+static void json_path_eval_internal( json_path_expr_t *expr,
+                                     json_t *json,
+                                     apr_array_header_t *nodes )
 {
   int i;
-  json_t *tmp_json = NULL, *tmp_json2 = NULL;
+  json_t *tmp_json = NULL;
   int test_result = 1;
+  apr_hash_index_t *idx;
 
   if ( !json )
     return;
@@ -228,9 +293,18 @@ static void json_path_eval_internal( json_path_expr_t *expr,
     break;
     
   case JSON_PATH_CURRENT_OBJ:
+    tmp_json = json;
     break;
     
   case JSON_PATH_ALL_CHILDREN:
+    if ( json && json->type == JSON_OBJECT ) {
+      for ( idx = apr_hash_first( NULL, json->value.object ); idx;
+            idx = apr_hash_next( idx ) ) {
+        apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
+        json_path_test_node( expr->next, tmp_json, nodes );
+      }
+    }
+    return;
     break;
     
   case JSON_PATH_LOOKUP:
@@ -239,56 +313,12 @@ static void json_path_eval_internal( json_path_expr_t *expr,
                                APR_HASH_KEY_STRING );
     }
     break;
+
   default:
     break;
   }
 
-  if ( tmp_json ) {
-    if ( expr->test ) {
-      /*
-       * The expression has a a test.  If our current node is an array we need
-       * to loop here and run the test on each node to see what should be
-       * pushed or recursively evaluated.
-       */
-      apr_pool_t *mp;
-      apr_pool_create( &mp, NULL );
-      apr_array_header_t *test_nodes = apr_array_make( mp, 128,
-                                                       sizeof(json_t *) );
-      if ( tmp_json->type == JSON_ARRAY ) {
-        for ( i = 0; i < tmp_json->value.array->nelts; i++ ) {
-          APR_ARRAY_CLEAR( test_nodes );
-          tmp_json2 = APR_ARRAY_IDX( tmp_json->value.array, i, json_t * );
-          json_path_eval_internal( expr->test, tmp_json2, test_nodes );
-          test_result = test_nodes->nelts > 0;
-          if ( test_result && !expr->next ) {
-            APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json2;
-          }
-          else if ( test_result && expr->next ) {
-            json_path_eval_internal( expr->next, tmp_json2, nodes );
-          }
-        }
-      }
-      else {
-        json_path_eval_internal( expr->test, tmp_json, test_nodes );
-        test_result = test_nodes->nelts > 0;
-        if ( test_result && !expr->next ) {
-          APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
-        }
-        else if ( test_result && expr->next ) {
-          json_path_eval_internal( expr->next, tmp_json, nodes );
-        }
-      }
-      apr_pool_destroy( mp );
-    }
-    else {
-      if ( expr->next ) {
-        json_path_eval_internal( expr->next, tmp_json, nodes );
-      }
-      else {
-        APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
-      }
-    }
-  }
+  json_path_test_node( expr, tmp_json, nodes );
 }
 
 /**

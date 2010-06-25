@@ -54,11 +54,14 @@ path_expr
   | '$' { root_object_handler( user_data ); }
   | '@' { current_object_handler( user_data ); }
   | '*' { all_children_handler( user_data ); }
-  | '(' { test_start_handler( user_data ); } path_expr ')'
+  | '(' { test_start_handler( user_data ); } path_filter ')'
         { test_end_handler( user_data ); }
-  | '!' { negate_handler( user_data ); } path_expr
   | path_expr '.' path_expr
 ;
+
+path_filter
+  : path_expr
+  | '!' path_expr { negate_handler( user_data ); }
 
 %%
 

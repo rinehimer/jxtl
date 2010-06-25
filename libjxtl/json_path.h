@@ -41,6 +41,8 @@ typedef struct json_path_expr_t {
   struct json_path_expr_t *next;
   /** A test to evaluate after lookup. */
   struct json_path_expr_t *test;
+  /** Whether or not this expression should be negated. */
+  int negate;
 }json_path_expr_t;
 
 
