@@ -290,6 +290,8 @@ static void json_path_eval_internal( json_path_expr_t *expr,
 
   switch ( expr->type ) {
   case JSON_PATH_ROOT_OBJ:
+    for( tmp_json = json; tmp_json && tmp_json->parent;
+         tmp_json = tmp_json->parent );
     break;
     
   case JSON_PATH_CURRENT_OBJ:
