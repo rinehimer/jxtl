@@ -337,7 +337,7 @@ extern int json_path_lex \
 #undef YY_DECL
 #endif
 
-#line 66 "json_path_lex.l"
+#line 67 "json_path_lex.l"
 
 
 #line 344 "json_path_lex.h"

@@ -100,6 +100,7 @@
 
 #define identifier_handler callbacks->identifier_handler
 #define root_object_handler callbacks->root_object_handler
+#define parent_object_handler callbacks->parent_object_handler
 #define current_object_handler callbacks->current_object_handler
 #define all_children_handler callbacks->all_children_handler
 #define test_start_handler callbacks->test_start_handler
@@ -132,13 +133,13 @@ void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 40 "json_path_parse.y"
+#line 41 "json_path_parse.y"
 {
   int ival;
   unsigned char *string;
 }
 /* Line 193 of yacc.c.  */
-#line 142 "json_path_parse.c"
+#line 143 "json_path_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -163,7 +164,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 167 "json_path_parse.c"
+#line 168 "json_path_parse.c"
 
 #ifdef short
 # undef short
@@ -378,18 +379,18 @@ union yyalloc
 #endif
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  8
+#define YYFINAL  9
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   20
+#define YYLAST   22
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  11
+#define YYNTOKENS  12
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  4
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  10
+#define YYNRULES  11
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  16
+#define YYNSTATES  17
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -405,12 +406,12 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     5,     2,     2,     6,     2,     2,     2,
-       9,    10,     8,     2,     2,     2,     4,     2,     2,     2,
+      10,    11,     9,     2,     2,     2,     4,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     7,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     8,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -434,23 +435,23 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,     5,     7,     9,    11,    12,    17,    21,
-      23
+       0,     0,     3,     5,     7,     9,    11,    13,    14,    19,
+      23,    25
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      12,     0,    -1,     3,    -1,     6,    -1,     7,    -1,     8,
-      -1,    -1,     9,    13,    14,    10,    -1,    12,     4,    12,
-      -1,    12,    -1,     5,    12,    -1
+      13,     0,    -1,     3,    -1,     6,    -1,     7,    -1,     8,
+      -1,     9,    -1,    -1,    10,    14,    15,    11,    -1,    13,
+       4,    13,    -1,    13,    -1,     5,    13,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    53,    53,    54,    55,    56,    57,    57,    59,    63,
-      64
+       0,    54,    54,    55,    56,    57,    58,    59,    59,    61,
+      65,    66
 };
 #endif
 
@@ -460,7 +461,8 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "\"identifier\"", "'.'", "'!'", "'$'",
-  "'@'", "'*'", "'('", "')'", "$accept", "path_expr", "@1", "path_filter", 0
+  "'@'", "'^'", "'*'", "'('", "')'", "$accept", "path_expr", "@1",
+  "path_filter", 0
 };
 #endif
 
@@ -469,23 +471,23 @@ static const char *const yytname[] =
    token YYLEX-NUM.  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,    46,    33,    36,    64,    42,    40,
-      41
+       0,   256,   257,   258,    46,    33,    36,    64,    94,    42,
+      40,    41
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    11,    12,    12,    12,    12,    13,    12,    12,    14,
-      14
+       0,    12,    13,    13,    13,    13,    13,    14,    13,    13,
+      15,    15
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     1,     1,     1,     0,     4,     3,     1,
-       2
+       0,     2,     1,     1,     1,     1,     1,     0,     4,     3,
+       1,     2
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -493,29 +495,29 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     2,     3,     4,     5,     6,     0,     0,     1,     0,
-       0,     9,     0,     8,    10,     7
+       0,     2,     3,     4,     5,     6,     7,     0,     0,     1,
+       0,     0,    10,     0,     9,    11,     8
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     6,     7,    12
+      -1,     7,     8,    13
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -10
+#define YYPACT_NINF -11
 static const yytype_int8 yypact[] =
 {
-       4,   -10,   -10,   -10,   -10,   -10,    14,    -3,   -10,     4,
-       4,     5,    -9,   -10,     5,   -10
+       5,   -11,   -11,   -11,   -11,   -11,   -11,    16,    -3,   -11,
+       5,     5,     6,   -10,   -11,     6,   -11
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -10,    10,   -10,   -10
+     -11,    11,   -11,   -11
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -525,24 +527,24 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-       1,    15,    10,     2,     3,     4,     5,     1,     0,     9,
-       2,     3,     4,     5,     8,     0,     0,    11,     9,    13,
-      14
+       1,    16,    11,     2,     3,     4,     5,     6,     1,     0,
+      10,     2,     3,     4,     5,     6,     9,     0,     0,    12,
+      10,    14,    15
 };
 
 static const yytype_int8 yycheck[] =
 {
-       3,    10,     5,     6,     7,     8,     9,     3,    -1,     4,
-       6,     7,     8,     9,     0,    -1,    -1,     7,     4,     9,
-      10
+       3,    11,     5,     6,     7,     8,     9,    10,     3,    -1,
+       4,     6,     7,     8,     9,    10,     0,    -1,    -1,     8,
+       4,    10,    11
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,     6,     7,     8,     9,    12,    13,     0,     4,
-       5,    12,    14,    12,    12,    10
+       0,     3,     6,     7,     8,     9,    10,    13,    14,     0,
+       4,     5,    13,    15,    13,    13,    11
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1392,43 +1394,48 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 53 "json_path_parse.y"
+#line 54 "json_path_parse.y"
     { identifier_handler( user_data, (yyvsp[(1) - (1)].string) ); }
     break;
 
   case 3:
-#line 54 "json_path_parse.y"
+#line 55 "json_path_parse.y"
     { root_object_handler( user_data ); }
     break;
 
   case 4:
-#line 55 "json_path_parse.y"
+#line 56 "json_path_parse.y"
     { current_object_handler( user_data ); }
     break;
 
   case 5:
-#line 56 "json_path_parse.y"
-    { all_children_handler( user_data ); }
+#line 57 "json_path_parse.y"
+    { parent_object_handler( user_data ); }
     break;
 
   case 6:
-#line 57 "json_path_parse.y"
-    { test_start_handler( user_data ); }
+#line 58 "json_path_parse.y"
+    { all_children_handler( user_data ); }
     break;
 
   case 7:
-#line 58 "json_path_parse.y"
+#line 59 "json_path_parse.y"
+    { test_start_handler( user_data ); }
+    break;
+
+  case 8:
+#line 60 "json_path_parse.y"
     { test_end_handler( user_data ); }
     break;
 
-  case 10:
-#line 64 "json_path_parse.y"
+  case 11:
+#line 66 "json_path_parse.y"
     { negate_handler( user_data ); }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1432 "json_path_parse.c"
+#line 1439 "json_path_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1648,7 +1655,7 @@ yyreturn:
 }
 
 
-#line 66 "json_path_parse.y"
+#line 68 "json_path_parse.y"
 
 
 void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,

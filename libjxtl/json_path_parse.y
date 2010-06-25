@@ -13,6 +13,7 @@
 
 #define identifier_handler callbacks->identifier_handler
 #define root_object_handler callbacks->root_object_handler
+#define parent_object_handler callbacks->parent_object_handler
 #define current_object_handler callbacks->current_object_handler
 #define all_children_handler callbacks->all_children_handler
 #define test_start_handler callbacks->test_start_handler
@@ -53,6 +54,7 @@ path_expr
   : T_IDENTIFIER { identifier_handler( user_data, $<string>1 ); }
   | '$' { root_object_handler( user_data ); }
   | '@' { current_object_handler( user_data ); }
+  | '^' { parent_object_handler( user_data ); }
   | '*' { all_children_handler( user_data ); }
   | '(' { test_start_handler( user_data ); } path_filter ')'
         { test_end_handler( user_data ); }

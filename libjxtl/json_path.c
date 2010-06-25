@@ -79,6 +79,11 @@ void json_path_root_object( void *user_data )
   json_path_expr_create( user_data, JSON_PATH_ROOT_OBJ, NULL );
 }
 
+void json_path_parent_object( void *user_data )
+{
+  json_path_expr_create( user_data, JSON_PATH_PARENT_OBJ, NULL );
+}
+
 /**
  * Request for the current object.
  */
@@ -148,6 +153,7 @@ void json_path_builder_init( json_path_builder_t *path_builder )
 
   path_builder->callbacks.identifier_handler = json_path_identifier;
   path_builder->callbacks.root_object_handler = json_path_root_object;
+  path_builder->callbacks.parent_object_handler = json_path_parent_object;
   path_builder->callbacks.current_object_handler = json_path_current_object;
   path_builder->callbacks.all_children_handler = json_path_all_children;
   path_builder->callbacks.test_start_handler = json_path_test_start;
@@ -293,7 +299,11 @@ static void json_path_eval_internal( json_path_expr_t *expr,
     for( tmp_json = json; tmp_json && tmp_json->parent;
          tmp_json = tmp_json->parent );
     break;
-    
+
+  case JSON_PATH_PARENT_OBJ:
+    tmp_json = json->parent;
+    break;
+
   case JSON_PATH_CURRENT_OBJ:
     tmp_json = json;
     break;

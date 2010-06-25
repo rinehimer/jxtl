@@ -15,6 +15,7 @@
 typedef struct json_path_callback_t {
   void ( *identifier_handler )( void *user_data, unsigned char *ident );
   void ( *root_object_handler )( void *user_data );
+  void ( *parent_object_handler )( void *user_data );
   void ( *current_object_handler )( void *user_data );
   void ( *all_children_handler )( void *user_data );
   void ( *test_start_handler )( void *user_data );
@@ -25,6 +26,7 @@ typedef struct json_path_callback_t {
 
 typedef enum json_path_expr_type {
   JSON_PATH_ROOT_OBJ,
+  JSON_PATH_PARENT_OBJ,
   JSON_PATH_CURRENT_OBJ,
   JSON_PATH_ALL_CHILDREN,
   JSON_PATH_LOOKUP
