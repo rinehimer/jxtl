@@ -172,6 +172,7 @@ static void json_add( json_writer_t *writer, json_t *json )
     else if ( tmp_json && tmp_json->type == JSON_ARRAY ) {
       /* Exists, but we already converted it to an array */
       json->parent = tmp_json;
+      json->name = NULL;
       APR_ARRAY_PUSH( tmp_json->value.array, json_t * ) = json;
     }
     else {
