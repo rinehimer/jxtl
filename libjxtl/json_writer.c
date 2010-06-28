@@ -142,8 +142,10 @@ static void json_add( json_writer_t *writer, json_t *json )
   json_t *tmp_json;
   json_t *new_array;
 
-  obj = APR_ARRAY_IDX( writer->json_stack, writer->json_stack->nelts - 1,
-                       json_t * );
+  if ( writer->json_stack->nelts > 0 ) {
+    obj = APR_ARRAY_IDX( writer->json_stack, writer->json_stack->nelts - 1,
+                         json_t * );
+  }
 
   if ( !obj ) {
     writer->json = json;

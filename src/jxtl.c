@@ -255,8 +255,11 @@ static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
    * current section array.
    */
 
-  section = APR_ARRAY_IDX( data->section, data->section->nelts - 1,
-			   jxtl_section_t * );
+  if ( data->section->nelts > 0 ) {
+    section = APR_ARRAY_IDX( data->section, data->section->nelts - 1,
+                             jxtl_section_t * );
+  }
+
   if ( section ) {
     current_content_array = APR_ARRAY_IDX( section->current_array,
                                            section->current_array->nelts - 1,
