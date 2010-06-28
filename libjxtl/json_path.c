@@ -292,7 +292,6 @@ static void json_path_eval_internal( json_path_expr_t *expr,
 {
   int i;
   json_t *tmp_json = NULL;
-  int test_result = 1;
   apr_hash_index_t *idx;
 
   if ( !json )
@@ -317,6 +316,9 @@ static void json_path_eval_internal( json_path_expr_t *expr,
 
   case JSON_PATH_PARENT_OBJ:
     tmp_json = json->parent;
+    if ( tmp_json && tmp_json->type == JSON_ARRAY ) {
+      tmp_json = tmp_json->parent;
+    }
     break;
 
   case JSON_PATH_CURRENT_OBJ:
