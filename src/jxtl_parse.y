@@ -20,7 +20,6 @@
 #define elseif_handler callbacks->elseif_handler
 #define else_handler callbacks->else_handler
 #define if_end_handler callbacks->if_end_handler
-#define test_handler callbacks->test_handler
 #define value_handler callbacks->value_handler
 #define user_data callbacks->user_data
 
@@ -45,12 +44,11 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, jxtl_callback_t *callbacks,
 }
 
 %token T_DIRECTIVE_START "{{" T_DIRECTIVE_END "}}"
-       T_SECTION "section" T_SEPARATOR "separator" T_TEST "test"
+       T_SECTION "section" T_SEPARATOR "separator"
        T_END "end" T_IF "if" T_ELSEIF "elseif" T_ELSE "else"
-%token <string> T_TEXT "text" T_IDENTIFIER "identifier" T_STRING "string"
+%token <string> T_TEXT "text"  T_PATH_EXPR "path expression" T_STRING "string"
 
 %left T_ELSEIF T_ELSE
-%type <ival> negate
 
 %%
 
@@ -67,24 +65,24 @@ text
 ;
 
 value_directive
-  : T_DIRECTIVE_START T_IDENTIFIER T_DIRECTIVE_END
+  : T_DIRECTIVE_START T_PATH_EXPR T_DIRECTIVE_END
     { value_handler( user_data, $<string>2 ); }
 ;
 
 section_directive
-  : T_DIRECTIVE_START T_SECTION T_IDENTIFIER
+  : T_DIRECTIVE_START T_SECTION T_PATH_EXPR
     { section_start_handler( user_data, $<string>3 ); }
     options
     T_DIRECTIVE_END
     section_content
     T_DIRECTIVE_START T_END T_DIRECTIVE_END
-    { section_end_handler( user_data, $<string>3 ); }
+    { section_end_handler( user_data ); }
 ;
 
 if_directive
-  : T_DIRECTIVE_START T_IF '(' negate T_IDENTIFIER ')' T_DIRECTIVE_END
+  : T_DIRECTIVE_START T_IF T_PATH_EXPR T_DIRECTIVE_END
     {
-      if_start_handler( user_data, $<string>5, $<ival>4 );
+      if_start_handler( user_data, $<string>3 );
     }
     section_content
     rest_of_if
@@ -92,9 +90,9 @@ if_directive
 ;
 
 rest_of_if
-  : T_DIRECTIVE_START T_ELSEIF '(' negate T_IDENTIFIER ')' T_DIRECTIVE_END
+  : T_DIRECTIVE_START T_ELSEIF T_PATH_EXPR T_DIRECTIVE_END
     {
-      elseif_handler( user_data, $<string>5, $<ival>4 );
+      elseif_handler( user_data, $<string>3 );
     }
     section_content rest_of_if
   | T_DIRECTIVE_START T_ELSE T_DIRECTIVE_END
@@ -132,17 +130,7 @@ option
       text_handler( user_data, $<string>3 );
       separator_end_handler( user_data );
     }
-  | T_TEST '=' '(' negate T_IDENTIFIER ')'
-    {
-      test_handler( user_data, $<string>5, $<ival>4 );
-    }
 ;
-
-negate
-  : /* empty */ { $$ = 0; }
-  | '!' { $$ = 1; }
-;
-
 
 %%
 

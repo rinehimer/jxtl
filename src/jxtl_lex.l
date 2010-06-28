@@ -58,63 +58,59 @@
 %option bison-locations
 %option case-insensitive
 
-%x directive options str unmatched expression comment
-
-identifier [a-zA-Z_@][a-zA-Z0-9_.@]*
+%x directive options str unmatched path_expr comment
 
 %%
 
 <INITIAL>{
-   "{{" {
-     /*
-      * Wait as long as possible to return text so that it can be collected
-      * all together.  If there is some saved texted in the str array, then
-      * return that now and put the the directive start text back so that it
-      * can be returned next time after the array is cleared.
-      */
-     if ( LEX_EXTRA_STR_ARRAY->nelts > 0 )  {
-       yylval->string = apr_pstrndup( LEX_EXTRA_MP,
-                                      LEX_EXTRA_STR_ARRAY->elts,
-                                      LEX_EXTRA_STR_ARRAY->nelts );
-       APR_ARRAY_CLEAR( LEX_EXTRA_STR_ARRAY );
-       yyless( 0 );
-       return T_TEXT;
-     }
-     else {
-       BEGIN( directive );
-       return T_DIRECTIVE_START;
-     }
-   }
-   "{{!" {
-     BEGIN( comment );
-   }
-   "{"|"\n" { STRING_COPY; }
-   [^{\n]+ { STRING_COPY; }
+  "{{" {
+    /*
+     * Wait as long as possible to return text so that it can be collected
+     * all together.  If there is some saved texted in the str array, then
+     * return that now and put the the directive start text back so that it
+     * can be returned next time after the array is cleared.
+     */
+    if ( LEX_EXTRA_STR_ARRAY->nelts > 0 )  {
+      yylval->string = apr_pstrndup( LEX_EXTRA_MP, LEX_EXTRA_STR_ARRAY->elts,
+				     LEX_EXTRA_STR_ARRAY->nelts );
+      APR_ARRAY_CLEAR( LEX_EXTRA_STR_ARRAY );
+      yyless( 0 );
+      return T_TEXT;
+    }
+    else {
+      BEGIN( directive );
+      return T_DIRECTIVE_START;
+    }
+  }
+  "{{!" {
+    BEGIN( comment );
+  }
+  "{"|"\n" { STRING_COPY; }
+  [^{\n]+ { STRING_COPY; }
 }
 
 <directive>{
-    "#section" { return T_SECTION; }
-    "#end" { return T_END; }
-    "#if" { BEGIN( expression ); return T_IF; }
-    "#else" { return T_ELSE; }
-    "#elseif" { BEGIN( expression ); return T_ELSEIF; }
-    ";" { BEGIN( options ); }
-    {identifier} {
-      yylval->string = apr_pstrdup( LEX_EXTRA_MP, yytext );
-      return T_IDENTIFIER;
-    }
-    "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
-    [ \t\r]+
-    "\n"
-   . { jxtl_error( "illegal character '%c' found in identifier", yytext[0] ); }
+  "#section" { return T_SECTION; }
+  "#end" { return T_END; }
+  "#if" { return T_IF; }
+  "#else" { return T_ELSE; }
+  "#elseif" { return T_ELSEIF; }
+  [a-zA-Z0-9_$@^.*()!]+ {
+    yylval->string = apr_pstrndup( LEX_EXTRA_MP, yytext, yyleng );
+    return T_PATH_EXPR;
+  }
+  ";" { BEGIN( options ); }
+  "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
+  [ \t\r]+
+  "\n"
+  . { jxtl_error( "illegal character '%c' found in path expression",
+		  yytext[0] ); }
 }
 
 <options>{
   "separator" { return T_SEPARATOR; }
-  "test" { return T_TEST; }
   "=" { return '='; }
   "," { return ','; }
-  "(" { BEGIN( expression ); return '('; }
   "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
   "\"" {
     APR_ARRAY_CLEAR( LEX_EXTRA_STR_ARRAY );
@@ -149,16 +145,6 @@ identifier [a-zA-Z_@][a-zA-Z0-9_.@]*
   "\n" {
     jxtl_error( "unterminated string constant" );
     BEGIN( INITIAL );
-  }
-}
-
-<expression>{
-  "!" { return '!'; }
-  "(" { return '('; }
-  ")" { BEGIN( options ); return ')'; }
-  {identifier} {
-    yylval->string = apr_pstrdup( LEX_EXTRA_MP, yytext );
-    return T_IDENTIFIER;
   }
 }
 

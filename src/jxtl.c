@@ -7,6 +7,7 @@
 
 #include "json.h"
 #include "json_node.h"
+#include "json_path.h"
 #include "json_writer.h"
 
 #include "jxtl.h"
@@ -28,33 +29,26 @@ typedef enum jxtl_content_type {
   JXTL_IF
 } jxtl_content_type;
 
-typedef struct jxtl_test_t {
-  unsigned char *name;
-  int negate;
-} jxtl_test_t;
-
 typedef struct jxtl_if_t {
+  json_path_expr_t *expr;
   apr_array_header_t *content;
-  jxtl_test_t *test;
 } jxtl_if_t;
 
 typedef struct jxtl_section_t {
-  /** Name of the section. */
-  unsigned char *name; 
+  /** Compiled path expression. */
+  json_path_expr_t *expr;
   /** Array of the content in the section. */
   apr_array_header_t *content;
   /** Array of content for the separator. */
   apr_array_header_t *separator;
   /** A array of content arrays. */
   apr_array_header_t *current_array;
-  /** A test to run when iterating over a section. */
-  jxtl_test_t *test;
 } jxtl_section_t;
 
 typedef struct jxtl_content_t {
   /** What this content contains in its value pointer. */
   jxtl_content_type type;
-  /** Either a string or a pointer to a jxtl_section_t or a jxtl_test_t */
+  /** A string, pointer to a jxtl_section_t, jxtl_if_t or a json_path_expr_t */
   void *value;
 } jxtl_content_t;
 
@@ -75,6 +69,8 @@ typedef struct jxtl_data_t {
   apr_array_header_t *section;
   /** Reusable array of json objects.  Used when printing a section. */
   apr_array_header_t *json_array;
+  /** Reusable path builder. */
+  json_path_builder_t path_builder;
 } jxtl_data_t;
 
 static void json_value_print( json_t *json )
@@ -101,37 +97,6 @@ static void json_value_print( json_t *json )
   }
 }
 
-static json_t *json_lookup( json_t *root, unsigned char *exp )
-{
-  json_t *json = root;
-  char *exp_ptr = exp;
-  char *last = exp;
-  char *token;
-  int token_len;
-
-  do {
-    exp_ptr = strchr( last, '.' );
-    token_len = ( exp_ptr ) ? exp_ptr - last : strlen( last );
-    token = last;
-    if ( token_len == 1 && token[0] == '@' ) {
-      /* No action, leave json alone */
-    }
-    else if ( token_len == 2 && token[0] == '@' & token[1] == '@' ) {
-      json = json->parent;
-    }
-    else if ( json && json->type == JSON_OBJECT ) {
-      json = apr_hash_get( json->value.object, token, token_len );
-    }
-    else {
-      json = NULL;
-      break;
-    }
-    last = exp_ptr + 1;
-  }while ( exp_ptr );
-
-  return json;
-}
-
 static void text_print( char *text, jxtl_content_t *prev_content,
 			jxtl_content_t *next_content,
 			section_print_type print_type )
@@ -151,26 +116,6 @@ static void text_print( char *text, jxtl_content_t *prev_content,
   printf( "%.*s", len, text_ptr );
 }
 
-/**
- * Evaluate whether or not to expand "section" for "json".
- */
-static int jxtl_test( jxtl_test_t *test, json_t *json )
-{
-  int result;
-
-  /* No test, return true */
-  if ( !test )
-    return 1;
-  
-  if ( json->type == JSON_OBJECT ) {
-    result = ( json_lookup( json, test->name ) != NULL );
-  }
-
-  result = ( test->negate ) ? !result : result;
-
-  return result;
-}
-
 static int in_true_if( jxtl_data_t *data )
 {
   if ( data->if_array->nelts == 0 ) {
@@ -179,26 +124,6 @@ static int in_true_if( jxtl_data_t *data )
   else {
     return APR_ARRAY_IDX( data->if_array, data->if_array->nelts - 1, int );
   }
-}
-
-/**
- * Count up the number of array items that pass the test for "section".  This
- * is necessary so we know if the separator should be printed or not.
- */
-static int num_true_array_items( jxtl_section_t *section, json_t *json )
-{
-  int i;
-  int num = 0;
-  json_t *json_value;
-
-  for ( i = 0; i < json->value.array->nelts; i++ ) {
-    json_value = APR_ARRAY_IDX( json->value.array, i, json_t * );
-    if ( jxtl_test( section->test, json_value ) ) {
-      num++;
-    }
-  }
-
-  return num;
 }
 
 static void jxtl_section_print( jxtl_section_t *section,
@@ -215,6 +140,7 @@ static void jxtl_content_print( apr_array_header_t *content_array,
   json_t *json, *json_value, *json_value2;
   jxtl_if_t *jxtl_if;
   apr_array_header_t *if_block;
+  json_path_obj_t path_obj;
 
   json = APR_ARRAY_IDX( json_array, json_array->nelts - 1, json_t * );
 
@@ -223,6 +149,8 @@ static void jxtl_content_print( apr_array_header_t *content_array,
 
   prev_content = NULL;
   next_content = NULL;
+
+  json_path_obj_init( &path_obj );
 
   for ( i = 0; i < content_array->nelts; i++ ) {
     content = APR_ARRAY_IDX( content_array, i, jxtl_content_t * );
@@ -236,12 +164,7 @@ static void jxtl_content_print( apr_array_header_t *content_array,
 
     case JXTL_SECTION:
       tmp_section = (jxtl_section_t *) content->value;
-      json_value = json_lookup( json, tmp_section->name );
-      if ( json_value ) {
-	APR_ARRAY_PUSH( json_array, json_t * ) = json_value;
-	jxtl_section_print( tmp_section, json_array, PRINT_SECTION );
-	APR_ARRAY_POP( json_array, json_t * );
-      }
+      jxtl_section_print( tmp_section, json_array, PRINT_SECTION );
       break;
 
     case JXTL_IF:
@@ -249,11 +172,11 @@ static void jxtl_content_print( apr_array_header_t *content_array,
        * Loop through all of the ifs until we find a true one and then break
        * the loop.
        */
-
       if_block = (apr_array_header_t *) content->value;
       for ( j = 0; j < if_block->nelts; j++ ) {
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
-        if ( jxtl_test( jxtl_if->test, json ) ) {
+        if ( !jxtl_if->expr ||
+	     json_path_compiled_eval( jxtl_if->expr, json, &path_obj ) ) {
           jxtl_content_print( jxtl_if->content, json_array, print_type );
           break;
         }
@@ -261,11 +184,16 @@ static void jxtl_content_print( apr_array_header_t *content_array,
       break;
 
     case JXTL_VALUE:
-      json_value_print( json_lookup( json, content->value ) );
+      if ( json_path_compiled_eval( content->value, json, &path_obj ) ) {
+	json_value = APR_ARRAY_IDX( path_obj.nodes, 0, json_t * );
+	json_value_print( json_value );
+      }
       break;
     }
     prev_content = content;
   }
+
+  json_path_obj_destroy( &path_obj );
 }
 
 /**
@@ -280,44 +208,30 @@ static void jxtl_section_print( jxtl_section_t *section,
   int num_printed;
   json_t *json;
   json_t *json_value;
-  apr_array_header_t *content_array;
+  json_path_obj_t path_obj;
 
   json = APR_ARRAY_IDX( json_array, json_array->nelts - 1, json_t * );
 
   if ( !json )
     return;
 
-  if ( print_type == PRINT_SECTION )
-    content_array = section->content;
-  else
-    content_array = section->separator;
+  json_path_obj_init( &path_obj );
 
-  /*
-   * When we have an array, just loop over the items in it and call
-   * jxtl_section_print() for each item.
-   */
-  if ( json->type == JSON_ARRAY ) {
-    num_items = num_true_array_items( section, json );
-    num_printed = 0;
-    for ( i = 0; i < json->value.array->nelts; i++ ) {
-      json_value = APR_ARRAY_IDX( json->value.array, i, json_t * );
-      if ( jxtl_test( section->test, json_value ) ) {
-        APR_ARRAY_PUSH( json_array, json_t * ) = json_value;
-        jxtl_section_print( section, json_array, PRINT_SECTION );
+  num_items = json_path_compiled_eval( section->expr, json, &path_obj );
+  num_printed = 0;
+  for ( i = 0; i < path_obj.nodes->nelts; i++ ) {
+    json_value = APR_ARRAY_IDX( path_obj.nodes, i, json_t * );
+    APR_ARRAY_PUSH( json_array, json_t * ) = json_value;
+    jxtl_content_print( section->content, json_array, PRINT_SECTION );
+    num_printed++;
+    /* Only print the separator if it's not the last one */
+    if ( num_printed < num_items )
+      jxtl_content_print( section->separator, json_array, PRINT_SEPARATOR );
 
-        num_printed++;
-        /* Only print the separator if it's not the last one */
-        if ( num_printed < num_items )
-          jxtl_section_print( section, json_array, PRINT_SEPARATOR );
-
-        APR_ARRAY_POP( json_array, json_t * );
-      }
-    }
-    return;
+    APR_ARRAY_POP( json_array, json_t * );
   }
-  else {
-    jxtl_content_print( content_array, json_array, print_type );
-  }
+
+  json_path_obj_destroy( &path_obj );
 }
 
 /*
@@ -378,7 +292,7 @@ void jxtl_text_func( void *user_data, unsigned char *text )
   }
 }
 
-void jxtl_section_start( void *user_data, unsigned char *name )
+void jxtl_section_start( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_section_t *section;
@@ -387,16 +301,15 @@ void jxtl_section_start( void *user_data, unsigned char *name )
     return;
 
   section = apr_palloc( data->mp, sizeof( jxtl_section_t ) );
-  section->name = (unsigned char *) apr_pstrdup( data->mp, (char *) name );
+  section->expr = json_path_compile( &data->path_builder, expr );
   section->content = apr_array_make( data->mp, 1024,
-                                     sizeof( jxtl_content_t * ) );
+				     sizeof( jxtl_content_t * ) );
   section->separator = apr_array_make( data->mp, 1024,
                                        sizeof( jxtl_content_t * ) );
   section->current_array = apr_array_make( data->mp, 32,
                                            sizeof( apr_array_header_t * ) );
   APR_ARRAY_PUSH( section->current_array,
                   apr_array_header_t * ) = section->content;
-  section->test = NULL;
   jxtl_content_push( data, JXTL_SECTION, section );
   data->section_depth++;
 }
@@ -406,11 +319,13 @@ void jxtl_section_start( void *user_data, unsigned char *name )
  * @param user_data The jxtl_data.
  * @param name The name of the section.
  */
-void jxtl_section_end( void *user_data, unsigned char *name )
+void jxtl_section_end( void *user_data )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_section_t *section;
   json_t *json;
+  int i;
+  json_path_obj_t path_obj;
 
   if ( !in_true_if( data ) )
     return;
@@ -420,13 +335,8 @@ void jxtl_section_end( void *user_data, unsigned char *name )
 
   if ( data->section_depth == 0 ) {
     /* Process saved document fragment */
-    json = json_lookup( data->json, section->name );
-    APR_ARRAY_CLEAR( data->json_array );
-    APR_ARRAY_PUSH( data->json_array, json_t * ) = json;
-
-    if ( json )
-      jxtl_section_print( section, data->json_array, PRINT_SECTION );
-
+    APR_ARRAY_PUSH( data->json_array, json_t * ) = data->json;
+    jxtl_section_print( section, data->json_array, PRINT_SECTION );
     APR_ARRAY_POP( data->json_array, json_t * );
     /* Clear the pool when we finish a section. */
     APR_ARRAY_CLEAR( data->section );
@@ -434,7 +344,7 @@ void jxtl_section_end( void *user_data, unsigned char *name )
   }
 }
 
-void jxtl_if_start( void *user_data, unsigned char *name, int negate )
+void jxtl_if_start( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_section_t *section;
@@ -443,10 +353,11 @@ void jxtl_if_start( void *user_data, unsigned char *name, int negate )
 
   if ( data->section_depth == 0 ) {
     /* No nested sections so evaluate this now and push the result. */
-    jxtl_test_t tmp_test;
-    tmp_test.name = name;
-    tmp_test.negate = negate;
-    APR_ARRAY_PUSH( data->if_array, int ) = jxtl_test( &tmp_test, data->json );
+    json_path_obj_t path_obj;
+    json_path_obj_init( &path_obj );
+    APR_ARRAY_PUSH( data->if_array, int ) = json_path_eval( expr, data->json,
+							    &path_obj );
+    json_path_obj_destroy( &path_obj );
   }
   else {
     /* Create the if, will be tested later. */
@@ -455,9 +366,7 @@ void jxtl_if_start( void *user_data, unsigned char *name, int negate )
     apr_array_header_t *if_block = apr_array_make( data->mp, 8,
                                                    sizeof( jxtl_if_t * ) );
     jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
-    jxtl_if->test = apr_palloc( data->mp, sizeof( jxtl_test_t ) );
-    jxtl_if->test->name = apr_pstrdup( data->mp, (char *) name );
-    jxtl_if->test->negate = negate;
+    jxtl_if->expr = json_path_compile( &data->path_builder, expr );
     jxtl_if->content = apr_array_make( data->mp, 1024,
                                        sizeof( jxtl_content_t * ) );
     APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
@@ -467,16 +376,16 @@ void jxtl_if_start( void *user_data, unsigned char *name, int negate )
   }
 }
 
-void jxtl_elseif( void *user_data, unsigned char *name, int negate )
+void jxtl_elseif( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
 
   if ( data->section_depth == 0 ) {
-    APR_ARRAY_POP( data->if_array, int );
-    jxtl_test_t tmp_test;
-    tmp_test.name = name;
-    tmp_test.negate = negate;
-    APR_ARRAY_PUSH( data->if_array, int ) = jxtl_test( &tmp_test, data->json );
+    json_path_obj_t path_obj;
+    json_path_obj_init( &path_obj );
+    APR_ARRAY_PUSH( data->if_array, int ) = json_path_eval( expr, data->json,
+							    &path_obj );
+    json_path_obj_destroy( &path_obj );
   }
   else {
     jxtl_section_t *section;
@@ -496,9 +405,7 @@ void jxtl_elseif( void *user_data, unsigned char *name, int negate )
     if_block = (apr_array_header_t *) content->value;
 
     jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
-    jxtl_if->test = apr_palloc( data->mp, sizeof( jxtl_test_t ) );
-    jxtl_if->test->name = apr_pstrdup( data->mp, (char *) name );
-    jxtl_if->test->negate = negate;
+    jxtl_if->expr = json_path_compile( &data->path_builder, expr );
     jxtl_if->content = apr_array_make( data->mp, 1024,
                                        sizeof( jxtl_content_t * ) );
     APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
@@ -549,7 +456,7 @@ void jxtl_else( void *user_data )
      * onto the actual section itself, because the if_block is already there.
      */
     jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
-    jxtl_if->test = NULL;
+    jxtl_if->expr = NULL;
     jxtl_if->content = apr_array_make( data->mp, 1024,
                                        sizeof( jxtl_content_t * ) );
     APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
@@ -617,7 +524,7 @@ void jxtl_separator_end( void *user_data )
  * @param user_data The jxtl_data.
  * @param name The name of the value to lookup.
  */
-void jxtl_value_func( void *user_data, unsigned char *name )
+void jxtl_value_func( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   json_t *json_value;
@@ -627,36 +534,16 @@ void jxtl_value_func( void *user_data, unsigned char *name )
 
   if ( data->section_depth > 0 ) {
     jxtl_content_push( data, JXTL_VALUE,
-                       apr_pstrdup( data->mp, (char *) name ) );
+		       json_path_compile( &data->path_builder, expr ) );
   }
   else {
-    json_value = json_lookup( data->json, name );
+    json_path_obj_t path_obj;
+    json_path_obj_init( &path_obj );
+    json_path_eval( expr, data->json, &path_obj );
+    json_value = APR_ARRAY_IDX( path_obj.nodes, 0, json_t * );
     json_value_print( json_value );
+    json_path_obj_destroy( &path_obj );
   }
-}
-
-/**
- * Parser callback function for when it encounters a test expression.
- * @param user_data The jxtl_data
- * @param name The name to lookup when doing the test
- * @param negate Whether or not to negate the result of the lookup.
- */
-void jxtl_test_func( void *user_data, unsigned char *name, int negate )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_test_t *test;
-  jxtl_section_t *section;
-
-  if ( !in_true_if( data ) )
-    return;
-
-  section = APR_ARRAY_IDX( data->section, data->section->nelts - 1,
-			   jxtl_section_t * );
-
-  test = apr_palloc( data->mp, sizeof( jxtl_test_t ) );
-  test->name = apr_pstrdup( data->mp, (char *) name );
-  test->negate = negate;
-  section->test = test;
 }
 
 void jxtl_usage( const char *prog_name,
@@ -791,12 +678,12 @@ int main( int argc, char const * const *argv )
     jxtl_if_end,
     jxtl_separator_start,
     jxtl_separator_end,
-    jxtl_test_func,
     jxtl_value_func,
     &jxtl_data
   };
 
   json_writer_init( &writer );
+  json_path_builder_init( &jxtl_data.path_builder );
 
   if ( jxtl_load_data( json_file, xml_file, skip_root, &writer ) == 0 ) {
     jxtl_data.json = writer.json;
@@ -808,6 +695,7 @@ int main( int argc, char const * const *argv )
     jxtl_lex_destroy( jxtl_scanner );
   }
 
+  json_path_builder_destroy( &jxtl_data.path_builder );
   json_writer_destroy( &writer );
 
   apr_pool_destroy( jxtl_data.mp );

@@ -73,10 +73,9 @@ typedef struct json_path_obj_t {
 }json_path_obj_t;
 
 extern json_path_expr_t *json_path_compile( json_path_builder_t *path_builder,
-                                            const char *path );
-extern int json_path_evaluate( const char *path,
-                               json_t *json,
-                               json_path_obj_t *path_ctx );
+                                            const unsigned char *path );
+extern int json_path_eval( const unsigned char *path, json_t *json,
+			   json_path_obj_t *path_ctx );
 extern int json_path_compiled_eval( json_path_expr_t *expr,
                                     json_t *json,
                                     json_path_obj_t *obj );

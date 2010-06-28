@@ -182,7 +182,7 @@ void json_path_builder_destroy( json_path_builder_t *path_builder )
  * Compile a JSON Path expression.
  */
 json_path_expr_t *json_path_compile( json_path_builder_t *path_builder,
-                                     const char *path )
+                                     const unsigned char *path )
 {
   YY_BUFFER_STATE buffer_state;
   int parse_result;
@@ -270,7 +270,17 @@ static void json_path_test_node( json_path_expr_t *expr,
         json_path_eval_internal( expr->next, json, nodes );
       }
       else {
-        APR_ARRAY_PUSH( nodes, json_t * ) = json;
+	if ( json->type == JSON_ARRAY ) {
+	  int i;
+	  json_t *tmp_json;
+	  for ( i = 0; i < json->value.array->nelts; i++ ) {
+	    tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
+	    APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
+	  }
+	}
+	else {
+	  APR_ARRAY_PUSH( nodes, json_t * ) = json;
+	}
       }
     }
   }
@@ -342,7 +352,8 @@ static void json_path_eval_internal( json_path_expr_t *expr,
  * Evaluate the given path expression in the context of json.
  * Returns the number of nodes selected.
  */
-int json_path_eval( const char *path, json_t *json, json_path_obj_t *obj )
+int json_path_eval( const unsigned char *path, json_t *json,
+		    json_path_obj_t *obj )
 {
   json_path_builder_t path_builder;
 
@@ -365,6 +376,6 @@ int json_path_compiled_eval( json_path_expr_t *expr,
 {
   APR_ARRAY_CLEAR( obj->nodes );
   apr_pool_clear( obj->mp );
-  json_path_eval_internal( obj->expr, json, obj->nodes );
+  json_path_eval_internal( expr, json, obj->nodes );
   return obj->nodes->nelts;
 }
