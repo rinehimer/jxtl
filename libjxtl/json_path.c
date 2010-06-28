@@ -123,10 +123,15 @@ void json_path_test_end( void *user_data )
   jsp_data *data = (jsp_data *) user_data;
   json_path_expr_t *expr;
   expr = APR_ARRAY_POP( data->expr_array, json_path_expr_t * );
-  expr->test = data->root;
 
-  data->curr = expr;
-  data->root = expr->root;
+  /*
+   * The root expression could be a test, i.e. '(a.b)'.
+   */
+  if ( expr ) {
+    expr->test = data->root;
+    data->curr = expr;
+    data->root = expr->root;
+  }
 }
 
 /**
@@ -284,7 +289,7 @@ static void json_path_eval_internal( json_path_expr_t *expr,
     return;
 
   /*
-   * We have an array, just iterate over all items automatically.
+   * We have an array, just iterate over all items.
    */
   if ( json->type == JSON_ARRAY ) {
     for ( i = 0; i < json->value.array->nelts; i++ ) {
