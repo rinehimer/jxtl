@@ -18,6 +18,6 @@ typedef struct json_callback_t {
   void *user_data;
 } json_callback_t;
 
-extern int json_file_parse( const char *json_file, json_writer_t *writer );
+int json_file_parse( const char *json_file, json_writer_t *writer );
 
 #endif

@@ -72,11 +72,10 @@ typedef struct json_path_obj_t {
   apr_array_header_t *nodes;
 }json_path_obj_t;
 
-extern json_path_expr_t *json_path_compile( json_path_builder_t *path_builder,
-                                            const unsigned char *path );
-extern int json_path_eval( const unsigned char *path, json_t *json,
-			   json_path_obj_t *path_ctx );
-extern int json_path_compiled_eval( json_path_expr_t *expr,
-                                    json_t *json,
-                                    json_path_obj_t *obj );
+json_path_expr_t *json_path_compile( json_path_builder_t *path_builder,
+				     const unsigned char *path );
+int json_path_eval( const unsigned char *path, json_t *json,
+		    json_path_obj_t *path_ctx );
+int json_path_compiled_eval( json_path_expr_t *expr, json_t *json,
+			     json_path_obj_t *obj );
 #endif

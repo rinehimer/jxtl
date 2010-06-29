@@ -40,9 +40,9 @@ static void expr_add( jsp_data *data, json_path_expr_t *expr )
   }
 }
 
-static json_path_expr_t *json_path_expr_create( jsp_data *data,
-                                                json_path_expr_type type,
-                                                unsigned char *identifier )
+static void json_path_expr_create( jsp_data *data,
+				   json_path_expr_type type,
+				   unsigned char *identifier )
 {
   json_path_expr_t *expr;
 

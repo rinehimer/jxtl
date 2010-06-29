@@ -3,7 +3,7 @@
 
 #include "json_writer.h"
 
-extern int xml_file_read( const char *filename, json_writer_t *writer,
-                          int skip_root );
+int xml_file_read( const char *filename, json_writer_t *writer,
+		   int skip_root );
 
 #endif

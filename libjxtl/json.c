@@ -71,9 +71,7 @@ static void json_object_print_internal( json_t *json,
 {
   apr_array_header_t *arr = NULL;
   int i = 0;
-  int len;
   json_t *tmp_json = NULL;
-  unsigned char c;
   apr_hash_index_t *idx;
 
   if ( !first )
