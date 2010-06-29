@@ -67,8 +67,6 @@ typedef struct jxtl_data_t {
   json_t *json;
   /** Array of jxtl_section_t objects. */
   apr_array_header_t *section;
-  /** Reusable array of json objects.  Used when printing a section. */
-  apr_array_header_t *json_array;
   /** Reusable path builder. */
   json_path_builder_t path_builder;
 } jxtl_data_t;
@@ -127,22 +125,20 @@ static int in_true_if( jxtl_data_t *data )
 }
 
 static void jxtl_section_print( jxtl_section_t *section,
-                                apr_array_header_t *json_array,
+                                json_t *json,
                                 section_print_type print_type );
 
 static void jxtl_content_print( apr_array_header_t *content_array,
-                                apr_array_header_t *json_array,
+                                json_t *json,
                                 section_print_type print_type )
 {
   int i, j;
   jxtl_content_t *content, *prev_content, *next_content;
   jxtl_section_t *tmp_section;
-  json_t *json, *json_value, *json_value2;
+  json_t *json_value;
   jxtl_if_t *jxtl_if;
   apr_array_header_t *if_block;
   json_path_obj_t path_obj;
-
-  json = APR_ARRAY_IDX( json_array, json_array->nelts - 1, json_t * );
 
   if ( !json )
     return;
@@ -164,7 +160,7 @@ static void jxtl_content_print( apr_array_header_t *content_array,
 
     case JXTL_SECTION:
       tmp_section = (jxtl_section_t *) content->value;
-      jxtl_section_print( tmp_section, json_array, PRINT_SECTION );
+      jxtl_section_print( tmp_section, json, PRINT_SECTION );
       break;
 
     case JXTL_IF:
@@ -177,7 +173,7 @@ static void jxtl_content_print( apr_array_header_t *content_array,
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
         if ( !jxtl_if->expr ||
 	     json_path_compiled_eval( jxtl_if->expr, json, &path_obj ) ) {
-          jxtl_content_print( jxtl_if->content, json_array, print_type );
+          jxtl_content_print( jxtl_if->content, json, print_type );
           break;
         }
       }
@@ -200,17 +196,14 @@ static void jxtl_content_print( apr_array_header_t *content_array,
  * Print a saved section
  */
 static void jxtl_section_print( jxtl_section_t *section,
-                                apr_array_header_t *json_array,
+                                json_t *json,
                                 section_print_type print_type )
 {
   int i;
   int num_items;
   int num_printed;
-  json_t *json;
   json_t *json_value;
   json_path_obj_t path_obj;
-
-  json = APR_ARRAY_IDX( json_array, json_array->nelts - 1, json_t * );
 
   if ( !json )
     return;
@@ -221,14 +214,11 @@ static void jxtl_section_print( jxtl_section_t *section,
   num_printed = 0;
   for ( i = 0; i < path_obj.nodes->nelts; i++ ) {
     json_value = APR_ARRAY_IDX( path_obj.nodes, i, json_t * );
-    APR_ARRAY_PUSH( json_array, json_t * ) = json_value;
-    jxtl_content_print( section->content, json_array, PRINT_SECTION );
+    jxtl_content_print( section->content, json_value, PRINT_SECTION );
     num_printed++;
     /* Only print the separator if it's not the last one */
     if ( num_printed < num_items )
-      jxtl_content_print( section->separator, json_array, PRINT_SEPARATOR );
-
-    APR_ARRAY_POP( json_array, json_t * );
+      jxtl_content_print( section->separator, json_value, PRINT_SEPARATOR );
   }
 
   json_path_obj_destroy( &path_obj );
@@ -326,9 +316,6 @@ void jxtl_section_end( void *user_data )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_section_t *section;
-  json_t *json;
-  int i;
-  json_path_obj_t path_obj;
 
   if ( !in_true_if( data ) )
     return;
@@ -338,9 +325,7 @@ void jxtl_section_end( void *user_data )
 
   if ( data->section_depth == 0 ) {
     /* Process saved document fragment */
-    APR_ARRAY_PUSH( data->json_array, json_t * ) = data->json;
-    jxtl_section_print( section, data->json_array, PRINT_SECTION );
-    APR_ARRAY_POP( data->json_array, json_t * );
+    jxtl_section_print( section, data->json, PRINT_SECTION );
     /* Clear the pool when we finish a section. */
     APR_ARRAY_CLEAR( data->section );
     apr_pool_clear( data->mp );
@@ -352,7 +337,6 @@ void jxtl_if_start( void *user_data, unsigned char *expr )
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_section_t *section;
   jxtl_if_t *jxtl_if;
-  json_t *json;
 
   if ( data->section_depth == 0 ) {
     /* No nested sections so evaluate this now and push the result. */
@@ -570,7 +554,6 @@ void jxtl_init( int argc, char const * const *argv , apr_pool_t *mp,
 		const char **template_file, const char **json_file,
 		const char **xml_file, int *skip_root )
 {
-  int i;
   apr_getopt_t *options;
   apr_status_t ret;
   int ch;
@@ -669,7 +652,6 @@ int main( int argc, char const * const *argv )
   jxtl_data.json = NULL;
   jxtl_data.section = apr_array_make( mp, 1024,
 					sizeof( jxtl_section_t * ) );
-  jxtl_data.json_array = apr_array_make( mp, 1024, sizeof( json_t * ) );
 
   jxtl_callback_t callbacks = {
     jxtl_text_func,
