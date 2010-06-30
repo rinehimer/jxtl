@@ -1,2 +1,3 @@
 SUBDIRS = libjxtl \
-          src
+          src \
+          test

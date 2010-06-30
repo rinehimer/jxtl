@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<beers>
+  <brewery>
+    <name>Dogfish Head</name>
+    <beer>
+      <beer_name>60 Minute IPA</beer_name>
+    </beer>
+    <beer>
+      <beer_name>90 Minute IPA</beer_name>
+    </beer>
+    <beer>
+      <beer_name>Punkin Ale</beer_name>
+      <season>Fall</season>
+    </beer>
+  </brewery>
+  <brewery>
+    <name>Troegs</name>
+    <beer>
+      <beer_name>HopBack Amber Ale</beer_name>
+    </beer>
+    <beer>
+      <beer_name>Sunshine Pils</beer_name>
+      <season>Summer</season>
+    </beer>
+    <beer>
+      <beer_name>Mad Elf</beer_name>
+      <season>Winter</season>
+    </beer>
+  </brewery>
+</beers>

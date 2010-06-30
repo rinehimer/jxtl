@@ -1,0 +1,3 @@
+{{#section brewery ; separator="\n"}}
+{{name}} Brewery
+{{#end}}

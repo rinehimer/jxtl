@@ -48,5 +48,6 @@ AC_SUBST(XML2_LIBS)
 
 AC_CONFIG_FILES([Makefile
                  libjxtl/Makefile
-		 src/Makefile])
+		 src/Makefile
+                 test/Makefile])
 AC_OUTPUT
