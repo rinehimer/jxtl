@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include <apr_pools.h>
+#include <apr_strings.h>
 #include <apr_tables.h>
 
 #include "apr_macros.h"
@@ -10,19 +11,34 @@
 #include "json_path_lex.h"
 #include "lex_extra.h"
 
-void json_path_obj_init( json_path_obj_t *json_path_obj )
+json_path_obj_t *json_path_obj_create( apr_pool_t *mp )
 {
-  apr_pool_create( &json_path_obj->mp, NULL );
-  json_path_obj->expr = NULL;
-  json_path_obj->nodes = apr_array_make( json_path_obj->mp, 128,
-                                         sizeof(json_t *) );
+  json_path_obj_t *path_obj;
+
+  if ( mp ) {
+    path_obj = apr_palloc( mp, sizeof(json_path_obj_t) );
+    path_obj->free_func = NULL;
+  }
+  else {
+    path_obj = malloc( sizeof(json_path_obj_t) );
+    path_obj->free_func = free;
+  }
+
+  apr_pool_create( &path_obj->mp, NULL );
+  path_obj->expr = NULL;
+  path_obj->nodes = apr_array_make( path_obj->mp, 128, sizeof(json_t *) );
+  return path_obj;
 }
 
-void json_path_obj_destroy( json_path_obj_t *json_path_obj )
+void json_path_obj_destroy( json_path_obj_t *path_obj )
 {
-  apr_pool_destroy( json_path_obj->mp );
-  json_path_obj->expr = NULL;
-  json_path_obj->nodes = NULL;
+  apr_pool_destroy( path_obj->mp );
+  path_obj->expr = NULL;
+  path_obj->nodes = NULL;
+
+  if ( path_obj->free_func ) {
+    path_obj->free_func( path_obj );
+  }
 }
 
 static void expr_add( jsp_data *data, json_path_expr_t *expr )
@@ -130,14 +146,9 @@ void json_path_test_end( void *user_data )
   json_path_expr_t *expr;
   expr = APR_ARRAY_POP( data->expr_array, json_path_expr_t * );
 
-  /*
-   * The root expression could be a test, i.e. '(a.b)'.
-   */
-  if ( expr ) {
-    expr->test = data->root;
-    data->curr = expr;
-    data->root = expr->root;
-  }
+  expr->test = data->root;
+  data->curr = expr;
+  data->root = expr->root;
 }
 
 /**
@@ -194,7 +205,6 @@ json_path_expr_t *json_path_compile( json_path_builder_t *path_builder,
   int parse_result;
   char *eval_str;
   int eval_str_len;
-  jsp_data data;
 
   APR_ARRAY_CLEAR( path_builder->data.expr_array );
   path_builder->data.root = NULL;
@@ -204,9 +214,9 @@ json_path_expr_t *json_path_compile( json_path_builder_t *path_builder,
    * Set up eval_str for flex.  Flex requires the last two bytes of a string
    * passed to yy_scan_buffer be the null terminator.
    */
-  eval_str_len = strlen( path ) + 2;
+  eval_str_len = strlen( (char*) path ) + 2;
   eval_str = malloc( eval_str_len );
-  apr_cpystrn( eval_str, path, eval_str_len - 1 );
+  apr_cpystrn( eval_str, (char *) path, eval_str_len - 1 );
   eval_str[eval_str_len - 1] = '\0';
 
   buffer_state = json_path__scan_buffer( eval_str, eval_str_len,
@@ -368,13 +378,15 @@ int json_path_eval( const unsigned char *path, json_t *json,
 		    json_path_obj_t *obj )
 {
   json_path_builder_t path_builder;
+  json_path_expr_t *expr;
 
   APR_ARRAY_CLEAR( obj->nodes );
   apr_pool_clear( obj->mp );
 
   json_path_builder_init( &path_builder );
-  obj->expr = json_path_compile( &path_builder, path );
-  json_path_eval_internal( obj->expr, json, obj->nodes );
+  expr = json_path_compile( &path_builder, path );
+  json_path_eval_internal( expr, json, obj->nodes );
+  json_path_builder_destroy( &path_builder );
 
   return obj->nodes->nelts;
 }

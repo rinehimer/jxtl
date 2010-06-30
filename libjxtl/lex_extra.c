@@ -12,7 +12,6 @@ void lex_extra_init( lex_extra_t *lex_extra, const char *filename )
 {
   apr_status_t status;
   apr_file_t *in_file = NULL;
-  apr_finfo_t file_info;
   char error_buf[1024];
 
   apr_pool_create( &lex_extra->mp, NULL );

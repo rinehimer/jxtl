@@ -124,7 +124,7 @@ static void jxtl_content_print( apr_array_header_t *content_array,
   json_t *json_value;
   jxtl_if_t *jxtl_if;
   apr_array_header_t *if_block;
-  json_path_obj_t path_obj;
+  json_path_obj_t *path_obj;
 
   if ( !json )
     return;
@@ -132,7 +132,7 @@ static void jxtl_content_print( apr_array_header_t *content_array,
   prev_content = NULL;
   next_content = NULL;
 
-  json_path_obj_init( &path_obj );
+  path_obj = json_path_obj_create( NULL );
 
   for ( i = 0; i < content_array->nelts; i++ ) {
     content = APR_ARRAY_IDX( content_array, i, jxtl_content_t * );
@@ -158,7 +158,7 @@ static void jxtl_content_print( apr_array_header_t *content_array,
       for ( j = 0; j < if_block->nelts; j++ ) {
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
         if ( !jxtl_if->expr ||
-	     json_path_compiled_eval( jxtl_if->expr, json, &path_obj ) ) {
+	     json_path_compiled_eval( jxtl_if->expr, json, path_obj ) ) {
           jxtl_content_print( jxtl_if->content, json, print_type );
           break;
         }
@@ -166,8 +166,8 @@ static void jxtl_content_print( apr_array_header_t *content_array,
       break;
 
     case JXTL_VALUE:
-      if ( json_path_compiled_eval( content->value, json, &path_obj ) ) {
-	json_value = APR_ARRAY_IDX( path_obj.nodes, 0, json_t * );
+      if ( json_path_compiled_eval( content->value, json, path_obj ) ) {
+	json_value = APR_ARRAY_IDX( path_obj->nodes, 0, json_t * );
 	json_value_print( json_value );
       }
       break;
@@ -175,7 +175,7 @@ static void jxtl_content_print( apr_array_header_t *content_array,
     prev_content = content;
   }
 
-  json_path_obj_destroy( &path_obj );
+  json_path_obj_destroy( path_obj );
 }
 
 /**
@@ -189,17 +189,17 @@ static void jxtl_section_print( jxtl_section_t *section,
   int num_items;
   int num_printed;
   json_t *json_value;
-  json_path_obj_t path_obj;
+  json_path_obj_t *path_obj;
 
   if ( !json )
     return;
 
-  json_path_obj_init( &path_obj );
+  path_obj = json_path_obj_create( NULL );
 
-  num_items = json_path_compiled_eval( section->expr, json, &path_obj );
+  num_items = json_path_compiled_eval( section->expr, json, path_obj );
   num_printed = 0;
-  for ( i = 0; i < path_obj.nodes->nelts; i++ ) {
-    json_value = APR_ARRAY_IDX( path_obj.nodes, i, json_t * );
+  for ( i = 0; i < path_obj->nodes->nelts; i++ ) {
+    json_value = APR_ARRAY_IDX( path_obj->nodes, i, json_t * );
     jxtl_content_print( section->content, json_value, PRINT_SECTION );
     num_printed++;
     /* Only print the separator if it's not the last one */
@@ -207,7 +207,7 @@ static void jxtl_section_print( jxtl_section_t *section,
       jxtl_content_print( section->separator, json_value, PRINT_SEPARATOR );
   }
 
-  json_path_obj_destroy( &path_obj );
+  json_path_obj_destroy( path_obj );
 }
 
 /*
@@ -423,12 +423,13 @@ void jxtl_value_func( void *user_data, unsigned char *expr )
 		       json_path_compile( &data->path_builder, expr ) );
   }
   else {
-    json_path_obj_t path_obj;
-    json_path_obj_init( &path_obj );
-    json_path_eval( expr, data->json, &path_obj );
-    json_value = APR_ARRAY_IDX( path_obj.nodes, 0, json_t * );
+    json_path_obj_t *path_obj;
+    path_obj = json_path_obj_create( data->mp );
+    json_path_eval( expr, data->json, path_obj );
+    json_value = APR_ARRAY_IDX( path_obj->nodes, 0, json_t * );
     json_value_print( json_value );
-    json_path_obj_destroy( &path_obj );
+    json_path_obj_destroy( path_obj );
+    apr_pool_clear( data->mp );
   }
 }
 

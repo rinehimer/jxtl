@@ -69,10 +69,13 @@ typedef struct json_path_builder_t {
 
 typedef struct json_path_obj_t {
   apr_pool_t *mp;
+  void ( *free_func )( void *ptr );
   json_path_expr_t *expr;
   apr_array_header_t *nodes;
 }json_path_obj_t;
 
+json_path_obj_t *json_path_obj_create( apr_pool_t *mp );
+void json_path_obj_destroy( json_path_obj_t *path_obj );
 json_path_expr_t *json_path_compile( json_path_builder_t *path_builder,
 				     const unsigned char *path );
 int json_path_eval( const unsigned char *path, json_t *json,

@@ -31,12 +31,13 @@ static void xml_node_process( xmlNodePtr root, json_writer_t *writer )
   xmlAttrPtr attr;
   json_type type;
   int need_text_prop = 0;
-  xmlBufferPtr elem_buf = xmlBufferCreate();
+  xmlBufferPtr elem_buf;
 
   if ( !root )
     return;
 
   need_text_prop = ( root->parent && root->parent->properties );
+  elem_buf = xmlBufferCreate();
 
   for ( node = root; node; node = node->next ) {
     switch ( node->type ) {
