@@ -25,11 +25,12 @@ typedef struct json_path_callback_t {
 } json_path_callback_t;
 
 typedef enum json_path_expr_type {
+  JSON_PATH_BOOLEAN_EXPR,
   JSON_PATH_ROOT_OBJ,
   JSON_PATH_PARENT_OBJ,
   JSON_PATH_CURRENT_OBJ,
   JSON_PATH_ALL_CHILDREN,
-  JSON_PATH_LOOKUP
+  JSON_PATH_LOOKUP,
 }json_path_expr_type;
 
 typedef struct json_path_expr_t {

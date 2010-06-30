@@ -108,7 +108,13 @@ void json_path_test_start( void *user_data )
 {
   jsp_data *data = (jsp_data *) user_data;
 
-  /* Save off the current expression. */
+  /*
+   * Make sure we have started an expression, if not this is just a boolean
+   * expression, create a place holder for it.
+   */
+  if ( !data->curr ) {
+    json_path_expr_create( user_data, JSON_PATH_BOOLEAN_EXPR, NULL );
+  }
   APR_ARRAY_PUSH( data->expr_array, json_path_expr_t * ) = data->curr;
 
   data->root = NULL;
@@ -309,6 +315,10 @@ static void json_path_eval_internal( json_path_expr_t *expr,
   }
 
   switch ( expr->type ) {
+  case JSON_PATH_BOOLEAN_EXPR:
+    tmp_json = json;
+    break;
+    
   case JSON_PATH_ROOT_OBJ:
     for( tmp_json = json; tmp_json && tmp_json->parent;
          tmp_json = tmp_json->parent );
@@ -370,7 +380,7 @@ int json_path_eval( const unsigned char *path, json_t *json,
 }
 
 /**
- * Evaluate a pre-compiled expression.
+ * Evaluate a pre-compiled expression.  Returns the number of nodes.
  */
 int json_path_compiled_eval( json_path_expr_t *expr,
                              json_t *json,
