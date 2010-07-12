@@ -7,13 +7,20 @@
 
 /*
 ** When creating a scanner, this is the object that gets stored in it's
-** "extra" slot.  It handles 
+** "extra" slot.
 */
 typedef struct lex_extra_t {
-  apr_status_t status; /* Status variable used when reading from in_file */
-  apr_pool_t *mp; /* Memory pool for opening file and allocating str_array */
+  /* Memory pool for objects allocated in this structure. */
+  apr_pool_t *mp;
+  /* Status variable used when reading from in_file. */
+  apr_status_t status;
+  /* Array for building up strings in the lexer. */
   apr_array_header_t *str_array;
+  /* The filename we opened. */
+  char *filename;
+  /* An APR file pointer. */
   apr_file_t *in_file;
+  /* Number of bytes read from the file. */
   apr_size_t bytes;
 }lex_extra_t;
 

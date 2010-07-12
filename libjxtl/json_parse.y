@@ -24,6 +24,7 @@
 #define null_handler callbacks->null_handler
 #define user_data callbacks->user_data
 
+char *json_lex_get_filename( yyscan_t *yyscanner );
 void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
 		 const char *error_string, ... );
 %}
@@ -112,9 +113,11 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
 		 const char *error_string, ... )
 {
   va_list args;
-  fprintf( stderr, "%d: ", yylloc->first_line );
+  fprintf( stderr, "%s: %d.%d-%d.%d ", json_lex_get_filename( scanner ),
+	   yylloc->first_line, yylloc->first_column, yylloc->last_line,
+	   yylloc->last_column );
   va_start( args, error_string);
   vfprintf( stderr, error_string, args );
   va_end( args );
-  fprintf( stderr, " near column %d\n", yylloc->first_column + 1 );
+  fprintf( stderr, "\n" );
 }

@@ -9,6 +9,7 @@
 #include "json.h"
 
 #include "json_parse.h"
+#include "json_parser.h"
 #include "lex_extra.h"
 #include "utf.h"
 
@@ -32,12 +33,21 @@
  }
 
 #define YY_USER_ACTION {						\
-    yylloc->first_line = yylineno;                                      \
-    yylloc->first_column = yycolumn;                                    \
-    yycolumn = yylloc->first_column + yyleng;                           \
-    yylloc->last_line = yylineno;                                       \
-    yylloc->last_column = yycolumn - 1;                                 \
+    yylloc->first_line = yylineno;					\
+    yylloc->last_line = yylineno;					\
+    yylloc->first_column = yycolumn + 1;				\
+    yylloc->last_column = yycolumn + yyleng;				\
+    if ( yyleng == 1 && yytext[0] == '\n' ) {				\
+      yylloc->first_column = 0;						\
+      yylloc->last_column = 0;						\
+    }									\
+    else {								\
+      yycolumn += yyleng;						\
+    }									\
  }
+
+void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
+		 const char *error_string, ... );
 %}
 
 %option prefix="json_"
@@ -48,7 +58,6 @@
 %option reentrant
 %option bison-bridge
 %option bison-locations
-%option debug
 
 %x unmatched squote_str dquote_str
    
@@ -207,8 +216,21 @@ exp ("e"|"E")("+"|"-")?[0-9]+
     json_lex_error( "start of illegal backslash" );
   }
   "\n" {
+    /* Unterminated string constant, still return the string for the parser. */
+    BEGIN( INITIAL );
     json_lex_error( "unterminated string constant" );
+    yylval->string = apr_palloc( LEX_EXTRA_MP,
+				 LEX_EXTRA_STR_ARRAY->nelts + 1 );
+    utf8_strcpyn( yylval->string, (unsigned char *) LEX_EXTRA_STR_ARRAY->elts,
+                  LEX_EXTRA_STR_ARRAY->nelts );
+    return T_STRING;
   }
 }
 
 %%
+
+char *json_lex_get_filename( yyscan_t *yyscanner )
+{
+  lex_extra_t *lex_extra = json_get_extra( yyscanner );
+  return lex_extra->filename;
+}

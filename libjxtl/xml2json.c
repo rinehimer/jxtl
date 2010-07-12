@@ -94,6 +94,10 @@ static void xml_node_process( xmlNodePtr root, json_writer_t *writer )
       
       json_writer_property_end( writer );
       break;
+
+    default:
+      /* Not handled when converting */
+      break;
     }
     xmlBufferEmpty( elem_buf );
   }
