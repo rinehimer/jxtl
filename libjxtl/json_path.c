@@ -11,6 +11,8 @@
 #include "json_path_lex.h"
 #include "lex_extra.h"
 
+#define NODELIST_SIZE 1024
+
 json_path_obj_t *json_path_obj_create( apr_pool_t *mp )
 {
   json_path_obj_t *path_obj;
@@ -25,15 +27,13 @@ json_path_obj_t *json_path_obj_create( apr_pool_t *mp )
   }
 
   apr_pool_create( &path_obj->mp, NULL );
-  path_obj->expr = NULL;
-  path_obj->nodes = apr_array_make( path_obj->mp, 128, sizeof(json_t *) );
+  path_obj->nodes = NULL;
   return path_obj;
 }
 
 void json_path_obj_destroy( json_path_obj_t *path_obj )
 {
   apr_pool_destroy( path_obj->mp );
-  path_obj->expr = NULL;
   path_obj->nodes = NULL;
 
   if ( path_obj->free_func ) {
@@ -249,7 +249,7 @@ static void json_path_test_node( json_path_expr_t *expr,
        */
       apr_pool_t *mp;
       apr_pool_create( &mp, NULL );
-      apr_array_header_t *test_nodes = apr_array_make( mp, 128,
+      apr_array_header_t *test_nodes = apr_array_make( mp, NODELIST_SIZE,
                                                        sizeof(json_t *) );
       if ( json->type == JSON_ARRAY ) {
         int i;
@@ -380,8 +380,8 @@ int json_path_eval( const unsigned char *path, json_t *json,
   json_path_builder_t path_builder;
   json_path_expr_t *expr;
 
-  APR_ARRAY_CLEAR( obj->nodes );
   apr_pool_clear( obj->mp );
+  obj->nodes = apr_array_make( obj->mp, NODELIST_SIZE, sizeof(json_t *) );
 
   json_path_builder_init( &path_builder );
   expr = json_path_compile( &path_builder, path );
@@ -398,8 +398,8 @@ int json_path_compiled_eval( json_path_expr_t *expr,
                              json_t *json,
                              json_path_obj_t *obj )
 {
-  APR_ARRAY_CLEAR( obj->nodes );
   apr_pool_clear( obj->mp );
+  obj->nodes = apr_array_make( obj->mp, NODELIST_SIZE, sizeof(json_t *) );
   json_path_eval_internal( expr, json, obj->nodes );
   return obj->nodes->nelts;
 }

@@ -70,7 +70,6 @@ typedef struct json_path_builder_t {
 typedef struct json_path_obj_t {
   apr_pool_t *mp;
   void ( *free_func )( void *ptr );
-  json_path_expr_t *expr;
   apr_array_header_t *nodes;
 }json_path_obj_t;
 
