@@ -59,14 +59,14 @@
 #define YYLSP_NEEDED 1
 
 /* Substitute the variable and function names.  */
-#define yyparse json_path_parse
-#define yylex   json_path_lex
-#define yyerror json_path_error
-#define yylval  json_path_lval
-#define yychar  json_path_char
-#define yydebug json_path_debug
-#define yynerrs json_path_nerrs
-#define yylloc json_path_lloc
+#define yyparse jxtl_path_parse
+#define yylex   jxtl_path_lex
+#define yyerror jxtl_path_error
+#define yylval  jxtl_path_lval
+#define yychar  jxtl_path_char
+#define yydebug jxtl_path_debug
+#define yynerrs jxtl_path_nerrs
+#define yylloc jxtl_path_lloc
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -84,19 +84,19 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "json_path_parse.y"
+#line 1 "jxtl_path_parse.y"
 
 #include <stdarg.h>
 
 /*
- * Define YY_DECL before including json_path_lex.h so that it knows we are
- * doing a custom declaration of json_path_lex.
+ * Define YY_DECL before including jxtl_path_lex.h so that it knows we are
+ * doing a custom declaration of jxtl_path_lex.
  */
 #define YY_DECL
 
-#include "json_path_parse.h"
-#include "json_path_lex.h"
-#include "json_path.h"
+#include "jxtl_path_parse.h"
+#include "jxtl_path_lex.h"
+#include "jxtl_path.h"
 
 #define identifier_handler callbacks->identifier_handler
 #define root_object_handler callbacks->root_object_handler
@@ -108,8 +108,8 @@
 #define negate_handler callbacks->negate_handler
 #define user_data callbacks->user_data
 
-void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
-		      json_path_callback_t *callbacks,
+void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner,
+		      jxtl_path_callback_t *callbacks,
 		      const char *error_string, ... );
 
 
@@ -133,13 +133,13 @@ void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 41 "json_path_parse.y"
+#line 41 "jxtl_path_parse.y"
 {
   int ival;
   unsigned char *string;
 }
-/* Line 193 of yacc.c.  */
-#line 143 "json_path_parse.c"
+/* Line 187 of yacc.c.  */
+#line 143 "jxtl_path_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -164,7 +164,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 168 "json_path_parse.c"
+#line 168 "jxtl_path_parse.c"
 
 #ifdef short
 # undef short
@@ -671,7 +671,7 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, json_path_callback_t *callbacks)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, jxtl_path_callback_t *callbacks)
 #else
 static void
 yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
@@ -680,7 +680,7 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbac
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
     yyscan_t scanner;
-    json_path_callback_t *callbacks;
+    jxtl_path_callback_t *callbacks;
 #endif
 {
   if (!yyvaluep)
@@ -709,7 +709,7 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbac
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, json_path_callback_t *callbacks)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, jxtl_path_callback_t *callbacks)
 #else
 static void
 yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
@@ -718,7 +718,7 @@ yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
     yyscan_t scanner;
-    json_path_callback_t *callbacks;
+    jxtl_path_callback_t *callbacks;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -768,7 +768,7 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, yyscan_t scanner, json_path_callback_t *callbacks)
+yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, yyscan_t scanner, jxtl_path_callback_t *callbacks)
 #else
 static void
 yy_reduce_print (yyvsp, yylsp, yyrule, scanner, callbacks)
@@ -776,7 +776,7 @@ yy_reduce_print (yyvsp, yylsp, yyrule, scanner, callbacks)
     YYLTYPE *yylsp;
     int yyrule;
     yyscan_t scanner;
-    json_path_callback_t *callbacks;
+    jxtl_path_callback_t *callbacks;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -1049,7 +1049,7 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, yyscan_t scanner, json_path_callback_t *callbacks)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, yyscan_t scanner, jxtl_path_callback_t *callbacks)
 #else
 static void
 yydestruct (yymsg, yytype, yyvaluep, yylocationp, scanner, callbacks)
@@ -1058,7 +1058,7 @@ yydestruct (yymsg, yytype, yyvaluep, yylocationp, scanner, callbacks)
     YYSTYPE *yyvaluep;
     YYLTYPE *yylocationp;
     yyscan_t scanner;
-    json_path_callback_t *callbacks;
+    jxtl_path_callback_t *callbacks;
 #endif
 {
   YYUSE (yyvaluep);
@@ -1089,7 +1089,7 @@ int yyparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int yyparse (yyscan_t scanner, json_path_callback_t *callbacks);
+int yyparse (yyscan_t scanner, jxtl_path_callback_t *callbacks);
 #else
 int yyparse ();
 #endif
@@ -1118,12 +1118,12 @@ yyparse (YYPARSE_PARAM)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 int
-yyparse (yyscan_t scanner, json_path_callback_t *callbacks)
+yyparse (yyscan_t scanner, jxtl_path_callback_t *callbacks)
 #else
 int
 yyparse (scanner, callbacks)
     yyscan_t scanner;
-    json_path_callback_t *callbacks;
+    jxtl_path_callback_t *callbacks;
 #endif
 #endif
 {
@@ -1394,48 +1394,48 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 54 "json_path_parse.y"
+#line 54 "jxtl_path_parse.y"
     { identifier_handler( user_data, (yyvsp[(1) - (1)].string) ); }
     break;
 
   case 3:
-#line 55 "json_path_parse.y"
+#line 55 "jxtl_path_parse.y"
     { root_object_handler( user_data ); }
     break;
 
   case 4:
-#line 56 "json_path_parse.y"
+#line 56 "jxtl_path_parse.y"
     { current_object_handler( user_data ); }
     break;
 
   case 5:
-#line 57 "json_path_parse.y"
+#line 57 "jxtl_path_parse.y"
     { parent_object_handler( user_data ); }
     break;
 
   case 6:
-#line 58 "json_path_parse.y"
+#line 58 "jxtl_path_parse.y"
     { all_children_handler( user_data ); }
     break;
 
   case 7:
-#line 59 "json_path_parse.y"
+#line 59 "jxtl_path_parse.y"
     { test_start_handler( user_data ); }
     break;
 
   case 8:
-#line 60 "json_path_parse.y"
+#line 60 "jxtl_path_parse.y"
     { test_end_handler( user_data ); }
     break;
 
   case 11:
-#line 66 "json_path_parse.y"
+#line 66 "jxtl_path_parse.y"
     { negate_handler( user_data ); }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1439 "json_path_parse.c"
+#line 1439 "jxtl_path_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1655,11 +1655,11 @@ yyreturn:
 }
 
 
-#line 68 "json_path_parse.y"
+#line 68 "jxtl_path_parse.y"
 
 
-void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
-		      json_path_callback_t *callbacks,
+void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner,
+		      jxtl_path_callback_t *callbacks,
 		      const char *error_string, ... )
 {
   va_list args;

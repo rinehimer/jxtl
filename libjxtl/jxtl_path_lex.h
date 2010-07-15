@@ -1,10 +1,10 @@
-#ifndef json_path_HEADER_H
-#define json_path_HEADER_H 1
-#define json_path_IN_HEADER 1
+#ifndef jxtl_path_HEADER_H
+#define jxtl_path_HEADER_H 1
+#define jxtl_path_IN_HEADER 1
 
-#line 6 "json_path_lex.h"
+#line 6 "jxtl_path_lex.h"
 
-#line 8 "json_path_lex.h"
+#line 8 "jxtl_path_lex.h"
 
 #define  YY_INT_ALIGNED short int
 
@@ -13,7 +13,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 35
+#define YY_FLEX_SUBMINOR_VERSION 33
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -35,7 +35,7 @@
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
 
-#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#if __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
  * if you want the limit (max/min) macros for int types. 
@@ -98,12 +98,11 @@ typedef unsigned int flex_uint32_t;
 
 #else	/* ! __cplusplus */
 
-/* C99 requires __STDC__ to be defined as 1. */
-#if defined (__STDC__)
+#if __STDC__
 
 #define YY_USE_CONST
 
-#endif	/* defined (__STDC__) */
+#endif	/* __STDC__ */
 #endif	/* ! __cplusplus */
 
 #ifdef YY_USE_CONST
@@ -129,19 +128,21 @@ typedef void* yyscan_t;
 #define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
 #define yy_flex_debug yyg->yy_flex_debug_r
 
-/* Size of default input buffer. */
-#ifndef YY_BUF_SIZE
-#define YY_BUF_SIZE 16384
-#endif
+int jxtl_path_lex_init (yyscan_t* scanner);
 
 #ifndef YY_TYPEDEF_YY_BUFFER_STATE
 #define YY_TYPEDEF_YY_BUFFER_STATE
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
+/* The following is because we cannot portably get our hands on size_t
+ * (without autoconf's help, which isn't available because we want
+ * flex-generated scanners to compile on their own).
+ */
+
 #ifndef YY_TYPEDEF_YY_SIZE_T
 #define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
+typedef unsigned int yy_size_t;
 #endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -195,25 +196,25 @@ struct yy_buffer_state
 	};
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
-void json_path_restart (FILE *input_file ,yyscan_t yyscanner );
-void json_path__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE json_path__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void json_path__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void json_path__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void json_path_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void json_path_pop_buffer_state (yyscan_t yyscanner );
+void jxtl_path_restart (FILE *input_file ,yyscan_t yyscanner );
+void jxtl_path__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE jxtl_path__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void jxtl_path__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void jxtl_path__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void jxtl_path_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void jxtl_path_pop_buffer_state (yyscan_t yyscanner );
 
-YY_BUFFER_STATE json_path__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE json_path__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE json_path__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE jxtl_path__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE jxtl_path__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE jxtl_path__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
-void *json_path_alloc (yy_size_t ,yyscan_t yyscanner );
-void *json_path_realloc (void *,yy_size_t ,yyscan_t yyscanner );
-void json_path_free (void * ,yyscan_t yyscanner );
+void *jxtl_path_alloc (yy_size_t ,yyscan_t yyscanner );
+void *jxtl_path_realloc (void *,yy_size_t ,yyscan_t yyscanner );
+void jxtl_path_free (void * ,yyscan_t yyscanner );
 
 /* Begin user sect3 */
 
-#define json_path_wrap(n) 1
+#define jxtl_path_wrap(n) 1
 #define YY_SKIP_YYWRAP
 
 #define yytext_ptr yytext_r
@@ -235,46 +236,42 @@ void json_path_free (void * ,yyscan_t yyscanner );
 #define YY_EXTRA_TYPE void *
 #endif
 
-int json_path_lex_init (yyscan_t* scanner);
-
-int json_path_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
-
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int json_path_lex_destroy (yyscan_t yyscanner );
+int jxtl_path_lex_destroy (yyscan_t yyscanner );
 
-int json_path_get_debug (yyscan_t yyscanner );
+int jxtl_path_get_debug (yyscan_t yyscanner );
 
-void json_path_set_debug (int debug_flag ,yyscan_t yyscanner );
+void jxtl_path_set_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE json_path_get_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE jxtl_path_get_extra (yyscan_t yyscanner );
 
-void json_path_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void jxtl_path_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
-FILE *json_path_get_in (yyscan_t yyscanner );
+FILE *jxtl_path_get_in (yyscan_t yyscanner );
 
-void json_path_set_in  (FILE * in_str ,yyscan_t yyscanner );
+void jxtl_path_set_in  (FILE * in_str ,yyscan_t yyscanner );
 
-FILE *json_path_get_out (yyscan_t yyscanner );
+FILE *jxtl_path_get_out (yyscan_t yyscanner );
 
-void json_path_set_out  (FILE * out_str ,yyscan_t yyscanner );
+void jxtl_path_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-int json_path_get_leng (yyscan_t yyscanner );
+int jxtl_path_get_leng (yyscan_t yyscanner );
 
-char *json_path_get_text (yyscan_t yyscanner );
+char *jxtl_path_get_text (yyscan_t yyscanner );
 
-int json_path_get_lineno (yyscan_t yyscanner );
+int jxtl_path_get_lineno (yyscan_t yyscanner );
 
-void json_path_set_lineno (int line_number ,yyscan_t yyscanner );
+void jxtl_path_set_lineno (int line_number ,yyscan_t yyscanner );
 
-YYSTYPE * json_path_get_lval (yyscan_t yyscanner );
+YYSTYPE * jxtl_path_get_lval (yyscan_t yyscanner );
 
-void json_path_set_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
+void jxtl_path_set_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
 
-       YYLTYPE *json_path_get_lloc (yyscan_t yyscanner );
+       YYLTYPE *jxtl_path_get_lloc (yyscan_t yyscanner );
     
-        void json_path_set_lloc (YYLTYPE * yylloc_param ,yyscan_t yyscanner );
+        void jxtl_path_set_lloc (YYLTYPE * yylloc_param ,yyscan_t yyscanner );
     
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -282,9 +279,9 @@ void json_path_set_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int json_path_wrap (yyscan_t yyscanner );
+extern "C" int jxtl_path_wrap (yyscan_t yyscanner );
 #else
-extern int json_path_wrap (yyscan_t yyscanner );
+extern int jxtl_path_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -316,11 +313,9 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int json_path_lex \
-               (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
+extern int jxtl_path_lex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
 
-#define YY_DECL int json_path_lex \
-               (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner)
+#define YY_DECL int jxtl_path_lex (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
 /* yy_get_previous_state - get the state just before the EOB char was reached */
@@ -337,9 +332,9 @@ extern int json_path_lex \
 #undef YY_DECL
 #endif
 
-#line 67 "json_path_lex.l"
+#line 67 "jxtl_path_lex.l"
 
 
-#line 344 "json_path_lex.h"
-#undef json_path_IN_HEADER
-#endif /* json_path_HEADER_H */
+#line 339 "jxtl_path_lex.h"
+#undef jxtl_path_IN_HEADER
+#endif /* jxtl_path_HEADER_H */

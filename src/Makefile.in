@@ -36,7 +36,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = jxtl$(EXEEXT) xml2json$(EXEEXT) json_path$(EXEEXT)
+bin_PROGRAMS = jxtl$(EXEEXT) xml2json$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in jxtl_lex.c \
 	jxtl_parse.c
@@ -50,13 +50,10 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-json_path_SOURCES = json_path.c
-json_path_OBJECTS = json_path-json_path.$(OBJEXT)
-am__DEPENDENCIES_1 = ${top_srcdir}/libjxtl/libjxtl.la
-json_path_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_jxtl_OBJECTS = jxtl-jxtl.$(OBJEXT) jxtl-jxtl_parse.$(OBJEXT) \
 	jxtl-jxtl_lex.$(OBJEXT)
 jxtl_OBJECTS = $(am_jxtl_OBJECTS)
+am__DEPENDENCIES_1 = ${top_srcdir}/libjxtl/libjxtl.la
 jxtl_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_xml2json_OBJECTS = xml2json-xml2json.$(OBJEXT)
 xml2json_OBJECTS = $(am_xml2json_OBJECTS)
@@ -77,8 +74,8 @@ LTLEXCOMPILE = $(LIBTOOL) --mode=compile $(LEX) $(LFLAGS) $(AM_LFLAGS)
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
 LTYACCCOMPILE = $(LIBTOOL) --mode=compile $(YACC) $(YFLAGS) \
 	$(AM_YFLAGS)
-SOURCES = json_path.c $(jxtl_SOURCES) $(xml2json_SOURCES)
-DIST_SOURCES = json_path.c $(jxtl_SOURCES) $(xml2json_SOURCES)
+SOURCES = $(jxtl_SOURCES) $(xml2json_SOURCES)
+DIST_SOURCES = $(jxtl_SOURCES) $(xml2json_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -114,6 +111,7 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
+GREP = @GREP@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -146,12 +144,10 @@ XML2_CFLAGS = @XML2_CFLAGS@
 XML2_CONFIG = @XML2_CONFIG@
 XML2_LIBS = @XML2_LIBS@
 YACC = @YACC@
-ac_ct_AR = @ac_ct_AR@
+YFLAGS = 
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
-ac_ct_RANLIB = @ac_ct_RANLIB@
-ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -168,23 +164,30 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
+datarootdir = @datarootdir@
+docdir = @docdir@
+dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
+htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
+localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
+pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
+psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -192,18 +195,13 @@ target_alias = @target_alias@
 INCLUDES = -I${top_srcdir}/libjxtl
 jxtl_SOURCES = jxtl.c jxtl_parse.y jxtl_lex.l
 xml2json_SOURCES = xml2json.c
-json_path_SROUCES = json_path.c
 LIBJXTL = ${top_srcdir}/libjxtl/libjxtl.la
-YFLAGS = 
 jxtl_CFLAGS = -g ${APR_CFLAGS} ${XML2_CFLAGS}
 jxtl_LDFLAGS = ${APR_LIBS} ${XML2_LIBS} -Wl,-rpath -Wl,${libdir}
 jxtl_LDADD = ${LIBJXTL}
 xml2json_CFLAGS = -g ${APR_CFLAGS} ${XML2_CFLAGS}
 xml2json_LDFLAGS = ${APR_LIBS} ${XML2_LIBS} -Wl,-rpath -Wl,${libdir}
 xml2json_LDADD = ${LIBJXTL}
-json_path_CFLAGS = -g ${APR_CFLAGS}
-json_path_LDFLAGS = ${APR_LIBS} -Wl,-rpath -Wl,${libdir}
-json_path_LDADD = ${LIBJXTL}
 all: all-am
 
 .SUFFIXES:
@@ -265,9 +263,6 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-json_path$(EXEEXT): $(json_path_OBJECTS) $(json_path_DEPENDENCIES) 
-	@rm -f json_path$(EXEEXT)
-	$(LINK) $(json_path_LDFLAGS) $(json_path_OBJECTS) $(json_path_LDADD) $(LIBS)
 jxtl$(EXEEXT): $(jxtl_OBJECTS) $(jxtl_DEPENDENCIES) 
 	@rm -f jxtl$(EXEEXT)
 	$(LINK) $(jxtl_LDFLAGS) $(jxtl_OBJECTS) $(jxtl_LDADD) $(LIBS)
@@ -281,7 +276,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/json_path-json_path.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jxtl-jxtl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jxtl-jxtl_lex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jxtl-jxtl_parse.Po@am__quote@
@@ -307,20 +301,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
-
-json_path-json_path.o: json_path.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(json_path_CFLAGS) $(CFLAGS) -MT json_path-json_path.o -MD -MP -MF "$(DEPDIR)/json_path-json_path.Tpo" -c -o json_path-json_path.o `test -f 'json_path.c' || echo '$(srcdir)/'`json_path.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/json_path-json_path.Tpo" "$(DEPDIR)/json_path-json_path.Po"; else rm -f "$(DEPDIR)/json_path-json_path.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='json_path.c' object='json_path-json_path.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(json_path_CFLAGS) $(CFLAGS) -c -o json_path-json_path.o `test -f 'json_path.c' || echo '$(srcdir)/'`json_path.c
-
-json_path-json_path.obj: json_path.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(json_path_CFLAGS) $(CFLAGS) -MT json_path-json_path.obj -MD -MP -MF "$(DEPDIR)/json_path-json_path.Tpo" -c -o json_path-json_path.obj `if test -f 'json_path.c'; then $(CYGPATH_W) 'json_path.c'; else $(CYGPATH_W) '$(srcdir)/json_path.c'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/json_path-json_path.Tpo" "$(DEPDIR)/json_path-json_path.Po"; else rm -f "$(DEPDIR)/json_path-json_path.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='json_path.c' object='json_path-json_path.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(json_path_CFLAGS) $(CFLAGS) -c -o json_path-json_path.obj `if test -f 'json_path.c'; then $(CYGPATH_W) 'json_path.c'; else $(CYGPATH_W) '$(srcdir)/json_path.c'; fi`
 
 jxtl-jxtl.o: jxtl.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_CFLAGS) $(CFLAGS) -MT jxtl-jxtl.o -MD -MP -MF "$(DEPDIR)/jxtl-jxtl.Tpo" -c -o jxtl-jxtl.o `test -f 'jxtl.c' || echo '$(srcdir)/'`jxtl.c; \

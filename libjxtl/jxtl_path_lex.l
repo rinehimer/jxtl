@@ -6,11 +6,11 @@
 
 #include "apr_macros.h"
 
-#include "json_path_parse.h"
+#include "jxtl_path_parse.h"
 #include "lex_extra.h"
 #include "utf.h"
 
-#define YY_DECL int json_path_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
+#define YY_DECL int jxtl_path_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
 
 #define LEX_EXTRA ((lex_extra_t *) yyextra)
 #define LEX_EXTRA_MP LEX_EXTRA->mp
@@ -19,8 +19,8 @@
 #define LEX_EXTRA_IN_FILE LEX_EXTRA->in_file
 #define LEX_EXTRA_BYTES LEX_EXTRA->bytes
 
-#define json_path_error( ... ) \
-  json_path_error( yylloc, yyscanner, NULL, __VA_ARGS__ )
+#define jxtl_path_error( ... ) \
+  jxtl_path_error( yylloc, yyscanner, NULL, __VA_ARGS__ )
 
 #define YY_USER_ACTION {						\
     yylloc->first_line = yylineno;                                      \
@@ -31,9 +31,9 @@
  }
 %}
 
-%option prefix="json_path_"
-%option header-file="json_path_lex.h"
-%option outfile="json_path_lex.c"
+%option prefix="jxtl_path_"
+%option header-file="jxtl_path_lex.h"
+%option outfile="jxtl_path_lex.c"
 %option noyywrap
 %option yylineno
 %option reentrant
@@ -60,7 +60,7 @@ identifier [a-zA-Z][a-zA-Z0-9_]*
 [ \t\r]+
 "\n"
 . {
-  json_path_error( "illegal character '%c' found in path expression",
+  jxtl_path_error( "illegal character '%c' found in path expression",
 		   yytext[0] );
 }
 

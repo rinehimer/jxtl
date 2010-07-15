@@ -2,14 +2,14 @@
 #include <stdarg.h>
 
 /*
- * Define YY_DECL before including json_path_lex.h so that it knows we are
- * doing a custom declaration of json_path_lex.
+ * Define YY_DECL before including jxtl_path_lex.h so that it knows we are
+ * doing a custom declaration of jxtl_path_lex.
  */
 #define YY_DECL
 
-#include "json_path_parse.h"
-#include "json_path_lex.h"
-#include "json_path.h"
+#include "jxtl_path_parse.h"
+#include "jxtl_path_lex.h"
+#include "jxtl_path.h"
 
 #define identifier_handler callbacks->identifier_handler
 #define root_object_handler callbacks->root_object_handler
@@ -21,12 +21,12 @@
 #define negate_handler callbacks->negate_handler
 #define user_data callbacks->user_data
 
-void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
-		      json_path_callback_t *callbacks,
+void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner,
+		      jxtl_path_callback_t *callbacks,
 		      const char *error_string, ... );
 %}
 
-%name-prefix="json_path_"
+%name-prefix="jxtl_path_"
 %defines
 %verbose
 %locations
@@ -35,7 +35,7 @@ void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
 %pure-parser
 
 %parse-param { yyscan_t scanner }
-%parse-param { json_path_callback_t *callbacks }
+%parse-param { jxtl_path_callback_t *callbacks }
 %lex-param { yyscan_t scanner }
 
 %union {
@@ -67,8 +67,8 @@ path_filter
 
 %%
 
-void json_path_error( YYLTYPE *yylloc, yyscan_t scanner,
-		      json_path_callback_t *callbacks,
+void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner,
+		      jxtl_path_callback_t *callbacks,
 		      const char *error_string, ... )
 {
   va_list args;
