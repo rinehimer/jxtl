@@ -1,131 +1,147 @@
-#include <libxml/parser.h>
+#include <apr_lib.h>
+#include <apr_pools.h>
+#include <apr_xml.h>
 
 #include "json_node.h"
 #include "json_writer.h"
 #include "xml2json.h"
 
-static json_type xml_node_type( xmlNodePtr node )
+int xml_text_is_whitespace( apr_text *t )
 {
-  xmlNodePtr ptr;
-  int num_text_nodes = 0;
+  int len;
+  int i;
 
-  if ( !node->children && !node->properties )
-    return JSON_NULL;
-
-  if ( node->properties )
-    return JSON_OBJECT;
-
-  for ( ptr = node->children; ptr; ptr = ptr->next ) {
-    if ( ( ptr->type == XML_TEXT_NODE ) ||
-         ( ptr->type == XML_CDATA_SECTION_NODE ) )
-      num_text_nodes++;
+  for ( ; t; t = t->next ) {
+    len = strlen( t->text );
+    for ( i = 0; i < len ; i++ ) {
+      if ( !apr_isspace( t->text[i] ) ) {
+	return 0;
+      }
+    }
   }
 
-  return ( num_text_nodes >= 1 ) ? JSON_STRING : JSON_OBJECT;
+  return 1;
 }
 
-static void xml_node_process( xmlNodePtr root, json_writer_t *writer )
+int xml_node_is_whitespace( apr_xml_elem *elem )
 {
-  xmlNodePtr node;
-  xmlNodePtr tmp_node;
-  xmlAttrPtr attr;
+  apr_text *t;
+  apr_xml_elem *child;
+  
+  t = elem->first_cdata.first;
+
+  if ( !xml_text_is_whitespace( t ) ) {
+    return 0;
+  }
+
+  for ( child = elem->first_child; child; child = child->next ) {
+    t = child->following_cdata.first;
+    if ( !xml_text_is_whitespace( t ) ) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static json_type xml_node_type( apr_xml_elem *node )
+{
+  /* Empty element is null */
+  if ( APR_XML_ELEM_IS_EMPTY( node ) && !node->attr )
+    return JSON_NULL;
+  
+  /* Not empty and has attrs, it must be an object. */
+  if ( node->attr )
+    return JSON_OBJECT;
+
+  /* Not empty, does not have attrs, and does not have a first child.  This
+   * must be a text node.
+   */
+  if ( !node->first_child ) {
+    return JSON_STRING;
+  }
+
+  /* Not empty, does not have attrs, and has a first child.  If it has text,
+   * verify that it is all white space.  If it's not, that means it has mixed
+   * content and all the content of this node will be treated as a
+   * string.
+   */
+  if ( node->first_cdata.first ) {
+    if ( !xml_node_is_whitespace( node ) ) {
+      return JSON_STRING;
+    }
+    else {
+      return JSON_OBJECT;
+    }
+  }
+
+  /* Not empty, does not have attrs, has a first child, and has no text. */
+  return JSON_OBJECT;
+}
+
+static void xml_node_process( apr_pool_t *mp, apr_xml_elem *root,
+			      json_writer_t *writer )
+{
+  apr_xml_elem *node;
+  apr_xml_attr *attr;
   json_type type;
-  int need_text_prop = 0;
-  xmlBufferPtr elem_buf;
+  const char *elem_buf;
+  apr_size_t buf_size;
 
   if ( !root )
     return;
 
-  need_text_prop = ( root->parent && root->parent->properties );
-  elem_buf = xmlBufferCreate();
-
   for ( node = root; node; node = node->next ) {
-    switch ( node->type ) {
-        
-    case XML_TEXT_NODE:
-    case XML_CDATA_SECTION_NODE:
-      for ( tmp_node = node; tmp_node; tmp_node = tmp_node->next ) {
-        xmlNodeBufGetContent( elem_buf, tmp_node );
-      }
-      if ( need_text_prop )
-        json_writer_property_start( writer, (unsigned char *) "text" );
-      json_writer_string_write( writer, elem_buf->content );
-      if ( need_text_prop )
-        json_writer_property_end( writer );
-      xmlBufferFree( elem_buf );
-      return;
-      break;
+    type = xml_node_type( node );
+    json_writer_property_start( writer, (unsigned char *) node->name );
       
-    case XML_ELEMENT_NODE:
-      type = xml_node_type( node );
-      json_writer_property_start( writer, (unsigned char *) node->name );
-      
-      if ( type == JSON_NULL ) {
-        json_writer_null_write( writer );
-      }
-      else if ( type == JSON_STRING ) {
-        for ( tmp_node = node->children; tmp_node;
-              tmp_node = tmp_node->next ) {
-          if ( tmp_node->type == XML_TEXT_NODE ||
-               tmp_node->type == XML_CDATA_SECTION_NODE ) {
-            xmlNodeBufGetContent( elem_buf, tmp_node );
-          }
-          else {
-            xmlNodeDump( elem_buf, tmp_node->doc, tmp_node, 0, 0 );
-          }
-        }
-        json_writer_string_write( writer, elem_buf->content );
-      }
-      else if ( type == JSON_OBJECT ) {
-        json_writer_object_start( writer );
-        
-        for ( attr = node->properties; attr; attr = attr->next ) {
-          xmlNodeBufGetContent( elem_buf, (xmlNodePtr) attr );
-          json_writer_property_start( writer, (unsigned char *) attr->name );
-          json_writer_string_write( writer, elem_buf->content );
-          json_writer_property_end( writer );
-          xmlBufferEmpty( elem_buf );
-        }
-
-        xml_node_process( node->children, writer );
-        
-        json_writer_object_end( writer );
-      }
-      
-      json_writer_property_end( writer );
-      break;
-
-    default:
-      /* Not handled when converting */
-      break;
+    if ( type == JSON_NULL ) {
+      json_writer_null_write( writer );
     }
-    xmlBufferEmpty( elem_buf );
-  }
+    else if ( type == JSON_STRING ) {
+      apr_xml_to_text( mp, node, APR_XML_X2T_INNER, NULL, NULL, &elem_buf,
+		       &buf_size );
+      json_writer_string_write( writer, (unsigned char *) elem_buf );
+    }
+    else if ( type == JSON_OBJECT ) {
+      json_writer_object_start( writer );
+        
+      for ( attr = node->attr; attr; attr = attr->next ) {
+	json_writer_property_start( writer, (unsigned char *) attr->name );
+	json_writer_string_write( writer, (unsigned char *) attr->value );
+	json_writer_property_end( writer );
+      }
 
-  xmlBufferFree( elem_buf );
+      xml_node_process( mp, node->first_child, writer );
+      
+      json_writer_object_end( writer );
+    }
+    json_writer_property_end( writer );
+  }
 }
 
 int xml_file_read( const char *filename, json_writer_t *writer, int skip_root )
 {
-  xmlDocPtr doc;
-  xmlNodePtr node;
+  apr_pool_t *mp;
+  apr_xml_parser *parser;
+  apr_xml_doc *doc;
+  apr_xml_elem *elem;
+  apr_file_t *file;
 
-  doc = xmlReadFile( filename, NULL, XML_PARSE_NOBLANKS );
-  if ( !doc ) {
-    fprintf( stderr, "%s : failed to parse\n", filename );
-    return -1;
-  }
+  apr_pool_create( &mp, NULL );
+  apr_file_open( &file, filename, APR_READ | APR_BUFFERED, 0, mp );
+  apr_xml_parse_file( mp, &parser, &doc, file, 4096 );
 
-  node = xmlDocGetRootElement( doc );
+  elem = doc->root;
   if ( skip_root ) {
-    node = node->children;
+    elem = elem->first_child;
   }
 
   json_writer_object_start( writer );
-  xml_node_process( node, writer );
+  xml_node_process( mp, elem, writer );
   json_writer_object_end( writer );
 
-  xmlFreeDoc( doc );
-  xmlCleanupParser();
+  apr_file_close( file );
+  apr_pool_destroy( mp );
   return 0;
 }

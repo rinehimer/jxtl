@@ -35,16 +35,17 @@ AC_CHECK_FUNCS([strcasecmp strdup])
 ## Apache portable runtime checking
 AC_CHECK_PROG(APR_CONFIG, apr-1-config, apr-1-config, [], [], [])
 AC_CHECK_PROG(APR_CONFIG, apr-config, apr-config, [], [], [exit1])
-APR_LIBS=`$APR_CONFIG --link-ld`
-AC_SUBST(APR_LIBS)
-APR_CFLAGS="`$APR_CONFIG --includes` `$APR_CONFIG --cflags` `$APR_CONFIG --cppflags`"
-AC_SUBST(APR_CFLAGS)
+AC_CHECK_PROG(APU_CONFIG, apu-1-config, apu-1-config, [], [], [])
+AC_CHECK_PROG(APU_CONFIG, apu-config, apu-config, [], [], [exit1])
+APR_CFLAGS=`$APR_CONFIG --cflags --cppflags --includes`
+APR_LIBS=`$APR_CONFIG --link-ld --libs`
+APU_CFLAGS=`$APU_CONFIG --includes`
+APU_LIBS=`$APU_CONFIG --link-ld --libs`
 
-AC_CHECK_PROG(XML2_CONFIG, xml2-config, xml2-config, [], [], [exit1])
-XML2_CFLAGS=`$XML2_CONFIG --cflags`
-AC_SUBST(XML2_CFLAGS)
-XML2_LIBS=`$XML2_CONFIG --libs`
-AC_SUBST(XML2_LIBS)
+AC_SUBST(APR_CFLAGS)
+AC_SUBST(APR_LIBS)
+AC_SUBST(APU_CFLAGS)
+AC_SUBST(APU_LIBS)
 
 AC_CONFIG_FILES([Makefile
                  libjxtl/Makefile

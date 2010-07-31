@@ -3,8 +3,6 @@
 #include <apr_pools.h>
 #include <apr_tables.h>
 
-#include <libxml/xmlwriter.h>
-
 #include "apr_macros.h"
 
 #include "json_node.h"
@@ -162,8 +160,7 @@ void json_object_print( json_t *json, int indent )
 
 
 
-static void json_write_string( xmlTextWriterPtr xml_writer,
-			       unsigned char *str )
+static void json_write_string( unsigned char *str )
 {
   unsigned char *c = str;
 
@@ -173,16 +170,15 @@ static void json_write_string( xmlTextWriterPtr xml_writer,
        * XML can't handle these characters, so just store as the Unicode escape
        * sequence.
        */
-      xmlTextWriterWriteFormatString( xml_writer, "\\u%.4x", *c );
+      printf( "\\u%.4x", *c );
     }
     else
-      xmlTextWriterWriteFormatString( xml_writer, "%c", *c );
+      printf( "%c", *c );
     c++;
   }
 }
 
-static void json_to_xml_internal( json_t *json,
-				  xmlTextWriterPtr xml_writer )
+static void json_to_xml_internal( json_t *json, int indent )
 {
   json_t *tmp_json;
   apr_array_header_t *arr;
@@ -191,29 +187,29 @@ static void json_to_xml_internal( json_t *json,
   int i;
 
   if ( json_name && json->type != JSON_ARRAY ) {
-    xmlTextWriterStartElement( xml_writer, json_name );
+    print_spaces( indent );
+    printf( "<%s>", json_name );
   }
 
   switch ( json->type ) {
   case JSON_STRING:
-    json_write_string( xml_writer, json->value.string );
+    json_write_string( json->value.string );
     break;
 
   case JSON_INTEGER:
-    xmlTextWriterWriteFormatString( xml_writer, "%d", json->value.integer );
+    printf( "%d", json->value.integer );
     break;
 
   case JSON_NUMBER:
-    xmlTextWriterWriteFormatString( xml_writer, "%lf", json->value.number );
+    printf( "%lf", json->value.number );
     break;
 
   case JSON_OBJECT:
     for ( idx = apr_hash_first( NULL, json->value.object ); idx;
 	  idx = apr_hash_next( idx ) ) {
       apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
-      json_to_xml_internal( tmp_json, xml_writer );
+      json_to_xml_internal( tmp_json, indent + 1 );
     }
-
     break;
 
   case JSON_ARRAY:
@@ -221,20 +217,21 @@ static void json_to_xml_internal( json_t *json,
 
     for ( i = 0; i < arr->nelts; i++ ) {
       tmp_json = APR_ARRAY_IDX( arr, i, json_t * );
-      xmlTextWriterStartElement( xml_writer, json_name );
-      json_to_xml_internal( tmp_json, xml_writer );
-      xmlTextWriterEndElement( xml_writer );
+      print_spaces( indent );
+      printf( "<%s>", json_name );
+      json_to_xml_internal( tmp_json, indent + 1 );
+      printf( "</%s>\n" );
     }
     break;
     
   case JSON_BOOLEAN:
     ( json->value.boolean ) ?
-      xmlTextWriterWriteString( xml_writer, BAD_CAST "true" ) :
-      xmlTextWriterWriteString( xml_writer, BAD_CAST "false" );
+      printf( "true" ) :
+      printf( "false" );
     break;
     
   case JSON_NULL:
-    xmlTextWriterWriteString( xml_writer, BAD_CAST "null" );
+    printf( "null" );
     break;
 
   default:
@@ -243,25 +240,14 @@ static void json_to_xml_internal( json_t *json,
   }
 
   if ( json_name && json->type != JSON_ARRAY ) {
-    xmlTextWriterEndElement( xml_writer );
+    printf( "</%s>\n", json_name );
   }
 }
 
-void json_to_xml( json_t *json, const char *filename, int indent )
+void json_to_xml( json_t *json, int indent )
 {
-  xmlTextWriterPtr xml_writer;
-
-  xml_writer = xmlNewTextWriterFilename( filename, 0 );
-  xmlTextWriterSetIndent( xml_writer, indent );
-
-  xmlTextWriterStartDocument( xml_writer, NULL, "UTF-8", NULL );
-  xmlTextWriterStartElement( xml_writer, BAD_CAST "json" );
-
-  json_to_xml_internal( json, xml_writer );
-
-  xmlTextWriterEndElement( xml_writer );
-  xmlTextWriterEndDocument( xml_writer );
-
-  xmlTextWriterFlush( xml_writer );
-  xmlFreeTextWriter( xml_writer );
+  printf( "<?xml version=\"1.0\"?>\n" );
+  printf( "<json>\n" );
+  json_to_xml_internal( json, 1 );
+  printf( "</json>\n" );
 }

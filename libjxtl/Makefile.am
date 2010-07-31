@@ -29,8 +29,8 @@ $(libjxtl_la_OBJECTS): json_parse.c json_parse.h json_lex.c json_lex.h \
                        jxtl_path_parse.c jxtl_path_parse.h jxtl_path_lex.c \
                        jxtl_path_lex.h
 
-libjxtl_la_CFLAGS = ${APR_CFLAGS} ${XML2_CFLAGS}
-libjxtl_la_LDFLAGS = ${APR_LIBS} ${XML2_LIBS}
+libjxtl_la_CFLAGS = ${APR_CFLAGS} ${APU_CFLAGS}
+libjxtl_la_LDFLAGS = ${APR_LIBS} ${APU_LIBS}
 
 YFLAGS =
 
