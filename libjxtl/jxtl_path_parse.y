@@ -43,27 +43,33 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner,
   unsigned char *string;
 }
 
-%token T_IDENTIFIER "identifier"
+%token T_IDENTIFIER "identifier" T_PARENT ".."
 
-%left '.'
+%left '/'
 %nonassoc '!'
 
 %%
 
 path_expr
   : T_IDENTIFIER { identifier_handler( user_data, $<string>1 ); }
-  | '$' { root_object_handler( user_data ); }
-  | '@' { current_object_handler( user_data ); }
-  | '^' { parent_object_handler( user_data ); }
-  | '*' { all_children_handler( user_data ); }
-  | '(' { test_start_handler( user_data ); } path_filter ')'
-        { test_end_handler( user_data ); }
-  | path_expr '.' path_expr
+    path_predicate
+  | '/' { root_object_handler( user_data ); }
+  | '.' { current_object_handler( user_data ); }
+  | T_PARENT { parent_object_handler( user_data ); }
+  | '*' { all_children_handler( user_data ); } path_predicate
+  | path_expr '/' path_expr
 ;
 
-path_filter
+path_predicate
+  : /* empty */
+  | '[' { test_start_handler( user_data ); } predicate_expr ']'
+        { test_end_handler( user_data ); }
+;
+
+predicate_expr
   : path_expr
   | '!' path_expr { negate_handler( user_data ); }
+;
 
 %%
 

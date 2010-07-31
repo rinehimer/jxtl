@@ -1,6 +1,6 @@
-#line 2 "jxtl_path_lex.c"
+#line 2 "jxtl_path_convert.c"
 
-#line 4 "jxtl_path_lex.c"
+#line 4 "jxtl_path_convert.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -134,7 +134,7 @@ typedef void* yyscan_t;
 #define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
 #define yy_flex_debug yyg->yy_flex_debug_r
 
-int jxtl_path_lex_init (yyscan_t* scanner);
+int jxtl_path_convert_lex_init (yyscan_t* scanner);
 
 /* Enter a start condition.  This macro really ought to take a parameter,
  * but we do it the disgusting crufty way forced on us by the ()-less
@@ -153,7 +153,7 @@ int jxtl_path_lex_init (yyscan_t* scanner);
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
 
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE jxtl_path_restart(yyin ,yyscanner )
+#define YY_NEW_FILE jxtl_path_convert_restart(yyin ,yyscanner )
 
 #define YY_END_OF_BUFFER_CHAR 0
 
@@ -175,20 +175,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
 
-    /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
-     *       access to the local variable yy_act. Since yyless() is a macro, it would break
-     *       existing scanners that call yyless() from OUTSIDE jxtl_path_lex. 
-     *       One obvious solution it to make yy_act a global. I tried that, and saw
-     *       a 5% performance hit in a non-yylineno scanner, because yy_act is
-     *       normally declared as a register variable-- so it is not worth it.
-     */
-    #define  YY_LESS_LINENO(n) \
-            do { \
-                int yyl;\
-                for ( yyl = n; yyl < yyleng; ++yyl )\
-                    if ( yytext[yyl] == '\n' )\
-                        --yylineno;\
-            }while(0)
+    #define YY_LESS_LINENO(n)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -273,7 +260,7 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via jxtl_path_restart()), so that the user can continue scanning by
+	 * (via jxtl_path_convert_restart()), so that the user can continue scanning by
 	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
@@ -296,36 +283,36 @@ struct yy_buffer_state
  */
 #define YY_CURRENT_BUFFER_LVALUE yyg->yy_buffer_stack[yyg->yy_buffer_stack_top]
 
-void jxtl_path_restart (FILE *input_file ,yyscan_t yyscanner );
-void jxtl_path__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE jxtl_path__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void jxtl_path__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void jxtl_path__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void jxtl_path_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void jxtl_path_pop_buffer_state (yyscan_t yyscanner );
+void jxtl_path_convert_restart (FILE *input_file ,yyscan_t yyscanner );
+void jxtl_path_convert__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE jxtl_path_convert__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void jxtl_path_convert__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void jxtl_path_convert__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void jxtl_path_convert_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void jxtl_path_convert_pop_buffer_state (yyscan_t yyscanner );
 
-static void jxtl_path_ensure_buffer_stack (yyscan_t yyscanner );
-static void jxtl_path__load_buffer_state (yyscan_t yyscanner );
-static void jxtl_path__init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
+static void jxtl_path_convert_ensure_buffer_stack (yyscan_t yyscanner );
+static void jxtl_path_convert__load_buffer_state (yyscan_t yyscanner );
+static void jxtl_path_convert__init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
 
-#define YY_FLUSH_BUFFER jxtl_path__flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
+#define YY_FLUSH_BUFFER jxtl_path_convert__flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
 
-YY_BUFFER_STATE jxtl_path__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE jxtl_path__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE jxtl_path__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE jxtl_path_convert__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE jxtl_path_convert__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE jxtl_path_convert__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
-void *jxtl_path_alloc (yy_size_t ,yyscan_t yyscanner );
-void *jxtl_path_realloc (void *,yy_size_t ,yyscan_t yyscanner );
-void jxtl_path_free (void * ,yyscan_t yyscanner );
+void *jxtl_path_convert_alloc (yy_size_t ,yyscan_t yyscanner );
+void *jxtl_path_convert_realloc (void *,yy_size_t ,yyscan_t yyscanner );
+void jxtl_path_convert_free (void * ,yyscan_t yyscanner );
 
-#define yy_new_buffer jxtl_path__create_buffer
+#define yy_new_buffer jxtl_path_convert__create_buffer
 
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){ \
-        jxtl_path_ensure_buffer_stack (yyscanner); \
+        jxtl_path_convert_ensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            jxtl_path__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            jxtl_path_convert__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
 	}
@@ -333,9 +320,9 @@ void jxtl_path_free (void * ,yyscan_t yyscanner );
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! YY_CURRENT_BUFFER ){\
-        jxtl_path_ensure_buffer_stack (yyscanner); \
+        jxtl_path_convert_ensure_buffer_stack (yyscanner); \
 		YY_CURRENT_BUFFER_LVALUE =    \
-            jxtl_path__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
+            jxtl_path_convert__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
 	} \
 	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
 	}
@@ -344,7 +331,7 @@ void jxtl_path_free (void * ,yyscan_t yyscanner );
 
 /* Begin user sect3 */
 
-#define jxtl_path_wrap(n) 1
+#define jxtl_path_convert_wrap(n) 1
 #define YY_SKIP_YYWRAP
 
 typedef unsigned char YY_CHAR;
@@ -368,8 +355,8 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 12
-#define YY_END_OF_BUFFER 13
+#define YY_NUM_RULES 38
+#define YY_END_OF_BUFFER 39
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -377,10 +364,17 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_accept[18] =
+static yyconst flex_int16_t yy_accept[88] =
     {   0,
-        0,    0,   13,   11,    9,   10,    7,    4,    2,    1,
-        5,    6,    8,    9,    3,    8,    0
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+        0,    0,   39,    4,    3,    3,   15,   13,   14,   10,
+       15,   11,   15,   23,   21,   22,   20,   18,   17,   23,
+       23,   31,   32,   24,   38,   38,   35,   37,   36,   36,
+        4,    1,   13,   10,    0,    0,    0,   12,   21,    0,
+       19,   31,   30,   25,   26,   27,   28,   29,   35,    0,
+        0,    2,    0,    0,    7,    0,    0,   34,   33,    0,
+        6,    0,    0,   33,    8,    0,    0,    0,    0,    0,
+        9,    0,    0,    5,    0,   16,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -388,17 +382,17 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    2,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    2,    4,    1,    1,    1,    1,    1,    1,    1,
-        1,    5,    1,    1,    1,    6,    7,    8,    8,    8,
-        8,    8,    8,    8,    8,    8,    8,    1,    1,    1,
-        1,    1,    1,    1,   11,   11,   11,   11,   11,   11,
-       11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
-       11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
-        9,    1,   10,    1,    8,    1,   11,   11,   11,   11,
+        1,    2,    4,    5,    6,    7,    1,    1,    1,    7,
+        7,    7,    1,    8,    9,    7,    1,    7,    7,    7,
+        7,    7,    7,    7,    7,    7,    7,    1,   10,    1,
+       11,    1,    1,    7,   13,   14,   15,   16,   17,   18,
+        7,    7,   19,    7,    7,   20,    7,   21,   22,   23,
+        7,   24,   25,   26,    7,    7,    7,    7,    7,    7,
+        1,   12,    1,    7,    7,    1,   13,   14,   15,   16,
 
-       11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
-       11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
-       11,   11,    1,    1,    1,    1,    1,    1,    1,    1,
+       17,   18,    7,    7,   19,    7,    7,   20,    7,   21,
+       22,   23,    7,   24,   25,   26,    7,    7,    7,    7,
+        7,    7,   27,    1,   28,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -415,42 +409,98 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[12] =
+static yyconst flex_int32_t yy_meta[29] =
     {   0,
-        1,    1,    1,    1,    1,    1,    1,    2,    1,    1,
-        2
+        1,    1,    2,    3,    4,    1,    5,    1,    6,    1,
+        1,    4,    5,    5,    5,    5,    5,    5,    5,    5,
+        5,    5,    5,    5,    5,    5,    7,    1
     } ;
 
-static yyconst flex_int16_t yy_base[19] =
+static yyconst flex_int16_t yy_base[97] =
     {   0,
-        0,    0,   16,   17,   13,   17,   17,   17,    8,   17,
-       17,   17,    0,   11,   17,    0,   17,   10
+        0,    1,   28,    0,   55,   82,    2,    3,    0,    0,
+        7,    9,  100,    0,  191,   72,  191,   96,  191,    0,
+        0,  191,   69,  191,   94,  191,  191,  191,  191,   78,
+       66,    0,  191,  191,  106,  191,    0,  191,   64,   63,
+        0,   85,   86,    0,    0,   68,   65,  191,   79,   56,
+      191,    0,  191,  191,  191,  191,  191,  191,    0,   50,
+       49,  191,   51,   59,  191,   59,   60,  191,   69,   54,
+      191,   44,   45,  191,   49,   48,   52,   46,   40,   35,
+      191,   38,    4,  191,    0,  191,  191,  132,  139,  146,
+      153,  160,  167,  171,  176,  183
+
     } ;
 
-static yyconst flex_int16_t yy_def[19] =
+static yyconst flex_int16_t yy_def[97] =
     {   0,
-       17,    1,   17,   17,   17,   17,   17,   17,   17,   17,
-       17,   17,   18,   17,   17,   18,    0,   17
+       88,   88,   87,    3,   89,   89,   90,   90,   91,   91,
+       92,   92,   87,   93,   87,   87,   87,   87,   87,   94,
+       87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+       87,   95,   87,   87,   87,   87,   96,   87,   87,   87,
+       93,   87,   87,   94,   87,   87,   87,   87,   87,   87,
+       87,   95,   87,   87,   87,   87,   87,   87,   96,   87,
+       87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+       87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+       87,   87,   87,   87,   87,   87,    0,   87,   87,   87,
+       87,   87,   87,   87,   87,   87
+
     } ;
 
-static yyconst flex_int16_t yy_nxt[29] =
+static yyconst flex_int16_t yy_nxt[220] =
     {   0,
-        4,    5,    6,    7,    8,    9,   10,    4,   11,   12,
-       13,   16,   14,   15,   14,   17,    3,   17,   17,   17,
-       17,   17,   17,   17,   17,   17,   17,   17
+       87,   87,   15,   15,   33,   33,   34,   34,   87,   38,
+       39,   38,   39,   35,   35,   40,   45,   40,   46,   63,
+       64,   87,   87,   86,   47,   85,   16,   16,   17,   18,
+       19,   20,   17,   21,   20,   17,   17,   22,   17,   17,
+       20,   20,   20,   20,   20,   20,   20,   20,   20,   20,
+       20,   20,   20,   20,   17,   23,   25,   26,   84,   27,
+       83,   82,   28,   81,   80,   29,   79,   78,   77,   76,
+       75,   74,   73,   72,   71,   70,   69,   68,   67,   30,
+       49,   66,   31,   25,   26,   65,   27,   43,   62,   28,
+       61,   60,   29,   51,   50,   49,   48,   43,   42,   87,
+
+       87,   87,   87,   87,   87,   87,   30,   87,   87,   31,
+       53,   87,   87,   87,   87,   87,   87,   87,   87,   54,
+       87,   87,   87,   55,   87,   87,   56,   87,   87,   57,
+       87,   58,   14,   14,   14,   14,   14,   14,   14,   24,
+       24,   24,   24,   24,   24,   24,   32,   32,   32,   32,
+       32,   32,   32,   36,   36,   36,   36,   36,   36,   36,
+       37,   37,   37,   37,   37,   37,   37,   41,   87,   41,
+       41,   41,   41,   44,   87,   44,   52,   87,   52,   87,
+       52,   52,   52,   59,   87,   87,   59,   59,   87,   59,
+       13,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+
+       87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+       87,   87,   87,   87,   87,   87,   87,   87,   87
     } ;
 
-static yyconst flex_int16_t yy_chk[29] =
+static yyconst flex_int16_t yy_chk[220] =
     {   0,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,   18,   14,    9,    5,    3,   17,   17,   17,   17,
-       17,   17,   17,   17,   17,   17,   17,   17
-    } ;
+        0,    0,    1,    2,    7,    8,    7,    8,    0,   11,
+       11,   12,   12,    7,    8,   11,   21,   12,   21,   45,
+       45,    0,    0,   85,   21,   83,    1,    2,    3,    3,
+        3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
+        3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
+        3,    3,    3,    3,    3,    3,    5,    5,   82,    5,
+       80,   79,    5,   78,   77,    5,   76,   75,   73,   72,
+       70,   69,   67,   66,   64,   63,   61,   60,   50,    5,
+       49,   47,    5,    6,    6,   46,    6,   43,   42,    6,
+       40,   39,    6,   31,   30,   25,   23,   18,   16,   13,
 
-/* Table of booleans, true if rule could match eol. */
-static yyconst flex_int32_t yy_rule_can_match_eol[13] =
-    {   0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,     };
+        0,    0,    0,    0,    0,    0,    6,    0,    0,    6,
+       35,    0,    0,    0,    0,    0,    0,    0,    0,   35,
+        0,    0,    0,   35,    0,    0,   35,    0,    0,   35,
+        0,   35,   88,   88,   88,   88,   88,   88,   88,   89,
+       89,   89,   89,   89,   89,   89,   90,   90,   90,   90,
+       90,   90,   90,   91,   91,   91,   91,   91,   91,   91,
+       92,   92,   92,   92,   92,   92,   92,   93,    0,   93,
+       93,   93,   93,   94,    0,   94,   95,    0,   95,    0,
+       95,   95,   95,   96,    0,    0,   96,   96,    0,   96,
+       87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+
+       87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
+       87,   87,   87,   87,   87,   87,   87,   87,   87
+    } ;
 
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
@@ -459,41 +509,18 @@ static yyconst flex_int32_t yy_rule_can_match_eol[13] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "jxtl_path_lex.l"
-#line 2 "jxtl_path_lex.l"
-#include <apr_hash.h>
-#include <apr_pools.h>
-#include <apr_strings.h>
-#include <apr_tables.h>
+#line 1 "jxtl_path_convert.l"
+#line 2 "jxtl_path_convert.l"
+  #include <stdio.h>
 
-#include "apr_macros.h"
-
-#include "jxtl_path_parse.h"
-#include "lex_extra.h"
-#include "utf.h"
-
-#define YY_DECL int jxtl_path_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
-
-#define LEX_EXTRA ((lex_extra_t *) yyextra)
-#define LEX_EXTRA_MP LEX_EXTRA->mp
-#define LEX_EXTRA_STR_ARRAY LEX_EXTRA->str_array
-#define LEX_EXTRA_STATUS LEX_EXTRA->status
-#define LEX_EXTRA_IN_FILE LEX_EXTRA->in_file
-#define LEX_EXTRA_BYTES LEX_EXTRA->bytes
-
-#define jxtl_path_error( ... ) \
-  jxtl_path_error( yylloc, yyscanner, NULL, __VA_ARGS__ )
-
-#define YY_USER_ACTION {						\
-    yylloc->first_line = yylineno;                                      \
-    yylloc->first_column = yycolumn;                                    \
-    yycolumn = yylloc->first_column + yyleng;                           \
-    yylloc->last_line = yylineno;                                       \
-    yylloc->last_column = yycolumn - 1;                                 \
- }
-#line 495 "jxtl_path_lex.c"
+#line 517 "jxtl_path_convert.c"
 
 #define INITIAL 0
+#define directive 1
+#define options 2
+#define str 3
+#define path_expr 4
+#define comment 5
 
 #ifndef YY_NO_UNISTD_H
 /* Special case for "unistd.h", since it is non-ANSI. We include it way
@@ -539,66 +566,48 @@ struct yyguts_t
     int yy_more_flag;
     int yy_more_len;
 
-    YYSTYPE * yylval_r;
-
-    YYLTYPE * yylloc_r;
-
     }; /* end struct yyguts_t */
 
 static int yy_init_globals (yyscan_t yyscanner );
 
-    /* This must go here because YYSTYPE and YYLTYPE are included
-     * from bison output in section 1.*/
-    #    define yylval yyg->yylval_r
-    
-    #    define yylloc yyg->yylloc_r
-    
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int jxtl_path_lex_destroy (yyscan_t yyscanner );
+int jxtl_path_convert_lex_destroy (yyscan_t yyscanner );
 
-int jxtl_path_get_debug (yyscan_t yyscanner );
+int jxtl_path_convert_get_debug (yyscan_t yyscanner );
 
-void jxtl_path_set_debug (int debug_flag ,yyscan_t yyscanner );
+void jxtl_path_convert_set_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE jxtl_path_get_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE jxtl_path_convert_get_extra (yyscan_t yyscanner );
 
-void jxtl_path_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void jxtl_path_convert_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
-FILE *jxtl_path_get_in (yyscan_t yyscanner );
+FILE *jxtl_path_convert_get_in (yyscan_t yyscanner );
 
-void jxtl_path_set_in  (FILE * in_str ,yyscan_t yyscanner );
+void jxtl_path_convert_set_in  (FILE * in_str ,yyscan_t yyscanner );
 
-FILE *jxtl_path_get_out (yyscan_t yyscanner );
+FILE *jxtl_path_convert_get_out (yyscan_t yyscanner );
 
-void jxtl_path_set_out  (FILE * out_str ,yyscan_t yyscanner );
+void jxtl_path_convert_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-int jxtl_path_get_leng (yyscan_t yyscanner );
+int jxtl_path_convert_get_leng (yyscan_t yyscanner );
 
-char *jxtl_path_get_text (yyscan_t yyscanner );
+char *jxtl_path_convert_get_text (yyscan_t yyscanner );
 
-int jxtl_path_get_lineno (yyscan_t yyscanner );
+int jxtl_path_convert_get_lineno (yyscan_t yyscanner );
 
-void jxtl_path_set_lineno (int line_number ,yyscan_t yyscanner );
+void jxtl_path_convert_set_lineno (int line_number ,yyscan_t yyscanner );
 
-YYSTYPE * jxtl_path_get_lval (yyscan_t yyscanner );
-
-void jxtl_path_set_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
-
-       YYLTYPE *jxtl_path_get_lloc (yyscan_t yyscanner );
-    
-        void jxtl_path_set_lloc (YYLTYPE * yylloc_param ,yyscan_t yyscanner );
-    
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
  */
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int jxtl_path_wrap (yyscan_t yyscanner );
+extern "C" int jxtl_path_convert_wrap (yyscan_t yyscanner );
 #else
-extern int jxtl_path_wrap (yyscan_t yyscanner );
+extern int jxtl_path_convert_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -697,9 +706,9 @@ static int input (yyscan_t yyscanner );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int jxtl_path_lex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
+extern int jxtl_path_convert_lex (yyscan_t yyscanner);
 
-#define YY_DECL int jxtl_path_lex (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner)
+#define YY_DECL int jxtl_path_convert_lex (yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
 /* Code executed at the beginning of each rule, after yytext and yyleng
@@ -726,14 +735,10 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 46 "jxtl_path_lex.l"
+#line 13 "jxtl_path_convert.l"
 
 
-#line 733 "jxtl_path_lex.c"
-
-    yylval = yylval_param;
-
-    yylloc = yylloc_param;
+#line 742 "jxtl_path_convert.c"
 
 	if ( !yyg->yy_init )
 		{
@@ -753,12 +758,12 @@ YY_DECL
 			yyout = stdout;
 
 		if ( ! YY_CURRENT_BUFFER ) {
-			jxtl_path_ensure_buffer_stack (yyscanner);
+			jxtl_path_convert_ensure_buffer_stack (yyscanner);
 			YY_CURRENT_BUFFER_LVALUE =
-				jxtl_path__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+				jxtl_path_convert__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
 		}
 
-		jxtl_path__load_buffer_state(yyscanner );
+		jxtl_path_convert__load_buffer_state(yyscanner );
 		}
 
 	while ( 1 )		/* loops until end-of-file is reached */
@@ -786,13 +791,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 18 )
+				if ( yy_current_state >= 88 )
 					yy_c = yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 17 );
+		while ( yy_base[yy_current_state] != 191 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -804,18 +809,6 @@ yy_find_action:
 			}
 
 		YY_DO_BEFORE_ACTION;
-
-		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
-			{
-			int yyl;
-			for ( yyl = 0; yyl < yyleng; ++yyl )
-				if ( yytext[yyl] == '\n' )
-					   
-    do{ yylineno++;
-        yycolumn=0;
-    }while(0)
-;
-			}
 
 do_action:	/* This label is used only to access EOF actions. */
 
@@ -830,73 +823,266 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 48 "jxtl_path_lex.l"
-{ return '/'; }
+#line 16 "jxtl_path_convert.l"
+{
+    ECHO;
+    BEGIN( directive );
+  }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 49 "jxtl_path_lex.l"
-{ return '.'; }
+#line 20 "jxtl_path_convert.l"
+{
+    ECHO;
+    BEGIN( comment );
+  }
 	YY_BREAK
 case 3:
+/* rule 3 can match eol */
 YY_RULE_SETUP
-#line 50 "jxtl_path_lex.l"
-{ return T_PARENT; }
+#line 24 "jxtl_path_convert.l"
+{ ECHO; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 51 "jxtl_path_lex.l"
-{ return '*'; }
+#line 25 "jxtl_path_convert.l"
+{ ECHO; }
 	YY_BREAK
+
+
 case 5:
 YY_RULE_SETUP
-#line 52 "jxtl_path_lex.l"
-{ return '['; }
+#line 29 "jxtl_path_convert.l"
+{ ECHO; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 53 "jxtl_path_lex.l"
-{ return ']'; }
+#line 30 "jxtl_path_convert.l"
+{ ECHO; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 54 "jxtl_path_lex.l"
-{ return '!'; }
+#line 31 "jxtl_path_convert.l"
+{ ECHO; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 55 "jxtl_path_lex.l"
-{
-  yylval->string = apr_pstrdup( LEX_EXTRA_MP, yytext );
-  return T_IDENTIFIER;
-}
+#line 32 "jxtl_path_convert.l"
+{ ECHO; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 59 "jxtl_path_lex.l"
-
+#line 33 "jxtl_path_convert.l"
+{ ECHO; }
 	YY_BREAK
 case 10:
-/* rule 10 can match eol */
 YY_RULE_SETUP
-#line 60 "jxtl_path_lex.l"
+#line 34 "jxtl_path_convert.l"
+{
+    int i;
+    char c;
+    for ( i = 0; i < yyleng; i++ ) {
+      c = yytext[i];
+      switch ( c ) {
+      case '$':
+	printf( "/" );
+	break;
 
+      case '@':
+	printf( "." );
+	break;
+
+      case '^':
+	printf( ".." );
+	break;
+
+      case '(':
+	if ( i != 0  && i != yyleng - 1 ) {
+	  printf( "[" );
+	}
+	break;
+
+      case ')':
+	printf( "]" );
+	break;
+
+      case '.':
+	if ( ( i + 1 ) < yyleng && yytext[i + 1] != '(' ) {
+	  printf( "/" );
+	}
+	break;
+
+      default:
+	printf( "%c", c );
+	break;
+      }
+    }
+  }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 61 "jxtl_path_lex.l"
-{
-  jxtl_path_error( "illegal character '%c' found in path expression",
-		   yytext[0] );
-}
+#line 74 "jxtl_path_convert.l"
+{ ECHO; BEGIN( options ); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 66 "jxtl_path_lex.l"
+#line 75 "jxtl_path_convert.l"
+{ ECHO; BEGIN( INITIAL ); }
+	YY_BREAK
+case 13:
+YY_RULE_SETUP
+#line 76 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 14:
+/* rule 14 can match eol */
+YY_RULE_SETUP
+#line 77 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 15:
+YY_RULE_SETUP
+#line 78 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+
+
+case 16:
+YY_RULE_SETUP
+#line 83 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 17:
+YY_RULE_SETUP
+#line 84 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 18:
+YY_RULE_SETUP
+#line 85 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 19:
+YY_RULE_SETUP
+#line 86 "jxtl_path_convert.l"
+{ ECHO; BEGIN( INITIAL ); }
+	YY_BREAK
+case 20:
+YY_RULE_SETUP
+#line 87 "jxtl_path_convert.l"
+{ ECHO; BEGIN( str ); }
+	YY_BREAK
+case 21:
+YY_RULE_SETUP
+#line 88 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 22:
+/* rule 22 can match eol */
+YY_RULE_SETUP
+#line 89 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 23:
+YY_RULE_SETUP
+#line 90 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+
+
+case 24:
+YY_RULE_SETUP
+#line 94 "jxtl_path_convert.l"
+{ ECHO; BEGIN( options ); }
+	YY_BREAK
+case 25:
+YY_RULE_SETUP
+#line 95 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 26:
+YY_RULE_SETUP
+#line 96 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 27:
+YY_RULE_SETUP
+#line 97 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 28:
+YY_RULE_SETUP
+#line 98 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 29:
+YY_RULE_SETUP
+#line 99 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 30:
+YY_RULE_SETUP
+#line 100 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 31:
+YY_RULE_SETUP
+#line 101 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 32:
+/* rule 32 can match eol */
+YY_RULE_SETUP
+#line 102 "jxtl_path_convert.l"
+{ ECHO; BEGIN( INITIAL ); }
+	YY_BREAK
+
+case YY_STATE_EOF(INITIAL):
+#line 105 "jxtl_path_convert.l"
+{
+  yyterminate();
+}
+	YY_BREAK
+
+case 33:
+/* rule 33 can match eol */
+YY_RULE_SETUP
+#line 110 "jxtl_path_convert.l"
+{ ECHO; BEGIN( INITIAL ); }
+	YY_BREAK
+case 34:
+YY_RULE_SETUP
+#line 111 "jxtl_path_convert.l"
+{ ECHO; BEGIN( INITIAL ); }
+	YY_BREAK
+case 35:
+YY_RULE_SETUP
+#line 112 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 36:
+YY_RULE_SETUP
+#line 113 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+case 37:
+/* rule 37 can match eol */
+YY_RULE_SETUP
+#line 114 "jxtl_path_convert.l"
+{ ECHO; }
+	YY_BREAK
+
+case 38:
+YY_RULE_SETUP
+#line 117 "jxtl_path_convert.l"
 ECHO;
 	YY_BREAK
-#line 899 "jxtl_path_lex.c"
-case YY_STATE_EOF(INITIAL):
+#line 1081 "jxtl_path_convert.c"
+case YY_STATE_EOF(directive):
+case YY_STATE_EOF(options):
+case YY_STATE_EOF(str):
+case YY_STATE_EOF(path_expr):
+case YY_STATE_EOF(comment):
 	yyterminate();
 
 	case YY_END_OF_BUFFER:
@@ -913,7 +1099,7 @@ case YY_STATE_EOF(INITIAL):
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
 			 * just pointed yyin at a new source and called
-			 * jxtl_path_lex().  If so, then we have to assure
+			 * jxtl_path_convert_lex().  If so, then we have to assure
 			 * consistency between YY_CURRENT_BUFFER and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
@@ -973,7 +1159,7 @@ case YY_STATE_EOF(INITIAL):
 				{
 				yyg->yy_did_buffer_switch_on_eof = 0;
 
-				if ( jxtl_path_wrap(yyscanner ) )
+				if ( jxtl_path_convert_wrap(yyscanner ) )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
@@ -1026,7 +1212,7 @@ case YY_STATE_EOF(INITIAL):
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-} /* end of jxtl_path_lex */
+} /* end of jxtl_path_convert_lex */
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -1105,7 +1291,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					jxtl_path_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
+					jxtl_path_convert_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
 				}
 			else
 				/* Can't grow it, we don't own it. */
@@ -1137,7 +1323,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			jxtl_path_restart(yyin  ,yyscanner);
+			jxtl_path_convert_restart(yyin  ,yyscanner);
 			}
 
 		else
@@ -1181,7 +1367,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 18 )
+			if ( yy_current_state >= 88 )
 				yy_c = yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1210,11 +1396,11 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 18 )
+		if ( yy_current_state >= 88 )
 			yy_c = yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-	yy_is_jam = (yy_current_state == 17);
+	yy_is_jam = (yy_current_state == 87);
 
 	return yy_is_jam ? 0 : yy_current_state;
 }
@@ -1251,10 +1437,6 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		}
 
 	*--yy_cp = (char) c;
-
-    if ( c == '\n' ){
-        --yylineno;
-    }
 
 	yyg->yytext_ptr = yy_bp;
 	yyg->yy_hold_char = *yy_cp;
@@ -1303,13 +1485,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 					 */
 
 					/* Reset buffer status. */
-					jxtl_path_restart(yyin ,yyscanner);
+					jxtl_path_convert_restart(yyin ,yyscanner);
 
 					/*FALLTHROUGH*/
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( jxtl_path_wrap(yyscanner ) )
+					if ( jxtl_path_convert_wrap(yyscanner ) )
 						return 0;
 
 					if ( ! yyg->yy_did_buffer_switch_on_eof )
@@ -1332,13 +1514,6 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	*yyg->yy_c_buf_p = '\0';	/* preserve yytext */
 	yyg->yy_hold_char = *++yyg->yy_c_buf_p;
 
-	if ( c == '\n' )
-		   
-    do{ yylineno++;
-        yycolumn=0;
-    }while(0)
-;
-
 	return c;
 }
 #endif	/* ifndef YY_NO_INPUT */
@@ -1348,34 +1523,34 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @note This function does not reset the start condition to @c INITIAL .
  */
-    void jxtl_path_restart  (FILE * input_file , yyscan_t yyscanner)
+    void jxtl_path_convert_restart  (FILE * input_file , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if ( ! YY_CURRENT_BUFFER ){
-        jxtl_path_ensure_buffer_stack (yyscanner);
+        jxtl_path_convert_ensure_buffer_stack (yyscanner);
 		YY_CURRENT_BUFFER_LVALUE =
-            jxtl_path__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+            jxtl_path_convert__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
 	}
 
-	jxtl_path__init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
-	jxtl_path__load_buffer_state(yyscanner );
+	jxtl_path_convert__init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
+	jxtl_path_convert__load_buffer_state(yyscanner );
 }
 
 /** Switch to a different input buffer.
  * @param new_buffer The new input buffer.
  * @param yyscanner The scanner object.
  */
-    void jxtl_path__switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
+    void jxtl_path_convert__switch_to_buffer  (YY_BUFFER_STATE  new_buffer , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	/* TODO. We should be able to replace this entire function body
 	 * with
-	 *		jxtl_path_pop_buffer_state();
-	 *		jxtl_path_push_buffer_state(new_buffer);
+	 *		jxtl_path_convert_pop_buffer_state();
+	 *		jxtl_path_convert_push_buffer_state(new_buffer);
      */
-	jxtl_path_ensure_buffer_stack (yyscanner);
+	jxtl_path_convert_ensure_buffer_stack (yyscanner);
 	if ( YY_CURRENT_BUFFER == new_buffer )
 		return;
 
@@ -1388,17 +1563,17 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		}
 
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	jxtl_path__load_buffer_state(yyscanner );
+	jxtl_path_convert__load_buffer_state(yyscanner );
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (jxtl_path_wrap()) processing, but the only time this flag
-	 * is looked at is after jxtl_path_wrap() is called, so it's safe
+	 * EOF (jxtl_path_convert_wrap()) processing, but the only time this flag
+	 * is looked at is after jxtl_path_convert_wrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
-static void jxtl_path__load_buffer_state  (yyscan_t yyscanner)
+static void jxtl_path_convert__load_buffer_state  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
@@ -1413,35 +1588,35 @@ static void jxtl_path__load_buffer_state  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @return the allocated buffer state.
  */
-    YY_BUFFER_STATE jxtl_path__create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
+    YY_BUFFER_STATE jxtl_path_convert__create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
     
-	b = (YY_BUFFER_STATE) jxtl_path_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) jxtl_path_convert_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in jxtl_path__create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in jxtl_path_convert__create_buffer()" );
 
 	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) jxtl_path_alloc(b->yy_buf_size + 2 ,yyscanner );
+	b->yy_ch_buf = (char *) jxtl_path_convert_alloc(b->yy_buf_size + 2 ,yyscanner );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in jxtl_path__create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in jxtl_path_convert__create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	jxtl_path__init_buffer(b,file ,yyscanner);
+	jxtl_path_convert__init_buffer(b,file ,yyscanner);
 
 	return b;
 }
 
 /** Destroy the buffer.
- * @param b a buffer created with jxtl_path__create_buffer()
+ * @param b a buffer created with jxtl_path_convert__create_buffer()
  * @param yyscanner The scanner object.
  */
-    void jxtl_path__delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void jxtl_path_convert__delete_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
@@ -1452,9 +1627,9 @@ static void jxtl_path__load_buffer_state  (yyscan_t yyscanner)
 		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		jxtl_path_free((void *) b->yy_ch_buf ,yyscanner );
+		jxtl_path_convert_free((void *) b->yy_ch_buf ,yyscanner );
 
-	jxtl_path_free((void *) b ,yyscanner );
+	jxtl_path_convert_free((void *) b ,yyscanner );
 }
 
 #ifndef __cplusplus
@@ -1463,21 +1638,21 @@ extern int isatty (int );
     
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
- * such as during a jxtl_path_restart() or at EOF.
+ * such as during a jxtl_path_convert_restart() or at EOF.
  */
-    static void jxtl_path__init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
+    static void jxtl_path_convert__init_buffer  (YY_BUFFER_STATE  b, FILE * file , yyscan_t yyscanner)
 
 {
 	int oerrno = errno;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-	jxtl_path__flush_buffer(b ,yyscanner);
+	jxtl_path_convert__flush_buffer(b ,yyscanner);
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then jxtl_path__init_buffer was _probably_
-     * called from jxtl_path_restart() or through yy_get_next_buffer.
+    /* If b is the current buffer, then jxtl_path_convert__init_buffer was _probably_
+     * called from jxtl_path_convert_restart() or through yy_get_next_buffer.
      * In that case, we don't want to reset the lineno or column.
      */
     if (b != YY_CURRENT_BUFFER){
@@ -1494,7 +1669,7 @@ extern int isatty (int );
  * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
  * @param yyscanner The scanner object.
  */
-    void jxtl_path__flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
+    void jxtl_path_convert__flush_buffer (YY_BUFFER_STATE  b , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if ( ! b )
@@ -1515,7 +1690,7 @@ extern int isatty (int );
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == YY_CURRENT_BUFFER )
-		jxtl_path__load_buffer_state(yyscanner );
+		jxtl_path_convert__load_buffer_state(yyscanner );
 }
 
 /** Pushes the new state onto the stack. The new state becomes
@@ -1524,15 +1699,15 @@ extern int isatty (int );
  *  @param new_buffer The new state.
  *  @param yyscanner The scanner object.
  */
-void jxtl_path_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
+void jxtl_path_convert_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (new_buffer == NULL)
 		return;
 
-	jxtl_path_ensure_buffer_stack(yyscanner);
+	jxtl_path_convert_ensure_buffer_stack(yyscanner);
 
-	/* This block is copied from jxtl_path__switch_to_buffer. */
+	/* This block is copied from jxtl_path_convert__switch_to_buffer. */
 	if ( YY_CURRENT_BUFFER )
 		{
 		/* Flush out information for old buffer. */
@@ -1546,8 +1721,8 @@ void jxtl_path_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanne
 		yyg->yy_buffer_stack_top++;
 	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-	/* copied from jxtl_path__switch_to_buffer. */
-	jxtl_path__load_buffer_state(yyscanner );
+	/* copied from jxtl_path_convert__switch_to_buffer. */
+	jxtl_path_convert__load_buffer_state(yyscanner );
 	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
@@ -1555,19 +1730,19 @@ void jxtl_path_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yyscanne
  *  The next element becomes the new top.
  *  @param yyscanner The scanner object.
  */
-void jxtl_path_pop_buffer_state (yyscan_t yyscanner)
+void jxtl_path_convert_pop_buffer_state (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 	if (!YY_CURRENT_BUFFER)
 		return;
 
-	jxtl_path__delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
+	jxtl_path_convert__delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
 	YY_CURRENT_BUFFER_LVALUE = NULL;
 	if (yyg->yy_buffer_stack_top > 0)
 		--yyg->yy_buffer_stack_top;
 
 	if (YY_CURRENT_BUFFER) {
-		jxtl_path__load_buffer_state(yyscanner );
+		jxtl_path_convert__load_buffer_state(yyscanner );
 		yyg->yy_did_buffer_switch_on_eof = 1;
 	}
 }
@@ -1575,7 +1750,7 @@ void jxtl_path_pop_buffer_state (yyscan_t yyscanner)
 /* Allocates the stack if it does not exist.
  *  Guarantees space for at least one push.
  */
-static void jxtl_path_ensure_buffer_stack (yyscan_t yyscanner)
+static void jxtl_path_convert_ensure_buffer_stack (yyscan_t yyscanner)
 {
 	int num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
@@ -1587,7 +1762,7 @@ static void jxtl_path_ensure_buffer_stack (yyscan_t yyscanner)
 		 * immediate realloc on the next call.
          */
 		num_to_alloc = 1;
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)jxtl_path_alloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)jxtl_path_convert_alloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
 		
@@ -1604,7 +1779,7 @@ static void jxtl_path_ensure_buffer_stack (yyscan_t yyscanner)
 		int grow_size = 8 /* arbitrary grow size */;
 
 		num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
-		yyg->yy_buffer_stack = (struct yy_buffer_state**)jxtl_path_realloc
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)jxtl_path_convert_realloc
 								(yyg->yy_buffer_stack,
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
@@ -1621,7 +1796,7 @@ static void jxtl_path_ensure_buffer_stack (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object. 
  */
-YY_BUFFER_STATE jxtl_path__scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
+YY_BUFFER_STATE jxtl_path_convert__scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
     
@@ -1631,9 +1806,9 @@ YY_BUFFER_STATE jxtl_path__scan_buffer  (char * base, yy_size_t  size , yyscan_t
 		/* They forgot to leave room for the EOB's. */
 		return 0;
 
-	b = (YY_BUFFER_STATE) jxtl_path_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	b = (YY_BUFFER_STATE) jxtl_path_convert_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in jxtl_path__scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in jxtl_path_convert__scan_buffer()" );
 
 	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
@@ -1645,33 +1820,33 @@ YY_BUFFER_STATE jxtl_path__scan_buffer  (char * base, yy_size_t  size , yyscan_t
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	jxtl_path__switch_to_buffer(b ,yyscanner );
+	jxtl_path_convert__switch_to_buffer(b ,yyscanner );
 
 	return b;
 }
 
-/** Setup the input buffer state to scan a string. The next call to jxtl_path_lex() will
+/** Setup the input buffer state to scan a string. The next call to jxtl_path_convert_lex() will
  * scan from a @e copy of @a str.
  * @param str a NUL-terminated string to scan
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
- *       jxtl_path__scan_bytes() instead.
+ *       jxtl_path_convert__scan_bytes() instead.
  */
-YY_BUFFER_STATE jxtl_path__scan_string (yyconst char * yystr , yyscan_t yyscanner)
+YY_BUFFER_STATE jxtl_path_convert__scan_string (yyconst char * yystr , yyscan_t yyscanner)
 {
     
-	return jxtl_path__scan_bytes(yystr,strlen(yystr) ,yyscanner);
+	return jxtl_path_convert__scan_bytes(yystr,strlen(yystr) ,yyscanner);
 }
 
-/** Setup the input buffer state to scan the given bytes. The next call to jxtl_path_lex() will
+/** Setup the input buffer state to scan the given bytes. The next call to jxtl_path_convert_lex() will
  * scan from a @e copy of @a bytes.
  * @param bytes the byte buffer to scan
  * @param len the number of bytes in the buffer pointed to by @a bytes.
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE jxtl_path__scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE jxtl_path_convert__scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 	char *buf;
@@ -1680,18 +1855,18 @@ YY_BUFFER_STATE jxtl_path__scan_bytes  (yyconst char * yybytes, int  _yybytes_le
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
-	buf = (char *) jxtl_path_alloc(n ,yyscanner );
+	buf = (char *) jxtl_path_convert_alloc(n ,yyscanner );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in jxtl_path__scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in jxtl_path_convert__scan_bytes()" );
 
 	for ( i = 0; i < _yybytes_len; ++i )
 		buf[i] = yybytes[i];
 
 	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = jxtl_path__scan_buffer(buf,n ,yyscanner);
+	b = jxtl_path_convert__scan_buffer(buf,n ,yyscanner);
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in jxtl_path__scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in jxtl_path_convert__scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -1733,7 +1908,7 @@ static void yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 /** Get the user-defined data for this scanner.
  * @param yyscanner The scanner object.
  */
-YY_EXTRA_TYPE jxtl_path_get_extra  (yyscan_t yyscanner)
+YY_EXTRA_TYPE jxtl_path_convert_get_extra  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyextra;
@@ -1742,7 +1917,7 @@ YY_EXTRA_TYPE jxtl_path_get_extra  (yyscan_t yyscanner)
 /** Get the current line number.
  * @param yyscanner The scanner object.
  */
-int jxtl_path_get_lineno  (yyscan_t yyscanner)
+int jxtl_path_convert_get_lineno  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     
@@ -1755,7 +1930,7 @@ int jxtl_path_get_lineno  (yyscan_t yyscanner)
 /** Get the current column number.
  * @param yyscanner The scanner object.
  */
-int jxtl_path_get_column  (yyscan_t yyscanner)
+int jxtl_path_convert_get_column  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     
@@ -1768,7 +1943,7 @@ int jxtl_path_get_column  (yyscan_t yyscanner)
 /** Get the input stream.
  * @param yyscanner The scanner object.
  */
-FILE *jxtl_path_get_in  (yyscan_t yyscanner)
+FILE *jxtl_path_convert_get_in  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyin;
@@ -1777,7 +1952,7 @@ FILE *jxtl_path_get_in  (yyscan_t yyscanner)
 /** Get the output stream.
  * @param yyscanner The scanner object.
  */
-FILE *jxtl_path_get_out  (yyscan_t yyscanner)
+FILE *jxtl_path_convert_get_out  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyout;
@@ -1786,7 +1961,7 @@ FILE *jxtl_path_get_out  (yyscan_t yyscanner)
 /** Get the length of the current token.
  * @param yyscanner The scanner object.
  */
-int jxtl_path_get_leng  (yyscan_t yyscanner)
+int jxtl_path_convert_get_leng  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyleng;
@@ -1796,7 +1971,7 @@ int jxtl_path_get_leng  (yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  */
 
-char *jxtl_path_get_text  (yyscan_t yyscanner)
+char *jxtl_path_convert_get_text  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yytext;
@@ -1806,7 +1981,7 @@ char *jxtl_path_get_text  (yyscan_t yyscanner)
  * @param user_defined The data to be associated with this scanner.
  * @param yyscanner The scanner object.
  */
-void jxtl_path_set_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
+void jxtl_path_convert_set_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyextra = user_defined ;
@@ -1816,13 +1991,13 @@ void jxtl_path_set_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner)
  * @param line_number
  * @param yyscanner The scanner object.
  */
-void jxtl_path_set_lineno (int  line_number , yyscan_t yyscanner)
+void jxtl_path_convert_set_lineno (int  line_number , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "jxtl_path_set_lineno called with no buffer" , yyscanner); 
+           yy_fatal_error( "jxtl_path_convert_set_lineno called with no buffer" , yyscanner); 
     
     yylineno = line_number;
 }
@@ -1831,13 +2006,13 @@ void jxtl_path_set_lineno (int  line_number , yyscan_t yyscanner)
  * @param line_number
  * @param yyscanner The scanner object.
  */
-void jxtl_path_set_column (int  column_no , yyscan_t yyscanner)
+void jxtl_path_convert_set_column (int  column_no , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "jxtl_path_set_column called with no buffer" , yyscanner); 
+           yy_fatal_error( "jxtl_path_convert_set_column called with no buffer" , yyscanner); 
     
     yycolumn = column_no;
 }
@@ -1846,27 +2021,27 @@ void jxtl_path_set_column (int  column_no , yyscan_t yyscanner)
  * input buffer.
  * @param in_str A readable stream.
  * @param yyscanner The scanner object.
- * @see jxtl_path__switch_to_buffer
+ * @see jxtl_path_convert__switch_to_buffer
  */
-void jxtl_path_set_in (FILE *  in_str , yyscan_t yyscanner)
+void jxtl_path_convert_set_in (FILE *  in_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyin = in_str ;
 }
 
-void jxtl_path_set_out (FILE *  out_str , yyscan_t yyscanner)
+void jxtl_path_convert_set_out (FILE *  out_str , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yyout = out_str ;
 }
 
-int jxtl_path_get_debug  (yyscan_t yyscanner)
+int jxtl_path_convert_get_debug  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yy_flex_debug;
 }
 
-void jxtl_path_set_debug (int  bdebug , yyscan_t yyscanner)
+void jxtl_path_convert_set_debug (int  bdebug , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     yy_flex_debug = bdebug ;
@@ -1874,38 +2049,14 @@ void jxtl_path_set_debug (int  bdebug , yyscan_t yyscanner)
 
 /* Accessor methods for yylval and yylloc */
 
-YYSTYPE * jxtl_path_get_lval  (yyscan_t yyscanner)
-{
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    return yylval;
-}
-
-void jxtl_path_set_lval (YYSTYPE *  yylval_param , yyscan_t yyscanner)
-{
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    yylval = yylval_param;
-}
-
-YYLTYPE *jxtl_path_get_lloc  (yyscan_t yyscanner)
-{
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    return yylloc;
-}
-    
-void jxtl_path_set_lloc (YYLTYPE *  yylloc_param , yyscan_t yyscanner)
-{
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    yylloc = yylloc_param;
-}
-    
 /* User-visible API */
 
-/* jxtl_path_lex_init is special because it creates the scanner itself, so it is
+/* jxtl_path_convert_lex_init is special because it creates the scanner itself, so it is
  * the ONLY reentrant function that doesn't take the scanner as the last argument.
  * That's why we explicitly handle the declaration, instead of using our macros.
  */
 
-int jxtl_path_lex_init(yyscan_t* ptr_yy_globals)
+int jxtl_path_convert_lex_init(yyscan_t* ptr_yy_globals)
 
 {
     if (ptr_yy_globals == NULL){
@@ -1913,7 +2064,7 @@ int jxtl_path_lex_init(yyscan_t* ptr_yy_globals)
         return 1;
     }
 
-    *ptr_yy_globals = (yyscan_t) jxtl_path_alloc ( sizeof( struct yyguts_t ), NULL );
+    *ptr_yy_globals = (yyscan_t) jxtl_path_convert_alloc ( sizeof( struct yyguts_t ), NULL );
 
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
@@ -1930,7 +2081,7 @@ static int yy_init_globals (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from jxtl_path_lex_destroy(), so don't allocate here.
+     * This function is called from jxtl_path_convert_lex_destroy(), so don't allocate here.
      */
 
     yyg->yy_buffer_stack = 0;
@@ -1954,37 +2105,37 @@ static int yy_init_globals (yyscan_t yyscanner)
 #endif
 
     /* For future reference: Set errno on error, since we are called by
-     * jxtl_path_lex_init()
+     * jxtl_path_convert_lex_init()
      */
     return 0;
 }
 
-/* jxtl_path_lex_destroy is for both reentrant and non-reentrant scanners. */
-int jxtl_path_lex_destroy  (yyscan_t yyscanner)
+/* jxtl_path_convert_lex_destroy is for both reentrant and non-reentrant scanners. */
+int jxtl_path_convert_lex_destroy  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
     /* Pop the buffer stack, destroying each element. */
 	while(YY_CURRENT_BUFFER){
-		jxtl_path__delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
+		jxtl_path_convert__delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
 		YY_CURRENT_BUFFER_LVALUE = NULL;
-		jxtl_path_pop_buffer_state(yyscanner);
+		jxtl_path_convert_pop_buffer_state(yyscanner);
 	}
 
 	/* Destroy the stack itself. */
-	jxtl_path_free(yyg->yy_buffer_stack ,yyscanner);
+	jxtl_path_convert_free(yyg->yy_buffer_stack ,yyscanner);
 	yyg->yy_buffer_stack = NULL;
 
     /* Destroy the start condition stack. */
-        jxtl_path_free(yyg->yy_start_stack ,yyscanner );
+        jxtl_path_convert_free(yyg->yy_start_stack ,yyscanner );
         yyg->yy_start_stack = NULL;
 
     /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * jxtl_path_lex() is called, initialization will occur. */
+     * jxtl_path_convert_lex() is called, initialization will occur. */
     yy_init_globals( yyscanner);
 
     /* Destroy the main struct (reentrant only). */
-    jxtl_path_free ( yyscanner , yyscanner );
+    jxtl_path_convert_free ( yyscanner , yyscanner );
     yyscanner = NULL;
     return 0;
 }
@@ -2013,12 +2164,12 @@ static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 }
 #endif
 
-void *jxtl_path_alloc (yy_size_t  size , yyscan_t yyscanner)
+void *jxtl_path_convert_alloc (yy_size_t  size , yyscan_t yyscanner)
 {
 	return (void *) malloc( size );
 }
 
-void *jxtl_path_realloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
+void *jxtl_path_convert_realloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 {
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
@@ -2030,14 +2181,23 @@ void *jxtl_path_realloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 	return (void *) realloc( (char *) ptr, size );
 }
 
-void jxtl_path_free (void * ptr , yyscan_t yyscanner)
+void jxtl_path_convert_free (void * ptr , yyscan_t yyscanner)
 {
-	free( (char *) ptr );	/* see jxtl_path_realloc() for (char *) cast */
+	free( (char *) ptr );	/* see jxtl_path_convert_realloc() for (char *) cast */
 }
 
 #define YYTABLES_NAME "yytables"
 
-#line 66 "jxtl_path_lex.l"
+#line 117 "jxtl_path_convert.l"
 
 
+
+int main( int argc, char **argv )
+{
+  yyscan_t scanner;
+  jxtl_path_convert_lex_init( &scanner );
+  jxtl_path_convert_lex( scanner );
+  jxtl_path_convert_lex_destroy( scanner );
+  return;
+}
 

@@ -36,10 +36,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = jxtl$(EXEEXT) xml2json$(EXEEXT)
+bin_PROGRAMS = jxtl$(EXEEXT) xml2json$(EXEEXT) \
+	jxtl_path_convert$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in jxtl_lex.c \
-	jxtl_parse.c
+	jxtl_parse.c jxtl_path_convert.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -55,6 +56,10 @@ am_jxtl_OBJECTS = jxtl-jxtl.$(OBJEXT) jxtl-jxtl_parse.$(OBJEXT) \
 jxtl_OBJECTS = $(am_jxtl_OBJECTS)
 am__DEPENDENCIES_1 = ${top_srcdir}/libjxtl/libjxtl.la
 jxtl_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am_jxtl_path_convert_OBJECTS =  \
+	jxtl_path_convert-jxtl_path_convert.$(OBJEXT)
+jxtl_path_convert_OBJECTS = $(am_jxtl_path_convert_OBJECTS)
+jxtl_path_convert_LDADD = $(LDADD)
 am_xml2json_OBJECTS = xml2json-xml2json.$(OBJEXT)
 xml2json_OBJECTS = $(am_xml2json_OBJECTS)
 xml2json_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -71,11 +76,14 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
 LTLEXCOMPILE = $(LIBTOOL) --mode=compile $(LEX) $(LFLAGS) $(AM_LFLAGS)
+YLWRAP = $(top_srcdir)/config/ylwrap
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
 LTYACCCOMPILE = $(LIBTOOL) --mode=compile $(YACC) $(YFLAGS) \
 	$(AM_YFLAGS)
-SOURCES = $(jxtl_SOURCES) $(xml2json_SOURCES)
-DIST_SOURCES = $(jxtl_SOURCES) $(xml2json_SOURCES)
+SOURCES = $(jxtl_SOURCES) $(jxtl_path_convert_SOURCES) \
+	$(xml2json_SOURCES)
+DIST_SOURCES = $(jxtl_SOURCES) $(jxtl_path_convert_SOURCES) \
+	$(xml2json_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -195,6 +203,7 @@ target_alias = @target_alias@
 INCLUDES = -I${top_srcdir}/libjxtl
 jxtl_SOURCES = jxtl.c jxtl_parse.y jxtl_lex.l
 xml2json_SOURCES = xml2json.c
+jxtl_path_convert_SOURCES = jxtl_path_convert.l
 LIBJXTL = ${top_srcdir}/libjxtl/libjxtl.la
 jxtl_CFLAGS = -g ${APR_CFLAGS} ${XML2_CFLAGS}
 jxtl_LDFLAGS = ${APR_LIBS} ${XML2_LIBS} -Wl,-rpath -Wl,${libdir}
@@ -202,6 +211,7 @@ jxtl_LDADD = ${LIBJXTL}
 xml2json_CFLAGS = -g ${APR_CFLAGS} ${XML2_CFLAGS}
 xml2json_LDFLAGS = ${APR_LIBS} ${XML2_LIBS} -Wl,-rpath -Wl,${libdir}
 xml2json_LDADD = ${LIBJXTL}
+jxtl_path_convert_CFLAGS = -g
 all: all-am
 
 .SUFFIXES:
@@ -266,6 +276,9 @@ clean-binPROGRAMS:
 jxtl$(EXEEXT): $(jxtl_OBJECTS) $(jxtl_DEPENDENCIES) 
 	@rm -f jxtl$(EXEEXT)
 	$(LINK) $(jxtl_LDFLAGS) $(jxtl_OBJECTS) $(jxtl_LDADD) $(LIBS)
+jxtl_path_convert$(EXEEXT): $(jxtl_path_convert_OBJECTS) $(jxtl_path_convert_DEPENDENCIES) 
+	@rm -f jxtl_path_convert$(EXEEXT)
+	$(LINK) $(jxtl_path_convert_LDFLAGS) $(jxtl_path_convert_OBJECTS) $(jxtl_path_convert_LDADD) $(LIBS)
 xml2json$(EXEEXT): $(xml2json_OBJECTS) $(xml2json_DEPENDENCIES) 
 	@rm -f xml2json$(EXEEXT)
 	$(LINK) $(xml2json_LDFLAGS) $(xml2json_OBJECTS) $(xml2json_LDADD) $(LIBS)
@@ -279,6 +292,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jxtl-jxtl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jxtl-jxtl_lex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jxtl-jxtl_parse.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jxtl_path_convert-jxtl_path_convert.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml2json-xml2json.Po@am__quote@
 
 .c.o:
@@ -343,6 +357,20 @@ jxtl-jxtl_lex.obj: jxtl_lex.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jxtl_lex.c' object='jxtl-jxtl_lex.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_CFLAGS) $(CFLAGS) -c -o jxtl-jxtl_lex.obj `if test -f 'jxtl_lex.c'; then $(CYGPATH_W) 'jxtl_lex.c'; else $(CYGPATH_W) '$(srcdir)/jxtl_lex.c'; fi`
+
+jxtl_path_convert-jxtl_path_convert.o: jxtl_path_convert.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_path_convert_CFLAGS) $(CFLAGS) -MT jxtl_path_convert-jxtl_path_convert.o -MD -MP -MF "$(DEPDIR)/jxtl_path_convert-jxtl_path_convert.Tpo" -c -o jxtl_path_convert-jxtl_path_convert.o `test -f 'jxtl_path_convert.c' || echo '$(srcdir)/'`jxtl_path_convert.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/jxtl_path_convert-jxtl_path_convert.Tpo" "$(DEPDIR)/jxtl_path_convert-jxtl_path_convert.Po"; else rm -f "$(DEPDIR)/jxtl_path_convert-jxtl_path_convert.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jxtl_path_convert.c' object='jxtl_path_convert-jxtl_path_convert.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_path_convert_CFLAGS) $(CFLAGS) -c -o jxtl_path_convert-jxtl_path_convert.o `test -f 'jxtl_path_convert.c' || echo '$(srcdir)/'`jxtl_path_convert.c
+
+jxtl_path_convert-jxtl_path_convert.obj: jxtl_path_convert.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_path_convert_CFLAGS) $(CFLAGS) -MT jxtl_path_convert-jxtl_path_convert.obj -MD -MP -MF "$(DEPDIR)/jxtl_path_convert-jxtl_path_convert.Tpo" -c -o jxtl_path_convert-jxtl_path_convert.obj `if test -f 'jxtl_path_convert.c'; then $(CYGPATH_W) 'jxtl_path_convert.c'; else $(CYGPATH_W) '$(srcdir)/jxtl_path_convert.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/jxtl_path_convert-jxtl_path_convert.Tpo" "$(DEPDIR)/jxtl_path_convert-jxtl_path_convert.Po"; else rm -f "$(DEPDIR)/jxtl_path_convert-jxtl_path_convert.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jxtl_path_convert.c' object='jxtl_path_convert-jxtl_path_convert.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_path_convert_CFLAGS) $(CFLAGS) -c -o jxtl_path_convert-jxtl_path_convert.obj `if test -f 'jxtl_path_convert.c'; then $(CYGPATH_W) 'jxtl_path_convert.c'; else $(CYGPATH_W) '$(srcdir)/jxtl_path_convert.c'; fi`
 
 xml2json-xml2json.o: xml2json.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xml2json_CFLAGS) $(CFLAGS) -MT xml2json-xml2json.o -MD -MP -MF "$(DEPDIR)/xml2json-xml2json.Tpo" -c -o xml2json-xml2json.o `test -f 'xml2json.c' || echo '$(srcdir)/'`xml2json.c; \
@@ -497,6 +525,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 	-rm -f jxtl_lex.c
 	-rm -f jxtl_parse.c
+	-rm -f jxtl_path_convert.c
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
@@ -564,6 +593,7 @@ ${jxtl_OBJECTS}: jxtl_parse.h jxtl_parse.c jxtl_lex.h jxtl_lex.c
 
 jxtl_parse.c jxtl_parse.h: jxtl_parse.y
 jxtl_lex.c jxtl_lex.h: jxtl_lex.l
+jxtl_path_convert.c: jxtl_path_convert.l
 
 %.c %.h: %.l
 	${LEXCOMPILE} $<

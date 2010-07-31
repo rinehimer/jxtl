@@ -95,7 +95,7 @@
   "#if" { return T_IF; }
   "#else" { return T_ELSE; }
   "#elseif" { return T_ELSEIF; }
-  [a-zA-Z0-9_$@^.*()!]+ {
+  [a-zA-Z0-9_/.*\[\]!]+ {
     yylval->string = apr_pstrndup( LEX_EXTRA_MP, yytext, yyleng );
     return T_PATH_EXPR;
   }

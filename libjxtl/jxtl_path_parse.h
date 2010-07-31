@@ -39,11 +39,13 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     T_IDENTIFIER = 258
+     T_IDENTIFIER = 258,
+     T_PARENT = 259
    };
 #endif
 /* Tokens.  */
 #define T_IDENTIFIER 258
+#define T_PARENT 259
 
 
 
@@ -56,7 +58,7 @@ typedef union YYSTYPE
   unsigned char *string;
 }
 /* Line 1489 of yacc.c.  */
-#line 60 "jxtl_path_parse.h"
+#line 62 "jxtl_path_parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

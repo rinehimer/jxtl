@@ -45,13 +45,12 @@ identifier [a-zA-Z][a-zA-Z0-9_]*
 
 %%
 
-"$" { return '$'; }
-"@" { return '@'; }
-"^" { return '^'; }
+"/" { return '/'; }
 "." { return '.'; }
+".." { return T_PARENT; }
 "*" { return '*'; }
-"(" { return '('; }
-")" { return ')'; }
+"[" { return '['; }
+"]" { return ']'; }
 "!" { return '!'; }
 {identifier} {
   yylval->string = apr_pstrdup( LEX_EXTRA_MP, yytext );
