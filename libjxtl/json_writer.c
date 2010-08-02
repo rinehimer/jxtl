@@ -4,7 +4,7 @@
 #include <apr_tables.h>
 
 #include "apr_macros.h"
-#include "json_node.h"
+#include "json.h"
 #include "json_writer.h"
 
 void json_writer_ctx_init( json_writer_ctx_t *context )

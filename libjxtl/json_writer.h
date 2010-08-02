@@ -4,7 +4,7 @@
 #include <apr_pools.h>
 #include <apr_tables.h>
 
-#include "json_node.h"
+#include "json.h"
 
 typedef enum json_state {
   JSON_INITIAL,

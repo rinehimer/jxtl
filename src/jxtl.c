@@ -6,7 +6,6 @@
 #include "apr_macros.h"
 
 #include "json.h"
-#include "json_node.h"
 #include "jxtl_path.h"
 #include "json_writer.h"
 

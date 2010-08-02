@@ -7,7 +7,7 @@
 #include "jxtl_path_lex.h"
 
 #include "lex_extra.h"
-#include "json_node.h"
+#include "json.h"
 
 /*
  * Parser callback prototypes.

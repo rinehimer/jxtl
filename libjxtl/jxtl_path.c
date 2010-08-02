@@ -5,7 +5,7 @@
 #include <apr_tables.h>
 
 #include "apr_macros.h"
-#include "json_node.h"
+#include "json.h"
 #include "jxtl_path.h"
 #include "jxtl_path_parse.h"
 #include "jxtl_path_lex.h"

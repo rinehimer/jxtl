@@ -2,7 +2,7 @@
 #include <apr_pools.h>
 #include <apr_xml.h>
 
-#include "json_node.h"
+#include "json.h"
 #include "json_writer.h"
 #include "xml2json.h"
 

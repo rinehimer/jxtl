@@ -548,9 +548,6 @@ static yyconst flex_int32_t yy_rule_can_match_eol[40] =
 
 #include "apr_macros.h"
 
-#include "json_node.h"
-#include "json.h"
-
 #include "jxtl_parse.h"
 #include "lex_extra.h"
 #include "utf.h"
@@ -589,7 +586,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[40] =
     }                                                           \
   }
 
-#line 593 "jxtl_lex.c"
+#line 590 "jxtl_lex.c"
 
 #define INITIAL 0
 #define directive 1
@@ -830,10 +827,10 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 63 "jxtl_lex.l"
+#line 60 "jxtl_lex.l"
 
 
-#line 837 "jxtl_lex.c"
+#line 834 "jxtl_lex.c"
 
     yylval = yylval_param;
 
@@ -934,7 +931,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 66 "jxtl_lex.l"
+#line 63 "jxtl_lex.l"
 {
     /*
      * Wait as long as possible to return text so that it can be collected
@@ -957,7 +954,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 85 "jxtl_lex.l"
+#line 82 "jxtl_lex.l"
 {
     BEGIN( comment );
   }
@@ -965,44 +962,44 @@ YY_RULE_SETUP
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 88 "jxtl_lex.l"
+#line 85 "jxtl_lex.l"
 { STRING_COPY; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 89 "jxtl_lex.l"
+#line 86 "jxtl_lex.l"
 { STRING_COPY; }
 	YY_BREAK
 
 
 case 5:
 YY_RULE_SETUP
-#line 93 "jxtl_lex.l"
+#line 90 "jxtl_lex.l"
 { return T_SECTION; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 94 "jxtl_lex.l"
+#line 91 "jxtl_lex.l"
 { return T_END; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 95 "jxtl_lex.l"
+#line 92 "jxtl_lex.l"
 { return T_IF; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 96 "jxtl_lex.l"
+#line 93 "jxtl_lex.l"
 { return T_ELSE; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 97 "jxtl_lex.l"
+#line 94 "jxtl_lex.l"
 { return T_ELSEIF; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 98 "jxtl_lex.l"
+#line 95 "jxtl_lex.l"
 {
     yylval->string = apr_pstrndup( LEX_EXTRA_MP, yytext, yyleng );
     return T_PATH_EXPR;
@@ -1010,28 +1007,28 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 102 "jxtl_lex.l"
+#line 99 "jxtl_lex.l"
 { BEGIN( options ); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 103 "jxtl_lex.l"
+#line 100 "jxtl_lex.l"
 { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 104 "jxtl_lex.l"
+#line 101 "jxtl_lex.l"
 
 	YY_BREAK
 case 14:
 /* rule 14 can match eol */
 YY_RULE_SETUP
-#line 105 "jxtl_lex.l"
+#line 102 "jxtl_lex.l"
 
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 106 "jxtl_lex.l"
+#line 103 "jxtl_lex.l"
 { jxtl_error( "illegal character '%c' found in path expression",
 		  yytext[0] ); }
 	YY_BREAK
@@ -1039,27 +1036,27 @@ YY_RULE_SETUP
 
 case 16:
 YY_RULE_SETUP
-#line 111 "jxtl_lex.l"
+#line 108 "jxtl_lex.l"
 { return T_SEPARATOR; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 112 "jxtl_lex.l"
+#line 109 "jxtl_lex.l"
 { return '='; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 113 "jxtl_lex.l"
+#line 110 "jxtl_lex.l"
 { return ','; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 114 "jxtl_lex.l"
+#line 111 "jxtl_lex.l"
 { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 115 "jxtl_lex.l"
+#line 112 "jxtl_lex.l"
 {
     APR_ARRAY_CLEAR( LEX_EXTRA_STR_ARRAY );
     BEGIN( str );
@@ -1067,18 +1064,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 119 "jxtl_lex.l"
+#line 116 "jxtl_lex.l"
 
 	YY_BREAK
 case 22:
 /* rule 22 can match eol */
 YY_RULE_SETUP
-#line 120 "jxtl_lex.l"
+#line 117 "jxtl_lex.l"
 
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 121 "jxtl_lex.l"
+#line 118 "jxtl_lex.l"
 {
     yyless( 0 );
     BEGIN( unmatched );
@@ -1088,7 +1085,7 @@ YY_RULE_SETUP
 
 case 24:
 YY_RULE_SETUP
-#line 128 "jxtl_lex.l"
+#line 125 "jxtl_lex.l"
 {
     yylval->string = apr_pstrndup( LEX_EXTRA_MP,
                                    LEX_EXTRA_STR_ARRAY->elts,
@@ -1100,37 +1097,37 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 136 "jxtl_lex.l"
+#line 133 "jxtl_lex.l"
 { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\b'; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 137 "jxtl_lex.l"
+#line 134 "jxtl_lex.l"
 { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\f'; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 138 "jxtl_lex.l"
+#line 135 "jxtl_lex.l"
 { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\n'; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 139 "jxtl_lex.l"
+#line 136 "jxtl_lex.l"
 { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\r'; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 140 "jxtl_lex.l"
+#line 137 "jxtl_lex.l"
 { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\t'; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 141 "jxtl_lex.l"
+#line 138 "jxtl_lex.l"
 { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '"'; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 142 "jxtl_lex.l"
+#line 139 "jxtl_lex.l"
 {
     STRING_COPY;
   }
@@ -1138,7 +1135,7 @@ YY_RULE_SETUP
 case 32:
 /* rule 32 can match eol */
 YY_RULE_SETUP
-#line 145 "jxtl_lex.l"
+#line 142 "jxtl_lex.l"
 {
     jxtl_error( "unterminated string constant" );
     BEGIN( INITIAL );
@@ -1148,7 +1145,7 @@ YY_RULE_SETUP
 
 case 33:
 YY_RULE_SETUP
-#line 152 "jxtl_lex.l"
+#line 149 "jxtl_lex.l"
 {
     jxtl_error( "bad option '%s'", yytext );
     BEGIN( options );
@@ -1156,7 +1153,7 @@ YY_RULE_SETUP
 	YY_BREAK
 
 case YY_STATE_EOF(INITIAL):
-#line 158 "jxtl_lex.l"
+#line 155 "jxtl_lex.l"
 {
   if ( LEX_EXTRA_STR_ARRAY->nelts > 0 )  {
     yylval->string = apr_pstrndup( LEX_EXTRA_MP,
@@ -1172,37 +1169,37 @@ case YY_STATE_EOF(INITIAL):
 case 34:
 /* rule 34 can match eol */
 YY_RULE_SETUP
-#line 170 "jxtl_lex.l"
+#line 167 "jxtl_lex.l"
 { BEGIN( INITIAL ); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 171 "jxtl_lex.l"
+#line 168 "jxtl_lex.l"
 { BEGIN( INITIAL ); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 172 "jxtl_lex.l"
+#line 169 "jxtl_lex.l"
 
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 173 "jxtl_lex.l"
+#line 170 "jxtl_lex.l"
 
 	YY_BREAK
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 174 "jxtl_lex.l"
+#line 171 "jxtl_lex.l"
 
 	YY_BREAK
 
 case 39:
 YY_RULE_SETUP
-#line 177 "jxtl_lex.l"
+#line 174 "jxtl_lex.l"
 ECHO;
 	YY_BREAK
-#line 1206 "jxtl_lex.c"
+#line 1203 "jxtl_lex.c"
 case YY_STATE_EOF(directive):
 case YY_STATE_EOF(options):
 case YY_STATE_EOF(str):
@@ -2349,7 +2346,7 @@ void jxtl_free (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 177 "jxtl_lex.l"
+#line 174 "jxtl_lex.l"
 
 
 

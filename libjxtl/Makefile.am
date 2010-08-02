@@ -4,7 +4,6 @@ libjxtlincdir = $(includedir)/libjxtl
 
 libjxtlinc_HEADERS = apr_macros.h \
                      json.h \
-                     json_node.h \
                      json_parser.h \
                      jxtl_path.h \
                      json_writer.h \
@@ -14,7 +13,6 @@ libjxtlinc_HEADERS = apr_macros.h \
 
 libjxtl_la_SOURCES = json.c \
                      json_lex.l \
-                     json_node.c \
                      json_parse.y \
                      json_parser.c \
                      jxtl_path.c \

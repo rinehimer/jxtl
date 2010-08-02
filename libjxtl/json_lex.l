@@ -5,7 +5,6 @@
 
 #include "apr_macros.h"
 
-#include "json_node.h"
 #include "json.h"
 
 #include "json_parse.h"
