@@ -1,0 +1,6 @@
+{{#if brewery/beer/season}}
+There are seasonal beers, they are:
+{{ #section brewery/beer[season] ; separator=", "}}
+{{beer_name}}
+{{ #end}}
+{{#end}}
