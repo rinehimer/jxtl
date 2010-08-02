@@ -127,9 +127,19 @@ int xml_file_read( const char *filename, json_writer_t *writer, int skip_root )
   apr_xml_doc *doc;
   apr_xml_elem *elem;
   apr_file_t *file;
+  int is_stdin;
+
+  is_stdin = ( filename && apr_strnatcasecmp( filename, "-" ) == 0 );
 
   apr_pool_create( &mp, NULL );
-  apr_file_open( &file, filename, APR_READ | APR_BUFFERED, 0, mp );
+
+  if ( is_stdin ) {
+    apr_file_open_stdin( &file, mp );
+  }
+  else {
+    apr_file_open( &file, filename, APR_READ | APR_BUFFERED, 0, mp );
+  }
+
   apr_xml_parse_file( mp, &parser, &doc, file, 4096 );
 
   elem = doc->root;
