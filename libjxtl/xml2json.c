@@ -127,6 +127,7 @@ int xml_file_read( const char *filename, json_writer_t *writer, int skip_root )
   apr_xml_doc *doc;
   apr_xml_elem *elem;
   apr_file_t *file;
+  apr_status_t status;
   int is_stdin;
 
   is_stdin = ( filename && apr_strnatcasecmp( filename, "-" ) == 0 );
@@ -137,21 +138,26 @@ int xml_file_read( const char *filename, json_writer_t *writer, int skip_root )
     apr_file_open_stdin( &file, mp );
   }
   else {
-    apr_file_open( &file, filename, APR_READ | APR_BUFFERED, 0, mp );
+    status = apr_file_open( &file, filename, APR_READ | APR_BUFFERED, 0, mp );
   }
 
-  apr_xml_parse_file( mp, &parser, &doc, file, 4096 );
-
-  elem = doc->root;
-  if ( skip_root ) {
-    elem = elem->first_child;
+  if ( status == APR_SUCCESS ) {
+    status = apr_xml_parse_file( mp, &parser, &doc, file, 4096 );
   }
 
-  json_writer_object_start( writer );
-  xml_node_process( mp, elem, writer );
-  json_writer_object_end( writer );
+  if ( status == APR_SUCCESS ) {
+    elem = doc->root;
+    if ( skip_root ) {
+      elem = elem->first_child;
+    }
+    
+    json_writer_object_start( writer );
+    xml_node_process( mp, elem, writer );
+    json_writer_object_end( writer );
+  }
 
   apr_file_close( file );
   apr_pool_destroy( mp );
-  return 0;
+
+  return status;
 }

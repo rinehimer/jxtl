@@ -140,7 +140,7 @@ typedef union YYSTYPE
   int ival;
   unsigned char *string;
 }
-/* Line 187 of yacc.c.  */
+/* Line 193 of yacc.c.  */
 #line 145 "jxtl_path_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -381,7 +381,7 @@ union yyalloc
 #endif
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  9
+#define YYFINAL  12
 /* YYLAST -- Last index in YYTABLE.  */
 #define YYLAST   21
 
@@ -392,7 +392,7 @@ union yyalloc
 /* YYNRULES -- Number of rules.  */
 #define YYNRULES  14
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  21
+#define YYNSTATES  22
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -437,24 +437,24 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,     4,     8,    10,    12,    14,    15,    19,
-      23,    24,    25,    30,    32
+       0,     0,     3,     4,     8,     9,    13,    15,    17,    18,
+      22,    25,    29,    30,    31
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      12,     0,    -1,    -1,     3,    13,    15,    -1,     5,    -1,
-       7,    -1,     4,    -1,    -1,     8,    14,    15,    -1,    12,
-       5,    12,    -1,    -1,    -1,     9,    16,    17,    10,    -1,
-      12,    -1,     6,    12,    -1
+      12,     0,    -1,    -1,     3,    13,    16,    -1,    -1,     5,
+      14,    12,    -1,     7,    -1,     4,    -1,    -1,     8,    15,
+      16,    -1,     6,    12,    -1,    12,     5,    12,    -1,    -1,
+      -1,     9,    17,    12,    10,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    54,    54,    54,    56,    57,    58,    59,    59,    60,
-      63,    65,    65,    70,    71
+       0,    55,    55,    55,    57,    57,    58,    59,    60,    60,
+      61,    62,    66,    68,    68
 };
 #endif
 
@@ -464,8 +464,8 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "\"identifier\"", "\"..\"", "'/'", "'!'",
-  "'.'", "'*'", "'['", "']'", "$accept", "path_expr", "@1", "@2",
-  "path_predicate", "@3", "predicate_expr", 0
+  "'.'", "'*'", "'['", "']'", "$accept", "path_expr", "@1", "@2", "@3",
+  "path_predicate", "@4", 0
 };
 #endif
 
@@ -482,15 +482,15 @@ static const yytype_uint16 yytoknum[] =
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    11,    13,    12,    12,    12,    12,    14,    12,    12,
-      15,    16,    15,    17,    17
+       0,    11,    13,    12,    14,    12,    12,    12,    15,    12,
+      12,    12,    16,    17,    16
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     0,     3,     1,     1,     1,     0,     3,     3,
-       0,     0,     4,     1,     2
+       0,     2,     0,     3,     0,     3,     1,     1,     0,     3,
+       2,     3,     0,     0,     4
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -498,31 +498,31 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     2,     6,     4,     5,     7,     0,    10,    10,     1,
-       0,    11,     3,     8,     9,     0,     0,    13,     0,    14,
-      12
+       0,     2,     7,     4,     0,     6,     8,     0,    12,     0,
+      10,    12,     1,     0,    13,     3,     5,     9,    11,     0,
+       0,    14
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     6,     7,     8,    12,    15,    18
+      -1,     7,     8,     9,    11,    15,    19
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -11
+#define YYPACT_NINF -8
 static const yytype_int8 yypact[] =
 {
-      10,   -11,   -11,   -11,   -11,   -11,    16,    -8,    -8,   -11,
-      10,   -11,   -11,   -11,   -11,     4,    10,    -3,    -7,    -3,
-     -11
+      13,    -8,    -8,    -8,    13,    -8,    -8,     1,    -6,    13,
+      -8,    -6,    -8,    13,    -8,    -8,    -8,    -8,    -8,    13,
+      -3,    -8
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -11,   -10,   -11,   -11,    -4,   -11,   -11
+      -8,    -4,    -8,    -8,    -8,    -7,    -8
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -532,25 +532,25 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-      14,    11,    10,    20,    13,    17,    19,     1,     2,     3,
-      16,     4,     5,     1,     2,     3,     9,     4,     5,     0,
-       0,    10
+      10,    12,    13,    14,    17,    16,    13,    21,     0,    18,
+       0,     0,     0,     0,     0,    20,     1,     2,     3,     4,
+       5,     6
 };
 
 static const yytype_int8 yycheck[] =
 {
-      10,     9,     5,    10,     8,    15,    16,     3,     4,     5,
-       6,     7,     8,     3,     4,     5,     0,     7,     8,    -1,
-      -1,     5
+       4,     0,     5,     9,    11,     9,     5,    10,    -1,    13,
+      -1,    -1,    -1,    -1,    -1,    19,     3,     4,     5,     6,
+       7,     8
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,     4,     5,     7,     8,    12,    13,    14,     0,
-       5,     9,    15,    15,    12,    16,     6,    12,    17,    12,
-      10
+       0,     3,     4,     5,     6,     7,     8,    12,    13,    14,
+      12,    15,     0,     5,     9,    16,    12,    16,    12,    17,
+      12,    10
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1400,43 +1400,43 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 54 "jxtl_path_parse.y"
+#line 55 "jxtl_path_parse.y"
     { identifier_handler( user_data, (yyvsp[(1) - (1)].string) ); }
     break;
 
   case 4:
-#line 56 "jxtl_path_parse.y"
-    { root_object_handler( user_data ); }
-    break;
-
-  case 5:
 #line 57 "jxtl_path_parse.y"
-    { current_object_handler( user_data ); }
+    { root_object_handler( user_data ); }
     break;
 
   case 6:
 #line 58 "jxtl_path_parse.y"
-    { parent_object_handler( user_data ); }
+    { current_object_handler( user_data ); }
     break;
 
   case 7:
 #line 59 "jxtl_path_parse.y"
+    { parent_object_handler( user_data ); }
+    break;
+
+  case 8:
+#line 60 "jxtl_path_parse.y"
     { all_children_handler( user_data ); }
     break;
 
-  case 11:
-#line 65 "jxtl_path_parse.y"
+  case 10:
+#line 61 "jxtl_path_parse.y"
+    { negate_handler( user_data ); }
+    break;
+
+  case 13:
+#line 68 "jxtl_path_parse.y"
     { test_start_handler( user_data ); }
     break;
 
-  case 12:
-#line 66 "jxtl_path_parse.y"
-    { test_end_handler( user_data ); }
-    break;
-
   case 14:
-#line 71 "jxtl_path_parse.y"
-    { negate_handler( user_data ); }
+#line 69 "jxtl_path_parse.y"
+    { test_end_handler( user_data ); }
     break;
 
 
@@ -1661,7 +1661,7 @@ yyreturn:
 }
 
 
-#line 74 "jxtl_path_parse.y"
+#line 72 "jxtl_path_parse.y"
 
 
 void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner,

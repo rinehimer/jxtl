@@ -50,25 +50,23 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner,
 
 %%
 
+
 path_expr
   : T_IDENTIFIER { identifier_handler( user_data, $<string>1 ); }
     path_predicate
-  | '/' { root_object_handler( user_data ); }
+  | '/' { root_object_handler( user_data ); } path_expr
   | '.' { current_object_handler( user_data ); }
   | T_PARENT { parent_object_handler( user_data ); }
   | '*' { all_children_handler( user_data ); } path_predicate
+  | '!' path_expr { negate_handler( user_data ); }
   | path_expr '/' path_expr
+
 ;
 
 path_predicate
   : /* empty */
-  | '[' { test_start_handler( user_data ); } predicate_expr ']'
+  | '[' { test_start_handler( user_data ); } path_expr ']'
         { test_end_handler( user_data ); }
-;
-
-predicate_expr
-  : path_expr
-  | '!' path_expr { negate_handler( user_data ); }
 ;
 
 %%
