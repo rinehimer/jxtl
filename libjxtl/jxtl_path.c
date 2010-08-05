@@ -67,7 +67,7 @@ static void jxtl_path_expr_create( jsp_data *data,
   expr->identifier = identifier;
   expr->root = ( data->root ) ? data->root : expr;
   expr->next = NULL;
-  expr->test = NULL;
+  expr->predicate = NULL;
   expr->negate = 0;
   expr_add( data, expr );
 }
@@ -118,19 +118,13 @@ void jxtl_path_all_children( void *user_data )
 }
 
 /**
- * Start a test.
+ * Start a predicate.  Push the current expression node on our stack and set
+ * root and curr to NULL.
  */
-void jxtl_path_test_start( void *user_data )
+void jxtl_path_predicate_start( void *user_data )
 {
   jsp_data *data = (jsp_data *) user_data;
 
-  /*
-   * Make sure we have started an expression, if not this is just a boolean
-   * expression, create a place holder for it.
-   */
-  if ( !data->curr ) {
-    jxtl_path_expr_create( user_data, JXTL_PATH_BOOLEAN_EXPR, NULL );
-  }
   APR_ARRAY_PUSH( data->expr_array, jxtl_path_expr_t * ) = data->curr;
 
   data->root = NULL;
@@ -138,15 +132,17 @@ void jxtl_path_test_start( void *user_data )
 }
 
 /**
- * End a test.
+ * End a predicate.  Pop off the previous expression node, set it's predicate
+ * to be this expression and reset the curr and root pointers from what we
+ * popped.
  */
-void jxtl_path_test_end( void *user_data )
+void jxtl_path_predicate_end( void *user_data )
 {
   jsp_data *data = (jsp_data *) user_data;
   jxtl_path_expr_t *expr;
   expr = APR_ARRAY_POP( data->expr_array, jxtl_path_expr_t * );
 
-  expr->test = data->root;
+  expr->predicate = data->root;
   data->curr = expr;
   data->root = expr->root;
 }
@@ -178,8 +174,8 @@ void jxtl_path_builder_init( jxtl_path_builder_t *path_builder )
   path_builder->callbacks.parent_object_handler = jxtl_path_parent_object;
   path_builder->callbacks.current_object_handler = jxtl_path_current_object;
   path_builder->callbacks.all_children_handler = jxtl_path_all_children;
-  path_builder->callbacks.test_start_handler = jxtl_path_test_start;
-  path_builder->callbacks.test_end_handler = jxtl_path_test_end;
+  path_builder->callbacks.predicate_start_handler = jxtl_path_predicate_start;
+  path_builder->callbacks.predicate_end_handler = jxtl_path_predicate_end;
   path_builder->callbacks.negate_handler = jxtl_path_negate;
   path_builder->callbacks.user_data = &path_builder->data;
 
@@ -233,6 +229,29 @@ jxtl_path_expr_t *jxtl_path_compile( jxtl_path_builder_t *path_builder,
 static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
                                      json_t *json,
                                      apr_array_header_t *nodes );
+static void jxtl_path_test_node( jxtl_path_expr_t *expr,
+                                 json_t *json,
+                                 apr_array_header_t *nodes );
+
+/**
+ * Finish a predicate.  If it evaluated to true and the expression is done,
+ * push the node on the result stack.  If it evaluated to true and the
+ * expression is not done, recursively evaluate.  If it's false, do nothing.
+ */
+static void jxtl_finish_predicate( jxtl_path_expr_t *expr,
+                                   json_t *json,
+                                   apr_array_header_t *nodes,
+                                   int predicate_nodes )
+{
+  int result;
+  result = ( expr->predicate->negate ) ? !predicate_nodes : predicate_nodes;
+  if ( result && !expr->next ) {
+    APR_ARRAY_PUSH( nodes, json_t * ) = json;
+  }
+  else if ( result && expr->next ) {
+    jxtl_path_eval_internal( expr->next, json, nodes );
+  }
+}
 
 static void jxtl_path_test_node( jxtl_path_expr_t *expr,
                                  json_t *json,
@@ -240,63 +259,51 @@ static void jxtl_path_test_node( jxtl_path_expr_t *expr,
 {
   int test_result;
 
-  if ( json ) {
-    if ( expr && expr->test ) {
+  if ( json && expr ) {
+    if ( expr->predicate ) {
       /*
-       * The expression has a a test.  If our current node is an array we need
-       * to loop here and run the test on each node to see what should be
-       * pushed or recursively evaluated.
+       * The expression has a a predicate.  If our current node is an array we
+       * need to loop here and evaluate the predicate on each node to see what
+       * should be pushed.  Otherwise, we just recursively evaluate it.
        */
       apr_pool_t *mp;
       apr_pool_create( &mp, NULL );
-      apr_array_header_t *test_nodes = apr_array_make( mp, NODELIST_SIZE,
-                                                       sizeof(json_t *) );
+      apr_array_header_t *predicate_nodes = apr_array_make( mp, NODELIST_SIZE,
+                                                            sizeof(json_t *) );
       if ( json->type == JSON_ARRAY ) {
         int i;
         json_t *tmp_json;
         for ( i = 0; i < json->value.array->nelts; i++ ) {
-          APR_ARRAY_CLEAR( test_nodes );
+          APR_ARRAY_CLEAR( predicate_nodes );
           tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
-          jxtl_path_eval_internal( expr->test, tmp_json, test_nodes );
-          test_result = test_nodes->nelts;
-          test_result = ( expr->test->negate ) ? !test_result : test_result;
-          if ( test_result && !expr->next ) {
-            APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
-          }
-          else if ( test_result && expr->next ) {
-            jxtl_path_eval_internal( expr->next, tmp_json, nodes );
-          }
+          jxtl_path_eval_internal( expr->predicate, tmp_json,
+                                   predicate_nodes );
+          jxtl_finish_predicate( expr, tmp_json, nodes,
+                                 predicate_nodes->nelts );
         }
       }
       else {
-        jxtl_path_eval_internal( expr->test, json, test_nodes );
-        test_result = test_nodes->nelts > 0;
-        test_result = ( expr->test->negate ) ? !test_result : test_result;
-        if ( test_result && !expr->next ) {
-          APR_ARRAY_PUSH( nodes, json_t * ) = json;
-        }
-        else if ( test_result && expr->next ) {
-          jxtl_path_eval_internal( expr->next, json, nodes );
-        }
+        jxtl_path_eval_internal( expr->predicate, json, predicate_nodes );
+        jxtl_finish_predicate( expr, json, nodes, predicate_nodes->nelts );
       }
       apr_pool_destroy( mp );
     }
+    else if ( expr->next ) {
+      /* No predicate, but expression keeps going. */
+      jxtl_path_eval_internal( expr->next, json, nodes );
+    }
     else {
-      if ( expr && expr->next ) {
-        jxtl_path_eval_internal( expr->next, json, nodes );
+      /* This is the end of the expression, push on whatever nodes are left. */
+      if ( json->type == JSON_ARRAY ) {
+        int i;
+        json_t *tmp_json;
+        for ( i = 0; i < json->value.array->nelts; i++ ) {
+          tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
+          APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
+        }
       }
       else {
-	if ( json->type == JSON_ARRAY ) {
-	  int i;
-	  json_t *tmp_json;
-	  for ( i = 0; i < json->value.array->nelts; i++ ) {
-	    tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
-	    APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
-	  }
-	}
-	else {
-	  APR_ARRAY_PUSH( nodes, json_t * ) = json;
-	}
+        APR_ARRAY_PUSH( nodes, json_t * ) = json;
       }
     }
   }

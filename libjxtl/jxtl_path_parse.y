@@ -16,8 +16,8 @@
 #define parent_object_handler callbacks->parent_object_handler
 #define current_object_handler callbacks->current_object_handler
 #define all_children_handler callbacks->all_children_handler
-#define test_start_handler callbacks->test_start_handler
-#define test_end_handler callbacks->test_end_handler
+#define predicate_start_handler callbacks->predicate_start_handler
+#define predicate_end_handler callbacks->predicate_end_handler
 #define negate_handler callbacks->negate_handler
 #define user_data callbacks->user_data
 
@@ -65,8 +65,8 @@ path_expr
 
 path_predicate
   : /* empty */
-  | '[' { test_start_handler( user_data ); } path_expr ']'
-        { test_end_handler( user_data ); }
+  | '[' { predicate_start_handler( user_data ); } path_expr ']'
+        { predicate_end_handler( user_data ); }
 ;
 
 %%

@@ -18,8 +18,8 @@ typedef struct jxtl_path_callback_t {
   void ( *parent_object_handler )( void *user_data );
   void ( *current_object_handler )( void *user_data );
   void ( *all_children_handler )( void *user_data );
-  void ( *test_start_handler )( void *user_data );
-  void ( *test_end_handler )( void *user_data );
+  void ( *predicate_start_handler )( void *user_data );
+  void ( *predicate_end_handler )( void *user_data );
   void ( *negate_handler )( void *user_data );
   void *user_data;
 } jxtl_path_callback_t;
@@ -42,8 +42,8 @@ typedef struct jxtl_path_expr_t {
   struct jxtl_path_expr_t *root;
   /** Next expression. */
   struct jxtl_path_expr_t *next;
-  /** A test to evaluate after lookup. */
-  struct jxtl_path_expr_t *test;
+  /** A predicate to evaluate. */
+  struct jxtl_path_expr_t *predicate;
   /** Whether or not this expression should be negated. */
   int negate;
 }jxtl_path_expr_t;

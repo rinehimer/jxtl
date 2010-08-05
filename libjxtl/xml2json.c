@@ -135,7 +135,7 @@ int xml_file_read( const char *filename, json_writer_t *writer, int skip_root )
   apr_pool_create( &mp, NULL );
 
   if ( is_stdin ) {
-    apr_file_open_stdin( &file, mp );
+    status = apr_file_open_stdin( &file, mp );
   }
   else {
     status = apr_file_open( &file, filename, APR_READ | APR_BUFFERED, 0, mp );
