@@ -41,7 +41,7 @@ void jxtl_path_obj_destroy( jxtl_path_obj_t *path_obj )
   }
 }
 
-static void expr_add( jsp_data *data, jxtl_path_expr_t *expr )
+static void expr_add( jxtl_data *data, jxtl_path_expr_t *expr )
 {
   if ( !data->root ) {
     data->root = expr;
@@ -56,7 +56,7 @@ static void expr_add( jsp_data *data, jxtl_path_expr_t *expr )
   }
 }
 
-static void jxtl_path_expr_create( jsp_data *data,
+static void jxtl_path_expr_create( jxtl_data *data,
 				   jxtl_path_expr_type type,
 				   unsigned char *identifier )
 {
@@ -81,7 +81,7 @@ static void jxtl_path_expr_create( jsp_data *data,
  */
 void jxtl_path_identifier( void *user_data, unsigned char *ident )
 {
-  jsp_data *data = (jsp_data *) user_data;
+  jxtl_data *data = (jxtl_data *) user_data;
   jxtl_path_expr_create( data, JXTL_PATH_LOOKUP,
                          (unsigned char *) apr_pstrdup( data->mp,
                                                         (char *) ident ) );
@@ -123,7 +123,7 @@ void jxtl_path_all_children( void *user_data )
  */
 void jxtl_path_predicate_start( void *user_data )
 {
-  jsp_data *data = (jsp_data *) user_data;
+  jxtl_data *data = (jxtl_data *) user_data;
 
   APR_ARRAY_PUSH( data->expr_array, jxtl_path_expr_t * ) = data->curr;
 
@@ -138,7 +138,7 @@ void jxtl_path_predicate_start( void *user_data )
  */
 void jxtl_path_predicate_end( void *user_data )
 {
-  jsp_data *data = (jsp_data *) user_data;
+  jxtl_data *data = (jxtl_data *) user_data;
   jxtl_path_expr_t *expr;
   expr = APR_ARRAY_POP( data->expr_array, jxtl_path_expr_t * );
 
@@ -152,7 +152,7 @@ void jxtl_path_predicate_end( void *user_data )
  */
 void jxtl_path_negate( void *user_data )
 {
-  jsp_data *data = (jsp_data *) user_data;
+  jxtl_data *data = (jxtl_data *) user_data;
   data->root->negate = 1;
 }
 

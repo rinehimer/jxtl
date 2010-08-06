@@ -49,7 +49,7 @@ typedef struct jxtl_path_expr_t {
 }jxtl_path_expr_t;
 
 
-typedef struct jsp_data {
+typedef struct jxtl_data {
   apr_pool_t *mp;
   /** Array to store the current expression.  */
   apr_array_header_t *expr_array;
@@ -57,14 +57,14 @@ typedef struct jsp_data {
   jxtl_path_expr_t *root;
   /** The current expression. */ 
   jxtl_path_expr_t *curr;
-}jsp_data;
+}jxtl_data;
 
 typedef struct jxtl_path_builder_t {
   apr_pool_t *mp;
   jxtl_path_callback_t callbacks;
   yyscan_t scanner;
   lex_extra_t lex_extra;
-  jsp_data data;
+  jxtl_data data;
 }jxtl_path_builder_t;
 
 typedef struct jxtl_path_obj_t {
