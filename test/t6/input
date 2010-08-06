@@ -1,0 +1,3 @@
+{{#if !brewery}}
+No breweries.
+{{#end}}
