@@ -386,16 +386,18 @@ int jxtl_path_eval( const unsigned char *path, json_t *json,
 {
   jxtl_path_builder_t path_builder;
   jxtl_path_expr_t *expr;
+  int negate;
 
   apr_pool_clear( obj->mp );
   obj->nodes = apr_array_make( obj->mp, NODELIST_SIZE, sizeof(json_t *) );
 
   jxtl_path_builder_init( &path_builder );
   expr = jxtl_path_compile( &path_builder, path );
+  negate = expr->negate;
   jxtl_path_eval_internal( expr, json, obj->nodes );
   jxtl_path_builder_destroy( &path_builder );
 
-  return obj->nodes->nelts;
+  return ( negate ) ? !obj->nodes->nelts : obj->nodes->nelts;
 }
 
 /**
@@ -408,5 +410,5 @@ int jxtl_path_compiled_eval( jxtl_path_expr_t *expr,
   apr_pool_clear( obj->mp );
   obj->nodes = apr_array_make( obj->mp, NODELIST_SIZE, sizeof(json_t *) );
   jxtl_path_eval_internal( expr, json, obj->nodes );
-  return obj->nodes->nelts;
+  return expr->negate ? !obj->nodes->nelts : obj->nodes->nelts;
 }
