@@ -10,6 +10,11 @@
 #define APR_ARRAY_IDX( ary, i, type ) (((type *)(ary)->elts)[i])
 #endif
 
+/**
+ * Return the last element in the array.
+ */
+#define APR_ARRAY_TAIL( ary, type ) APR_ARRAY_IDX( ary, ary->nelts - 1, type )
+
 #ifndef APR_ARRAY_PUSH
 #define APR_ARRAY_PUSH( ary, type ) (*((type *)apr_array_push(ary)))
 #endif

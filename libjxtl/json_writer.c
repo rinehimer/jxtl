@@ -29,8 +29,7 @@ void json_writer_ctx_destroy( json_writer_ctx_t *context )
 
 json_state json_writer_ctx_state_get( json_writer_ctx_t *context )
 {
-  return APR_ARRAY_IDX( context->state_stack, context->state_stack->nelts - 1,
-			json_state );
+  return APR_ARRAY_TAIL( context->state_stack,json_state );
 }
 
 int json_writer_ctx_can_start_object_or_array( json_writer_ctx_t *context )
@@ -42,8 +41,7 @@ int json_writer_ctx_can_start_object_or_array( json_writer_ctx_t *context )
 
 unsigned char *json_writer_ctx_prop_get( json_writer_ctx_t *context )
 {
-  return APR_ARRAY_IDX( context->prop_stack, context->prop_stack->nelts - 1,
-			unsigned char * );
+  return APR_ARRAY_TAIL( context->prop_stack, unsigned char * );
 }
 
 int json_writer_ctx_object_start( json_writer_ctx_t *context )
@@ -143,8 +141,7 @@ static void json_add( json_writer_t *writer, json_t *json )
   json_t *new_array;
 
   if ( writer->json_stack->nelts > 0 ) {
-    obj = APR_ARRAY_IDX( writer->json_stack, writer->json_stack->nelts - 1,
-                         json_t * );
+    obj = APR_ARRAY_TAIL( writer->json_stack, json_t * );
   }
 
   if ( !obj ) {

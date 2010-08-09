@@ -316,12 +316,8 @@ void jxtl_elseif( void *user_data, unsigned char *expr )
   jxtl_if_t *jxtl_if;
   jxtl_content_t *content;
 
-  content_array = APR_ARRAY_IDX( data->content_array,
-                                 data->content_array->nelts - 1,
-                                 apr_array_header_t * );
-  content = APR_ARRAY_IDX( content_array,
-                           content_array->nelts - 1,
-                           jxtl_content_t * );
+  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
+  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
   if_block = (apr_array_header_t *) content->value;
   jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
   jxtl_if->expr = jxtl_path_compile( &data->path_builder, expr );
@@ -339,12 +335,8 @@ void jxtl_else( void *user_data )
   jxtl_if_t *jxtl_if;
   jxtl_content_t *content;
   
-  content_array = APR_ARRAY_IDX( data->content_array, 
-                                 data->content_array->nelts - 1,
-                                 apr_array_header_t * );
-  content = APR_ARRAY_IDX( content_array,
-                           content_array->nelts - 1,
-                           jxtl_content_t * );
+  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
+  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
   if_block = (apr_array_header_t *) content->value;
 
   jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
@@ -381,12 +373,9 @@ void jxtl_separator_start( void *user_data )
   jxtl_content_t *content;
   jxtl_section_t *section;
 
-  content_array = APR_ARRAY_IDX( data->content_array,
-                                 data->content_array->nelts - 1,
-                                 apr_array_header_t * );
+  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
 
-  content = APR_ARRAY_IDX( content_array, content_array->nelts - 1,
-                           jxtl_content_t * );
+  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
   section = content->value;
   APR_ARRAY_PUSH( data->content_array,
                   apr_array_header_t * ) = data->current_array;
