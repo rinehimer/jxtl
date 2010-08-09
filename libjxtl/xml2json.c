@@ -1,5 +1,6 @@
 #include <apr_lib.h>
 #include <apr_pools.h>
+#include <apr_strings.h>
 #include <apr_xml.h>
 
 #include "json.h"

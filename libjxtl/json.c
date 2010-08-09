@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <apr_hash.h>
 #include <apr_pools.h>
+#include <apr_strings.h>
 #include <apr_tables.h>
 
 #include "apr_macros.h"
@@ -285,7 +286,7 @@ static void json_to_xml_internal( json_t *json, int indent )
       print_spaces( indent );
       printf( "<%s>", json_name );
       json_to_xml_internal( tmp_json, indent + 1 );
-      printf( "</%s>\n" );
+      printf( "</%s>\n", json_name );
     }
     break;
     

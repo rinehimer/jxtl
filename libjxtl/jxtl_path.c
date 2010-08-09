@@ -257,8 +257,6 @@ static void jxtl_path_test_node( jxtl_path_expr_t *expr,
                                  json_t *json,
                                  apr_array_header_t *nodes )
 {
-  int test_result;
-
   if ( json && expr ) {
     if ( expr->predicate ) {
       /*

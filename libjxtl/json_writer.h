@@ -27,6 +27,8 @@ typedef struct json_writer_t {
   apr_array_header_t *json_stack;
 } json_writer_t;
 
+void json_writer_init( json_writer_t *writer );
+void json_writer_destroy( json_writer_t *writer );
 void json_writer_object_start( void *writer_ptr );
 void json_writer_object_end( void *writer_ptr );
 void json_writer_array_start( void *writer_ptr );

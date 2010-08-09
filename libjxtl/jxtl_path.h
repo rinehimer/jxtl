@@ -73,8 +73,12 @@ typedef struct jxtl_path_obj_t {
   apr_array_header_t *nodes;
 }jxtl_path_obj_t;
 
+void jxtl_path_builder_init( jxtl_path_builder_t *path_builder );
+void jxtl_path_builder_destroy( jxtl_path_builder_t *path_builder );
+
 jxtl_path_obj_t *jxtl_path_obj_create( apr_pool_t *mp );
 void jxtl_path_obj_destroy( jxtl_path_obj_t *path_obj );
+
 jxtl_path_expr_t *jxtl_path_compile( jxtl_path_builder_t *path_builder,
 				     const unsigned char *path );
 int jxtl_path_eval( const unsigned char *path, json_t *json,

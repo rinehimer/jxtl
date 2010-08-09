@@ -217,8 +217,6 @@ static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
                                void *value )
 {
   jxtl_content_t *content = NULL;
-  jxtl_section_t *section = NULL;
-  apr_array_header_t *current_content_array;
 
   content = apr_palloc( data->mp, sizeof( jxtl_content_t ) );
   content->type = type;
@@ -276,7 +274,6 @@ void jxtl_section_start( void *user_data, unsigned char *expr )
 void jxtl_section_end( void *user_data )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_section_t *section;
 
   data->current_array = APR_ARRAY_POP( data->content_array,
                                        apr_array_header_t * );
@@ -330,7 +327,6 @@ void jxtl_elseif( void *user_data, unsigned char *expr )
 void jxtl_else( void *user_data )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_section_t *section;
   apr_array_header_t *content_array, *if_block;
   jxtl_if_t *jxtl_if;
   jxtl_content_t *content;
@@ -350,7 +346,6 @@ void jxtl_else( void *user_data )
 void jxtl_if_end( void *user_data )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_section_t *section;
   
   data->current_array = APR_ARRAY_POP( data->content_array,
                                        apr_array_header_t * );
