@@ -1,0 +1,3 @@
+{{#section brewery/beer/* ; separator="\n"}}
+{{.}}
+{{#end}}

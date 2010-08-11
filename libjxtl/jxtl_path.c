@@ -355,7 +355,7 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
       for ( idx = apr_hash_first( NULL, json->value.object ); idx;
             idx = apr_hash_next( idx ) ) {
         apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
-        jxtl_path_test_node( expr->next, tmp_json, nodes );
+        jxtl_path_test_node( expr, tmp_json, nodes );
       }
     }
     return;
