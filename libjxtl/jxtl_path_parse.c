@@ -104,7 +104,7 @@
 #define root_object_handler callbacks->root_object_handler
 #define parent_object_handler callbacks->parent_object_handler
 #define current_object_handler callbacks->current_object_handler
-#define all_children_handler callbacks->all_children_handler
+#define any_object_handler callbacks->any_object_handler
 #define predicate_start_handler callbacks->predicate_start_handler
 #define predicate_end_handler callbacks->predicate_end_handler
 #define negate_handler callbacks->negate_handler
@@ -1426,7 +1426,7 @@ yyreduce:
 
   case 11:
 #line 67 "jxtl_path_parse.y"
-    { all_children_handler( user_data ); }
+    { any_object_handler( user_data ); }
     break;
 
   case 15:

@@ -17,7 +17,7 @@ typedef struct jxtl_path_callback_t {
   void ( *root_object_handler )( void *user_data );
   void ( *parent_object_handler )( void *user_data );
   void ( *current_object_handler )( void *user_data );
-  void ( *all_children_handler )( void *user_data );
+  void ( *any_object_handler )( void *user_data );
   void ( *predicate_start_handler )( void *user_data );
   void ( *predicate_end_handler )( void *user_data );
   void ( *negate_handler )( void *user_data );
@@ -29,7 +29,7 @@ typedef enum jxtl_path_expr_type {
   JXTL_PATH_ROOT_OBJ,
   JXTL_PATH_PARENT_OBJ,
   JXTL_PATH_CURRENT_OBJ,
-  JXTL_PATH_ALL_CHILDREN,
+  JXTL_PATH_ANY_OBJ,
   JXTL_PATH_LOOKUP,
 }jxtl_path_expr_type;
 

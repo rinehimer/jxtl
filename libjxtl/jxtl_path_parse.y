@@ -15,7 +15,7 @@
 #define root_object_handler callbacks->root_object_handler
 #define parent_object_handler callbacks->parent_object_handler
 #define current_object_handler callbacks->current_object_handler
-#define all_children_handler callbacks->all_children_handler
+#define any_object_handler callbacks->any_object_handler
 #define predicate_start_handler callbacks->predicate_start_handler
 #define predicate_end_handler callbacks->predicate_end_handler
 #define negate_handler callbacks->negate_handler
@@ -64,7 +64,7 @@ path_pattern
   : T_IDENTIFIER { identifier_handler( user_data, $<string>1 ); } predicate
   | '.' { current_object_handler( user_data ); }
   | T_PARENT { parent_object_handler( user_data ); }
-  | '*' { all_children_handler( user_data ); } predicate
+  | '*' { any_object_handler( user_data ); } predicate
   | path_pattern '/' path_pattern
 ;
 

@@ -112,9 +112,9 @@ void jxtl_path_current_object( void *user_data )
 /**
  * Request for all children.
  */
-void jxtl_path_all_children( void *user_data )
+void jxtl_path_any_object( void *user_data )
 {
-  jxtl_path_expr_create( user_data, JXTL_PATH_ALL_CHILDREN, NULL );
+  jxtl_path_expr_create( user_data, JXTL_PATH_ANY_OBJ, NULL );
 }
 
 /**
@@ -173,7 +173,7 @@ void jxtl_path_builder_init( jxtl_path_builder_t *path_builder )
   path_builder->callbacks.root_object_handler = jxtl_path_root_object;
   path_builder->callbacks.parent_object_handler = jxtl_path_parent_object;
   path_builder->callbacks.current_object_handler = jxtl_path_current_object;
-  path_builder->callbacks.all_children_handler = jxtl_path_all_children;
+  path_builder->callbacks.any_object_handler = jxtl_path_any_object;
   path_builder->callbacks.predicate_start_handler = jxtl_path_predicate_start;
   path_builder->callbacks.predicate_end_handler = jxtl_path_predicate_end;
   path_builder->callbacks.negate_handler = jxtl_path_negate;
@@ -350,7 +350,7 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
     tmp_json = json;
     break;
     
-  case JXTL_PATH_ALL_CHILDREN:
+  case JXTL_PATH_ANY_OBJ:
     if ( json && json->type == JSON_OBJECT ) {
       for ( idx = apr_hash_first( NULL, json->value.object ); idx;
             idx = apr_hash_next( idx ) ) {
