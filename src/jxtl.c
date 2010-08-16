@@ -515,7 +515,7 @@ int main( int argc, char const * const *argv )
   const char *json_file = NULL;
   const char *xml_file = NULL;
   int skip_root;
-  json_writer_t writer;
+  json_writer_t *writer;
 
   apr_app_initialize( NULL, NULL, NULL );
   apr_pool_create( &mp, NULL );
@@ -550,11 +550,11 @@ int main( int argc, char const * const *argv )
     &jxtl_data
   };
 
-  json_writer_init( &writer );
+  writer = json_writer_create( mp );
   jxtl_path_builder_init( &jxtl_data.path_builder );
 
-  if ( jxtl_load_data( json_file, xml_file, skip_root, &writer ) == 0 ) {
-    jxtl_data.json = writer.json;
+  if ( jxtl_load_data( json_file, xml_file, skip_root, writer ) == 0 ) {
+    jxtl_data.json = writer->json;
     jxtl_lex_init( &jxtl_scanner );
     lex_extra_init( &lex_extra, template_file );
     jxtl_set_extra( &lex_extra, jxtl_scanner );
@@ -564,7 +564,6 @@ int main( int argc, char const * const *argv )
   }
 
   jxtl_path_builder_destroy( &jxtl_data.path_builder );
-  json_writer_destroy( &writer );
 
   apr_pool_destroy( jxtl_data.mp );
   apr_pool_destroy( mp );

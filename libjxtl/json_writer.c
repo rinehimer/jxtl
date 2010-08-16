@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <apr_general.h>
 #include <apr_pools.h>
 #include <apr_strings.h>
 #include <apr_tables.h>
@@ -7,24 +8,18 @@
 #include "json.h"
 #include "json_writer.h"
 
-void json_writer_ctx_init( json_writer_ctx_t *context )
+json_writer_ctx_t *json_writer_ctx_create( apr_pool_t *mp )
 {
-  apr_pool_create( &context->mp, NULL );
+  json_writer_ctx_t *context;
+  context = apr_palloc( mp, sizeof( json_writer_ctx_t ) );
+  context->mp = mp;
   context->depth = 0;
   context->prop_stack = apr_array_make( context->mp, 1024,
 					sizeof( unsigned char * ) );
   context->state_stack = apr_array_make( context->mp, 1024,
 					 sizeof( json_state ) );
   APR_ARRAY_PUSH( context->state_stack, json_state ) = JSON_INITIAL;
-}
-
-void json_writer_ctx_destroy( json_writer_ctx_t *context )
-{
-  apr_pool_destroy( context->mp );
-  context->mp = NULL;
-  context->depth = 0;
-  context->prop_stack = NULL;
-  context->state_stack = NULL;
+  return context;
 }
 
 json_state json_writer_ctx_state_get( json_writer_ctx_t *context )
@@ -47,37 +42,37 @@ unsigned char *json_writer_ctx_prop_get( json_writer_ctx_t *context )
 int json_writer_ctx_object_start( json_writer_ctx_t *context )
 {
   if ( !json_writer_ctx_can_start_object_or_array( context ) )
-    return 0;
+    return FALSE;
 
   APR_ARRAY_PUSH( context->state_stack, json_state ) = JSON_IN_OBJECT;
-  return 1;
+  return TRUE;
 }
 
 int json_writer_ctx_object_end( json_writer_ctx_t *context )
 {
   if ( json_writer_ctx_state_get( context ) != JSON_IN_OBJECT )
-    return 0;
+    return FALSE;
 
   apr_array_pop( context->state_stack );
-  return 1;
+  return TRUE;
 }
 
 int json_writer_ctx_array_start( json_writer_ctx_t *context )
 {
   if ( !json_writer_ctx_can_start_object_or_array( context ) )
-    return 0;
+    return FALSE;
 
   APR_ARRAY_PUSH( context->state_stack, json_state ) = JSON_IN_ARRAY;
-  return 1;
+  return TRUE;
 }
 
 int json_writer_ctx_array_end( json_writer_ctx_t *context )
 {
   if ( json_writer_ctx_state_get( context ) != JSON_IN_ARRAY )
-    return 0;
+    return FALSE;
 
   apr_array_pop( context->state_stack );
-  return 1;
+  return TRUE;
 }
 
 int json_writer_ctx_property_start( json_writer_ctx_t *context,
@@ -85,20 +80,20 @@ int json_writer_ctx_property_start( json_writer_ctx_t *context,
 {
   unsigned char *name_copy;
   if ( json_writer_ctx_state_get( context ) != JSON_IN_OBJECT )
-    return 0;
+    return FALSE;
 
   name_copy = (unsigned char *) apr_pstrdup( context->mp, (char *) name );
 
   APR_ARRAY_PUSH( context->prop_stack, unsigned char * ) = name_copy;
   APR_ARRAY_PUSH( context->state_stack, json_state ) = JSON_PROPERTY;
-  return 1;
+  return TRUE;
 }
 
 int json_writer_ctx_property_end( json_writer_ctx_t *context )
 {
   apr_array_pop( context->prop_stack );
   apr_array_pop( context->state_stack );
-  return 1;
+  return TRUE;
 }
 
 int json_writer_ctx_can_write_value( json_writer_ctx_t *context )
@@ -107,28 +102,22 @@ int json_writer_ctx_can_write_value( json_writer_ctx_t *context )
   return ( state == JSON_PROPERTY || state == JSON_IN_ARRAY );
 }
 
-void json_writer_init( json_writer_t *writer )
+json_writer_t *json_writer_create( apr_pool_t *mp )
 {
-  apr_pool_create( &writer->mp, NULL );
-  writer->context = apr_palloc( writer->mp, sizeof( json_writer_ctx_t ) );
-  json_writer_ctx_init( writer->context );
+  json_writer_t *writer;
+  writer = apr_palloc( mp, sizeof( json_writer_t ) );
+  writer->mp = mp;
+  writer->context = json_writer_ctx_create( writer->mp );
   writer->json = NULL;
   writer->json_stack = apr_array_make( writer->mp, 1024, sizeof( json_t * ) );
-}
-
-void json_writer_destroy( json_writer_t *writer )
-{
-  json_writer_ctx_destroy( writer->context );
-  apr_pool_destroy( writer->mp );
-  writer->mp = NULL;
-  writer->json = NULL;
+  return writer;
 }
 
 static void json_writer_error( const char *error_string, ... )
 {
   va_list args;
   fprintf( stderr, "json_writer error:  " );
-  va_start( args, error_string);
+  va_start( args, error_string );
   vfprintf( stderr, error_string, args );
   fprintf( stderr, "\n" );
   va_end( args );
