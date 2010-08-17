@@ -495,7 +495,7 @@ int jxtl_load_data( const char *json_file, const char *xml_file,
   int ret = 1;
 
   if ( xml_file ) {
-    ret = xml_file_read( xml_file, writer, skip_root );
+    ret = xml_file_to_json( xml_file, writer, skip_root );
   }
   else if ( json_file ) {
     ret = json_file_parse( json_file, writer );

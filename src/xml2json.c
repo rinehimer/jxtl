@@ -26,7 +26,7 @@ int main( int argc, char **argv )
     ret = 1;
   }
   
-  if ( ( ret == 0 ) && ( xml_file_read( argv[1], writer, 1 ) == 0 ) ) {
+  if ( ( ret == 0 ) && ( xml_file_to_json( argv[1], writer, 1 ) == 0 ) ) {
     json_object_print( writer->json, 1 );
     ret = 0;
   }
