@@ -87,6 +87,28 @@ static json_type xml_elem_type( apr_xml_elem *elem )
   return JSON_OBJECT;
 }
 
+/**
+ * When we have a string to write, check to see if it is a valid boolean value
+ * in JSON.  It's possible we may do number checking here in the future.
+ */
+static void write_xml_string( json_writer_t *writer, const char *str  )
+{
+  if ( *str != 't' && *str != 'f' ) {
+    /* Handle the majority of the cases and avoid unnecessary function call to
+       compare the strings. */
+    json_writer_string_write( writer, (unsigned char *) str );
+  }
+  else if ( apr_strnatcmp( str, "true" ) == 0 ) {
+    json_writer_boolean_write( writer, TRUE );
+  }
+  else if ( apr_strnatcmp( str, "false" ) == 0 ) {
+    json_writer_boolean_write( writer, FALSE );
+  }
+  else {
+    json_writer_string_write( writer, (unsigned char *) str );
+  }
+}
+
 static void xml_elem_to_json( apr_pool_t *mp, apr_xml_elem *root,
 			      json_writer_t *writer )
 {
@@ -109,14 +131,14 @@ static void xml_elem_to_json( apr_pool_t *mp, apr_xml_elem *root,
     else if ( type == JSON_STRING ) {
       apr_xml_to_text( mp, elem, APR_XML_X2T_INNER, NULL, NULL, &elem_buf,
 		       &buf_size );
-      json_writer_string_write( writer, (unsigned char *) elem_buf );
+      write_xml_string( writer, elem_buf );
     }
     else if ( type == JSON_OBJECT ) {
       json_writer_object_start( writer );
         
       for ( attr = elem->attr; attr; attr = attr->next ) {
 	json_writer_property_start( writer, (unsigned char *) attr->name );
-	json_writer_string_write( writer, (unsigned char *) attr->value );
+	write_xml_string( writer, attr->value );
 	json_writer_property_end( writer );
       }
 
