@@ -17,28 +17,11 @@ jxtl_path_obj_t *jxtl_path_obj_create( apr_pool_t *mp )
 {
   jxtl_path_obj_t *path_obj;
 
-  if ( mp ) {
-    path_obj = apr_palloc( mp, sizeof(jxtl_path_obj_t) );
-    path_obj->free_func = NULL;
-  }
-  else {
-    path_obj = malloc( sizeof(jxtl_path_obj_t) );
-    path_obj->free_func = free;
-  }
+  path_obj = apr_palloc( mp, sizeof(jxtl_path_obj_t) );
+  path_obj->mp = mp;
+  path_obj->nodes = apr_array_make( mp, NODELIST_SIZE, sizeof(json_t *) );
 
-  apr_pool_create( &path_obj->mp, NULL );
-  path_obj->nodes = NULL;
   return path_obj;
-}
-
-void jxtl_path_obj_destroy( jxtl_path_obj_t *path_obj )
-{
-  apr_pool_destroy( path_obj->mp );
-  path_obj->nodes = NULL;
-
-  if ( path_obj->free_func ) {
-    path_obj->free_func( path_obj );
-  }
 }
 
 static void expr_add( jxtl_data *data, jxtl_path_expr_t *expr )
@@ -386,8 +369,7 @@ int jxtl_path_eval( const unsigned char *path, json_t *json,
   jxtl_path_expr_t *expr;
   int negate;
 
-  apr_pool_clear( obj->mp );
-  obj->nodes = apr_array_make( obj->mp, NODELIST_SIZE, sizeof(json_t *) );
+  APR_ARRAY_CLEAR( obj->nodes );
 
   jxtl_path_builder_init( &path_builder );
   expr = jxtl_path_compile( &path_builder, path );
@@ -405,8 +387,7 @@ int jxtl_path_compiled_eval( jxtl_path_expr_t *expr,
                              json_t *json,
                              jxtl_path_obj_t *obj )
 {
-  apr_pool_clear( obj->mp );
-  obj->nodes = apr_array_make( obj->mp, NODELIST_SIZE, sizeof(json_t *) );
+  APR_ARRAY_CLEAR( obj->nodes );
   jxtl_path_eval_internal( expr, json, obj->nodes );
   return expr->negate ? !obj->nodes->nelts : obj->nodes->nelts;
 }

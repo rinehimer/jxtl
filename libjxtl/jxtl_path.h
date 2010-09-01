@@ -69,7 +69,6 @@ typedef struct jxtl_path_builder_t {
 
 typedef struct jxtl_path_obj_t {
   apr_pool_t *mp;
-  void ( *free_func )( void *ptr );
   apr_array_header_t *nodes;
 }jxtl_path_obj_t;
 
