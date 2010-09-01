@@ -143,10 +143,13 @@ void jxtl_path_negate( void *user_data )
  * End of parser callback functions.
  *****************************************************************************/
 
-void jxtl_path_builder_init( jxtl_path_builder_t *path_builder )
+jxtl_path_builder_t *jxtl_path_builder_create( apr_pool_t *mp )
 {
-  apr_pool_create( &path_builder->mp, NULL );
-  path_builder->data.expr_array = apr_array_make( path_builder->mp, 32,
+  jxtl_path_builder_t *path_builder;
+
+  path_builder = apr_palloc( mp, sizeof(jxtl_path_builder_t) );
+  path_builder->mp = mp;
+  path_builder->data.expr_array = apr_array_make( mp, 32,
                                                   sizeof(jxtl_path_expr_t *) );
   path_builder->data.mp = path_builder->mp;
   path_builder->data.root = NULL;
@@ -163,15 +166,12 @@ void jxtl_path_builder_init( jxtl_path_builder_t *path_builder )
   path_builder->callbacks.user_data = &path_builder->data;
 
   jxtl_path_lex_init( &path_builder->scanner );
+  apr_pool_cleanup_register( mp, path_builder->scanner, jxtl_path_lex_destroy,
+                             apr_pool_cleanup_null );
   lex_extra_init( &path_builder->lex_extra, NULL );
   jxtl_path_set_extra( &path_builder->lex_extra, path_builder->scanner );
-}
 
-void jxtl_path_builder_destroy( jxtl_path_builder_t *path_builder )
-{
-  lex_extra_destroy( &path_builder->lex_extra );
-  jxtl_path_lex_destroy( path_builder->scanner );
-  apr_pool_destroy( path_builder->mp );
+  return path_builder;
 }
 
 /**
@@ -194,7 +194,7 @@ jxtl_path_expr_t *jxtl_path_compile( jxtl_path_builder_t *path_builder,
    * passed to yy_scan_buffer be the null terminator.
    */
   eval_str_len = strlen( (char*) path ) + 2;
-  eval_str = malloc( eval_str_len );
+  eval_str = apr_palloc( path_builder->mp, eval_str_len );
   apr_cpystrn( eval_str, (char *) path, eval_str_len - 1 );
   eval_str[eval_str_len - 1] = '\0';
 
@@ -204,8 +204,6 @@ jxtl_path_expr_t *jxtl_path_compile( jxtl_path_builder_t *path_builder,
                                   &path_builder->callbacks );
   jxtl_path__delete_buffer( buffer_state, path_builder->scanner );
   
-  free( eval_str );
-
   return path_builder->data.root;
 }
 
@@ -362,20 +360,23 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
  * Evaluate the given path expression in the context of json.
  * Returns the number of nodes selected.
  */
-int jxtl_path_eval( const unsigned char *path, json_t *json,
-		    jxtl_path_obj_t *obj )
+int jxtl_path_eval( apr_pool_t *mp, const unsigned char *path, json_t *json,
+		    jxtl_path_obj_t **obj_ptr )
 {
-  jxtl_path_builder_t path_builder;
+  jxtl_path_builder_t *path_builder;
   jxtl_path_expr_t *expr;
+  jxtl_path_obj_t *obj;
   int negate;
 
   APR_ARRAY_CLEAR( obj->nodes );
 
-  jxtl_path_builder_init( &path_builder );
-  expr = jxtl_path_compile( &path_builder, path );
+  path_builder = jxtl_path_builder_create( mp );
+  obj = jxtl_path_obj_create( mp );
+  expr = jxtl_path_compile( path_builder, path );
   negate = expr->negate;
   jxtl_path_eval_internal( expr, json, obj->nodes );
   jxtl_path_builder_destroy( &path_builder );
+  *obj_ptr = obj;
 
   return ( negate ) ? !obj->nodes->nelts : obj->nodes->nelts;
 }
@@ -383,11 +384,13 @@ int jxtl_path_eval( const unsigned char *path, json_t *json,
 /**
  * Evaluate a pre-compiled expression.  Returns the number of nodes.
  */
-int jxtl_path_compiled_eval( jxtl_path_expr_t *expr,
-                             json_t *json,
-                             jxtl_path_obj_t *obj )
+int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
+                             json_t *json, jxtl_path_obj_t **obj_ptr )
 {
-  APR_ARRAY_CLEAR( obj->nodes );
+  jxtl_path_obj_t *obj;
+  obj = jxtl_path_obj_create( mp );
   jxtl_path_eval_internal( expr, json, obj->nodes );
+  *obj_ptr = obj;
+
   return expr->negate ? !obj->nodes->nelts : obj->nodes->nelts;
 }
