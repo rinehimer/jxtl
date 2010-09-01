@@ -375,7 +375,6 @@ int jxtl_path_eval( apr_pool_t *mp, const unsigned char *path, json_t *json,
   expr = jxtl_path_compile( path_builder, path );
   negate = expr->negate;
   jxtl_path_eval_internal( expr, json, obj->nodes );
-  jxtl_path_builder_destroy( &path_builder );
   *obj_ptr = obj;
 
   return ( negate ) ? !obj->nodes->nelts : obj->nodes->nelts;
