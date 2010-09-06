@@ -9,24 +9,16 @@
 
 #include "json_parse.h"
 #include "json_lex.h"
+
+#include "json.h"
+#include "json_writer.h"
+#include "parser.h"
 #include "json_parser.h"
 
-#define object_start_handler callbacks->object_start_handler
-#define object_end_handler callbacks->object_end_handler
-#define array_start_handler callbacks->array_start_handler
-#define array_end_handler callbacks->array_end_handler
-#define property_start_handler callbacks->property_start_handler
-#define property_end_handler callbacks->property_end_handler
-#define string_handler callbacks->string_handler
-#define integer_handler callbacks->integer_handler
-#define number_handler callbacks->number_handler
-#define boolean_handler callbacks->boolean_handler
-#define null_handler callbacks->null_handler
-#define user_data callbacks->user_data
+#define callbacks ((json_callback_t *) callbacks_ptr)
 
-char *json_lex_get_filename( yyscan_t *yyscanner );
-void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
-		 const char *error_string, ... );
+void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
+		 void *callbacks_ptr, const char *error_string, ... );
 %}
 
 %name-prefix="json_"
@@ -38,7 +30,8 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
 %pure-parser
 
 %parse-param { yyscan_t scanner }
-%parse-param { json_callback_t *callbacks }
+%parse-param { parser_t *parser }
+%parse-param { void *callbacks_ptr }
 %lex-param { yyscan_t scanner }
 
 %union {
@@ -60,14 +53,14 @@ object_or_array
 ;
 
 object
-  : '{' { object_start_handler( user_data ); }
-    '}' { object_end_handler( user_data ); }
-  | '{' { object_start_handler( user_data ); }
+  : '{' { callbacks->object_start_handler( callbacks->user_data ); }
+    '}' { callbacks->object_end_handler( callbacks->user_data ); }
+  | '{' { callbacks->object_start_handler( callbacks->user_data ); }
     members
-    '}' { object_end_handler( user_data ); }
-  | '{' { object_start_handler( user_data ); }
+    '}' { callbacks->object_end_handler( callbacks->user_data ); }
+  | '{' { callbacks->object_start_handler( callbacks->user_data ); }
     error
-    '}' { object_end_handler( user_data ); }
+    '}' { callbacks->object_end_handler( callbacks->user_data ); }
 ;
 
 members
@@ -76,19 +69,20 @@ members
 ;
 
 pair
-  : T_STRING { property_start_handler( user_data, $<string>1 ); }
-    ':' value { property_end_handler( user_data ); }
+  : T_STRING { callbacks->property_start_handler( callbacks->user_data,
+                                                  $<string>1 ); }
+    ':' value { callbacks->property_end_handler( callbacks->user_data ); }
 ;
 
 array
-  : '[' { array_start_handler( user_data ); }
-    ']' { array_end_handler( user_data ); }
-  | '[' { array_start_handler( user_data ); }
+  : '[' { callbacks->array_start_handler( callbacks->user_data ); }
+    ']' { callbacks->array_end_handler( callbacks->user_data ); }
+  | '[' { callbacks->array_start_handler( callbacks->user_data ); }
     elements
-    ']' { array_end_handler( user_data ); }
-  | '[' { array_start_handler( user_data ); }
+    ']' { callbacks->array_end_handler( callbacks->user_data ); }
+  | '[' { callbacks->array_start_handler( callbacks->user_data ); }
     error
-    ']' { array_end_handler( user_data ); }
+    ']' { callbacks->array_end_handler( callbacks->user_data ); }
 ;
 
 elements
@@ -97,27 +91,72 @@ elements
 ;
 
 value
-  : T_STRING { string_handler( user_data, $<string>1 ); }
-  | T_INTEGER { integer_handler( user_data, $<integer>1 ); }
-  | T_NUMBER { number_handler( user_data, $<number>1 ); }
+  : T_STRING { callbacks->string_handler( callbacks->user_data, $<string>1 ); }
+  | T_INTEGER { callbacks->integer_handler( callbacks->user_data,
+                                            $<integer>1 ); }
+  | T_NUMBER { callbacks->number_handler( callbacks->user_data, $<number>1 ); }
   | object
   | array
-  | T_TRUE { boolean_handler( user_data, 1 ); }
-  | T_FALSE { boolean_handler( user_data, 0 ); }
-  | T_NULL { null_handler( user_data ); }
+  | T_TRUE { callbacks->boolean_handler( callbacks->user_data, 1 ); }
+  | T_FALSE { callbacks->boolean_handler( callbacks->user_data, 0 ); }
+  | T_NULL { callbacks->null_handler( callbacks->user_data ); }
 ;
 
 %%
 
-void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
-		 const char *error_string, ... )
+void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
+		 void *callbacks_ptr, const char *error_string, ... )
 {
   va_list args;
-  fprintf( stderr, "%s: %d.%d-%d.%d ", json_lex_get_filename( scanner ),
+  char *filename;
+  fprintf( stderr, "%s: %d.%d-%d.%d ", parser->get_filename( parser ),
 	   yylloc->first_line, yylloc->first_column, yylloc->last_line,
 	   yylloc->last_column );
   va_start( args, error_string);
   vfprintf( stderr, error_string, args );
   va_end( args );
   fprintf( stderr, "\n" );
+}
+
+parser_t *json_parser_create( apr_pool_t *mp )
+{
+  parser_t *parser = parser_create( mp,
+				    json_lex_init,
+				    json_set_extra,
+				    json_lex_destroy,
+				    json__scan_buffer,
+				    json__delete_buffer,
+				    json_parse );
+  json_writer_t *writer = json_writer_create( mp );
+
+  json_callback_t *json_callbacks = apr_palloc( mp, sizeof(json_callback_t) );
+  json_callbacks->object_start_handler = json_writer_object_start;
+  json_callbacks->object_end_handler = json_writer_object_end;
+  json_callbacks->array_start_handler = json_writer_array_start;
+  json_callbacks->array_end_handler = json_writer_array_end;
+  json_callbacks->property_start_handler = json_writer_property_start;
+  json_callbacks->property_end_handler = json_writer_property_end;
+  json_callbacks->string_handler = json_writer_string_write;
+  json_callbacks->integer_handler = json_writer_integer_write;
+  json_callbacks->number_handler = json_writer_number_write;
+  json_callbacks->boolean_handler = json_writer_boolean_write;
+  json_callbacks->null_handler = json_writer_null_write;
+  json_callbacks->user_data = writer;
+
+  parser_set_user_data( parser, json_callbacks );
+
+  return parser;
+}
+
+int json_parser_parse_file( parser_t *parser, const char *file, json_t **obj )
+{
+  *obj = NULL;
+  json_callback_t *json_callbacks = parser_get_user_data( parser );
+  json_writer_t *writer = json_callbacks->user_data;
+
+  if ( parser_parse_file( parser, file ) == 0 ) {
+    *obj = writer->json;
+  }
+
+  return parser->parse_result;
 }

@@ -543,50 +543,24 @@ static yyconst flex_int32_t yy_rule_can_match_eol[39] =
 
 #include "apr_macros.h"
 
+#include "json_parse.h"
+
+#include "parser.h"
 #include "json.h"
 
-#include "json_parse.h"
 #include "json_parser.h"
-#include "lex_extra.h"
+#include "parser_lex_macros.h"
 #include "utf.h"
 
 #define YY_DECL int json_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
 
-#define LEX_EXTRA ((lex_extra_t *) yyextra)
-#define LEX_EXTRA_MP LEX_EXTRA->mp
-#define LEX_EXTRA_STR_ARRAY LEX_EXTRA->str_array
-#define LEX_EXTRA_STATUS LEX_EXTRA->status
-#define LEX_EXTRA_IN_FILE LEX_EXTRA->in_file
-#define LEX_EXTRA_BYTES LEX_EXTRA->bytes
-
 #define json_lex_error( ... ) \
   json_error( yylloc, yyscanner, NULL, __VA_ARGS__ )
-
-#define YY_INPUT( buf, result, max_size ) {				\
-    LEX_EXTRA_BYTES = max_size;                                         \
-    LEX_EXTRA_STATUS = apr_file_read( LEX_EXTRA_IN_FILE, buf,           \
-                                      &LEX_EXTRA_BYTES );               \
-    result = ( LEX_EXTRA_STATUS == APR_SUCCESS ) ? LEX_EXTRA_BYTES : YY_NULL; \
- }
-
-#define YY_USER_ACTION {						\
-    yylloc->first_line = yylineno;					\
-    yylloc->last_line = yylineno;					\
-    yylloc->first_column = yycolumn + 1;				\
-    yylloc->last_column = yycolumn + yyleng;				\
-    if ( yyleng == 1 && yytext[0] == '\n' ) {				\
-      yylloc->first_column = 0;						\
-      yylloc->last_column = 0;						\
-    }									\
-    else {								\
-      yycolumn += yyleng;						\
-    }									\
- }
 
 void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
 		 const char *error_string, ... );
 
-#line 590 "json_lex.c"
+#line 564 "json_lex.c"
 
 #define INITIAL 0
 #define unmatched 1
@@ -824,10 +798,10 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 68 "json_lex.l"
+#line 42 "json_lex.l"
 
 
-#line 831 "json_lex.c"
+#line 805 "json_lex.c"
 
     yylval = yylval_param;
 
@@ -928,62 +902,62 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 71 "json_lex.l"
-{ APR_ARRAY_CLEAR( LEX_EXTRA_STR_ARRAY ); BEGIN( squote_str ); }
+#line 45 "json_lex.l"
+{ APR_ARRAY_CLEAR( PARSER_STR_ARRAY ); BEGIN( squote_str ); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 72 "json_lex.l"
-{ APR_ARRAY_CLEAR( LEX_EXTRA_STR_ARRAY ); BEGIN( dquote_str ); }
+#line 46 "json_lex.l"
+{ APR_ARRAY_CLEAR( PARSER_STR_ARRAY ); BEGIN( dquote_str ); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 73 "json_lex.l"
+#line 47 "json_lex.l"
 { return '{'; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 74 "json_lex.l"
+#line 48 "json_lex.l"
 { return '}'; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 75 "json_lex.l"
+#line 49 "json_lex.l"
 { return '['; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 76 "json_lex.l"
+#line 50 "json_lex.l"
 { return ']'; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 77 "json_lex.l"
+#line 51 "json_lex.l"
 { return ','; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 78 "json_lex.l"
+#line 52 "json_lex.l"
 { return ':'; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 79 "json_lex.l"
+#line 53 "json_lex.l"
 { return T_FALSE; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 80 "json_lex.l"
+#line 54 "json_lex.l"
 { return T_TRUE; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 81 "json_lex.l"
+#line 55 "json_lex.l"
 { return T_NULL; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 82 "json_lex.l"
+#line 56 "json_lex.l"
 {
     yylval->integer = strtol( yytext, NULL, 10 );
     return T_INTEGER;
@@ -991,7 +965,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 86 "json_lex.l"
+#line 60 "json_lex.l"
 {
     yylval->number = strtod( yytext, NULL );
     return T_NUMBER;
@@ -999,7 +973,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 90 "json_lex.l"
+#line 64 "json_lex.l"
 {
     yylval->number = strtod( yytext, NULL );
     return T_NUMBER;
@@ -1007,7 +981,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 94 "json_lex.l"
+#line 68 "json_lex.l"
 {
     yylval->number = strtod( yytext, NULL );
     return T_NUMBER;
@@ -1015,18 +989,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 98 "json_lex.l"
+#line 72 "json_lex.l"
 
 	YY_BREAK
 case 17:
 /* rule 17 can match eol */
 YY_RULE_SETUP
-#line 99 "json_lex.l"
+#line 73 "json_lex.l"
 
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 100 "json_lex.l"
+#line 74 "json_lex.l"
 {
     yyless( 0 );
     yycolumn--;
@@ -1037,7 +1011,7 @@ YY_RULE_SETUP
 
 case 19:
 YY_RULE_SETUP
-#line 108 "json_lex.l"
+#line 82 "json_lex.l"
 {
     json_lex_error( "unexpected \"%.*s\"", yyleng, yytext );
     BEGIN( INITIAL );
@@ -1047,90 +1021,90 @@ YY_RULE_SETUP
 
 case 20:
 YY_RULE_SETUP
-#line 115 "json_lex.l"
+#line 89 "json_lex.l"
 {
     BEGIN( INITIAL );
-    yylval->string = apr_palloc( LEX_EXTRA_MP,
-				 LEX_EXTRA_STR_ARRAY->nelts + 1 );
-    utf8_strcpyn( yylval->string, (unsigned char *) LEX_EXTRA_STR_ARRAY->elts,
-                  LEX_EXTRA_STR_ARRAY->nelts );
+    yylval->string = apr_palloc( PARSER_MP,
+				 PARSER_STR_ARRAY->nelts + 1 );
+    utf8_strcpyn( yylval->string, (unsigned char *) PARSER_STR_ARRAY->elts,
+                  PARSER_STR_ARRAY->nelts );
     return T_STRING;
   }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 123 "json_lex.l"
-{ APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\''; }
+#line 97 "json_lex.l"
+{ APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\''; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 124 "json_lex.l"
-{ APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '"'; }
+#line 98 "json_lex.l"
+{ APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '"'; }
 	YY_BREAK
 
 
 case 23:
 YY_RULE_SETUP
-#line 127 "json_lex.l"
+#line 101 "json_lex.l"
 {
     BEGIN( INITIAL );
-    yylval->string = apr_palloc( LEX_EXTRA_MP,
-				 LEX_EXTRA_STR_ARRAY->nelts + 1 );
-    utf8_strcpyn( yylval->string, (unsigned char *) LEX_EXTRA_STR_ARRAY->elts,
-                  LEX_EXTRA_STR_ARRAY->nelts );
+    yylval->string = apr_palloc( PARSER_MP,
+				 PARSER_STR_ARRAY->nelts + 1 );
+    utf8_strcpyn( yylval->string, (unsigned char *) PARSER_STR_ARRAY->elts,
+                  PARSER_STR_ARRAY->nelts );
     return T_STRING;
   }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 135 "json_lex.l"
-{ APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '"'; }
+#line 109 "json_lex.l"
+{ APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '"'; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 136 "json_lex.l"
-{ APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\''; }
+#line 110 "json_lex.l"
+{ APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\''; }
 	YY_BREAK
 
 
 case 26:
 YY_RULE_SETUP
-#line 140 "json_lex.l"
-{ APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\\'; }
+#line 114 "json_lex.l"
+{ APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\\'; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 141 "json_lex.l"
-{ APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '/'; }
+#line 115 "json_lex.l"
+{ APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '/'; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 142 "json_lex.l"
-{ APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\b'; }
+#line 116 "json_lex.l"
+{ APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\b'; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 143 "json_lex.l"
-{ APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\f'; }
+#line 117 "json_lex.l"
+{ APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\f'; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 144 "json_lex.l"
-{ APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\n'; }
+#line 118 "json_lex.l"
+{ APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\n'; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 145 "json_lex.l"
-{ APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\r'; }
+#line 119 "json_lex.l"
+{ APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\r'; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 146 "json_lex.l"
-{ APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\t'; }
+#line 120 "json_lex.l"
+{ APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\t'; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 147 "json_lex.l"
+#line 121 "json_lex.l"
 {
     int value;
     int value2;
@@ -1151,7 +1125,7 @@ YY_RULE_SETUP
 	  value = ( ( value - 0xD800 ) << 10 ) + ( value2 - 0xDC00 ) + 0x10000;
 	  utf8_encode( value, utf8_str );
 	  for ( i = 0; utf8_str[i]; i++ ) {
-	    APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = utf8_str[i];
+	    APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = utf8_str[i];
 	  }
 	}
 	else {
@@ -1165,7 +1139,7 @@ YY_RULE_SETUP
 	
 	utf8_encode( value, utf8_str );
 	for ( i = 0; utf8_str[i]; i++ ) {
-	  APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = utf8_str[i];
+	  APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = utf8_str[i];
 	}
       }
       else {
@@ -1180,36 +1154,36 @@ YY_RULE_SETUP
     else {
       utf8_encode( value, utf8_str );
       for ( i = 0; utf8_str[i]; i++ ) {
-	APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = utf8_str[i];
+	APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = utf8_str[i];
       }
     }
   }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 200 "json_lex.l"
+#line 174 "json_lex.l"
 {
     /*
      * Not legal as per the JSON specification, save it off and issue an
      * error.
      */
-    APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = yytext[0];
+    APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = yytext[0];
     json_lex_error( "illegal control character 0x%x", yytext[0] );
   }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 208 "json_lex.l"
+#line 182 "json_lex.l"
 {
     int i;
     for ( i = 0; i < yyleng; i++ ) {
-      APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = yytext[i];
+      APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = yytext[i];
     }
   }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 214 "json_lex.l"
+#line 188 "json_lex.l"
 {
     json_lex_error( "start of illegal backslash" );
   }
@@ -1217,25 +1191,25 @@ YY_RULE_SETUP
 case 37:
 /* rule 37 can match eol */
 YY_RULE_SETUP
-#line 217 "json_lex.l"
+#line 191 "json_lex.l"
 {
     /* Unterminated string constant, still return the string for the parser. */
     BEGIN( INITIAL );
     json_lex_error( "unterminated string constant" );
-    yylval->string = apr_palloc( LEX_EXTRA_MP,
-				 LEX_EXTRA_STR_ARRAY->nelts + 1 );
-    utf8_strcpyn( yylval->string, (unsigned char *) LEX_EXTRA_STR_ARRAY->elts,
-                  LEX_EXTRA_STR_ARRAY->nelts );
+    yylval->string = apr_palloc( PARSER_MP,
+				 PARSER_STR_ARRAY->nelts + 1 );
+    utf8_strcpyn( yylval->string, (unsigned char *) PARSER_STR_ARRAY->elts,
+                  PARSER_STR_ARRAY->nelts );
     return T_STRING;
   }
 	YY_BREAK
 
 case 38:
 YY_RULE_SETUP
-#line 229 "json_lex.l"
+#line 203 "json_lex.l"
 ECHO;
 	YY_BREAK
-#line 1239 "json_lex.c"
+#line 1213 "json_lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(unmatched):
 case YY_STATE_EOF(squote_str):
@@ -2380,13 +2354,7 @@ void json_free (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 229 "json_lex.l"
+#line 203 "json_lex.l"
 
 
-
-char *json_lex_get_filename( yyscan_t *yyscanner )
-{
-  lex_extra_t *lex_extra = json_get_extra( yyscanner );
-  return lex_extra->filename;
-}
 

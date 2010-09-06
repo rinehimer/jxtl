@@ -5,45 +5,19 @@
 
 #include "apr_macros.h"
 
+#include "json_parse.h"
+
+#include "parser.h"
 #include "json.h"
 
-#include "json_parse.h"
 #include "json_parser.h"
-#include "lex_extra.h"
+#include "parser_lex_macros.h"
 #include "utf.h"
 
 #define YY_DECL int json_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
 
-#define LEX_EXTRA ((lex_extra_t *) yyextra)
-#define LEX_EXTRA_MP LEX_EXTRA->mp
-#define LEX_EXTRA_STR_ARRAY LEX_EXTRA->str_array
-#define LEX_EXTRA_STATUS LEX_EXTRA->status
-#define LEX_EXTRA_IN_FILE LEX_EXTRA->in_file
-#define LEX_EXTRA_BYTES LEX_EXTRA->bytes
-
 #define json_lex_error( ... ) \
   json_error( yylloc, yyscanner, NULL, __VA_ARGS__ )
-
-#define YY_INPUT( buf, result, max_size ) {				\
-    LEX_EXTRA_BYTES = max_size;                                         \
-    LEX_EXTRA_STATUS = apr_file_read( LEX_EXTRA_IN_FILE, buf,           \
-                                      &LEX_EXTRA_BYTES );               \
-    result = ( LEX_EXTRA_STATUS == APR_SUCCESS ) ? LEX_EXTRA_BYTES : YY_NULL; \
- }
-
-#define YY_USER_ACTION {						\
-    yylloc->first_line = yylineno;					\
-    yylloc->last_line = yylineno;					\
-    yylloc->first_column = yycolumn + 1;				\
-    yylloc->last_column = yycolumn + yyleng;				\
-    if ( yyleng == 1 && yytext[0] == '\n' ) {				\
-      yylloc->first_column = 0;						\
-      yylloc->last_column = 0;						\
-    }									\
-    else {								\
-      yycolumn += yyleng;						\
-    }									\
- }
 
 void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
 		 const char *error_string, ... );
@@ -59,7 +33,7 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
 %option bison-locations
 
 %x unmatched squote_str dquote_str
-   
+
 unicode_escape ("\\u"[0-9a-fA-F]{4}){1,2}
 integer "-"?([0-9]|[1-9][0-9]+)
 frac "."[0-9]+
@@ -68,8 +42,8 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 %%
 
 <INITIAL>{
-  "'" { APR_ARRAY_CLEAR( LEX_EXTRA_STR_ARRAY ); BEGIN( squote_str ); }
-  "\"" { APR_ARRAY_CLEAR( LEX_EXTRA_STR_ARRAY ); BEGIN( dquote_str ); }
+  "'" { APR_ARRAY_CLEAR( PARSER_STR_ARRAY ); BEGIN( squote_str ); }
+  "\"" { APR_ARRAY_CLEAR( PARSER_STR_ARRAY ); BEGIN( dquote_str ); }
   "{" { return '{'; }
   "}" { return '}'; }
   "[" { return '['; }
@@ -114,36 +88,36 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 <dquote_str>{
   "\"" {
     BEGIN( INITIAL );
-    yylval->string = apr_palloc( LEX_EXTRA_MP,
-				 LEX_EXTRA_STR_ARRAY->nelts + 1 );
-    utf8_strcpyn( yylval->string, (unsigned char *) LEX_EXTRA_STR_ARRAY->elts,
-                  LEX_EXTRA_STR_ARRAY->nelts );
+    yylval->string = apr_palloc( PARSER_MP,
+				 PARSER_STR_ARRAY->nelts + 1 );
+    utf8_strcpyn( yylval->string, (unsigned char *) PARSER_STR_ARRAY->elts,
+                  PARSER_STR_ARRAY->nelts );
     return T_STRING;
   }
-  "'" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\''; }
-  "\\\"" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '"'; }
+  "'" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\''; }
+  "\\\"" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '"'; }
 }
 <squote_str>{
   "'" {
     BEGIN( INITIAL );
-    yylval->string = apr_palloc( LEX_EXTRA_MP,
-				 LEX_EXTRA_STR_ARRAY->nelts + 1 );
-    utf8_strcpyn( yylval->string, (unsigned char *) LEX_EXTRA_STR_ARRAY->elts,
-                  LEX_EXTRA_STR_ARRAY->nelts );
+    yylval->string = apr_palloc( PARSER_MP,
+				 PARSER_STR_ARRAY->nelts + 1 );
+    utf8_strcpyn( yylval->string, (unsigned char *) PARSER_STR_ARRAY->elts,
+                  PARSER_STR_ARRAY->nelts );
     return T_STRING;
   }
-  "\"" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '"'; }
-  "\\\'" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\''; }
+  "\"" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '"'; }
+  "\\\'" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\''; }
 }
 
 <squote_str,dquote_str>{
-  "\\\\" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\\'; }
-  "\\/" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '/'; }
-  "\\b" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\b'; }
-  "\\f" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\f'; }
-  "\\n" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\n'; }
-  "\\r" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\r'; }
-  "\\t" { APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = '\t'; }
+  "\\\\" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\\'; }
+  "\\/" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '/'; }
+  "\\b" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\b'; }
+  "\\f" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\f'; }
+  "\\n" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\n'; }
+  "\\r" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\r'; }
+  "\\t" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\t'; }
   {unicode_escape} {
     int value;
     int value2;
@@ -164,7 +138,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 	  value = ( ( value - 0xD800 ) << 10 ) + ( value2 - 0xDC00 ) + 0x10000;
 	  utf8_encode( value, utf8_str );
 	  for ( i = 0; utf8_str[i]; i++ ) {
-	    APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = utf8_str[i];
+	    APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = utf8_str[i];
 	  }
 	}
 	else {
@@ -178,7 +152,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 	
 	utf8_encode( value, utf8_str );
 	for ( i = 0; utf8_str[i]; i++ ) {
-	  APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = utf8_str[i];
+	  APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = utf8_str[i];
 	}
       }
       else {
@@ -193,7 +167,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
     else {
       utf8_encode( value, utf8_str );
       for ( i = 0; utf8_str[i]; i++ ) {
-	APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = utf8_str[i];
+	APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = utf8_str[i];
       }
     }
   }
@@ -202,13 +176,13 @@ exp ("e"|"E")("+"|"-")?[0-9]+
      * Not legal as per the JSON specification, save it off and issue an
      * error.
      */
-    APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = yytext[0];
+    APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = yytext[0];
     json_lex_error( "illegal control character 0x%x", yytext[0] );
   }
   [^\"\'\\\x00-\x1f]+ {
     int i;
     for ( i = 0; i < yyleng; i++ ) {
-      APR_ARRAY_PUSH( LEX_EXTRA_STR_ARRAY, char ) = yytext[i];
+      APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = yytext[i];
     }
   }
   . {
@@ -218,18 +192,12 @@ exp ("e"|"E")("+"|"-")?[0-9]+
     /* Unterminated string constant, still return the string for the parser. */
     BEGIN( INITIAL );
     json_lex_error( "unterminated string constant" );
-    yylval->string = apr_palloc( LEX_EXTRA_MP,
-				 LEX_EXTRA_STR_ARRAY->nelts + 1 );
-    utf8_strcpyn( yylval->string, (unsigned char *) LEX_EXTRA_STR_ARRAY->elts,
-                  LEX_EXTRA_STR_ARRAY->nelts );
+    yylval->string = apr_palloc( PARSER_MP,
+				 PARSER_STR_ARRAY->nelts + 1 );
+    utf8_strcpyn( yylval->string, (unsigned char *) PARSER_STR_ARRAY->elts,
+                  PARSER_STR_ARRAY->nelts );
     return T_STRING;
   }
 }
 
 %%
-
-char *json_lex_get_filename( yyscan_t *yyscanner )
-{
-  lex_extra_t *lex_extra = json_get_extra( yyscanner );
-  return lex_extra->filename;
-}

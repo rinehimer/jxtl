@@ -106,24 +106,16 @@
 
 #include "json_parse.h"
 #include "json_lex.h"
+
+#include "json.h"
+#include "json_writer.h"
+#include "parser.h"
 #include "json_parser.h"
 
-#define object_start_handler callbacks->object_start_handler
-#define object_end_handler callbacks->object_end_handler
-#define array_start_handler callbacks->array_start_handler
-#define array_end_handler callbacks->array_end_handler
-#define property_start_handler callbacks->property_start_handler
-#define property_end_handler callbacks->property_end_handler
-#define string_handler callbacks->string_handler
-#define integer_handler callbacks->integer_handler
-#define number_handler callbacks->number_handler
-#define boolean_handler callbacks->boolean_handler
-#define null_handler callbacks->null_handler
-#define user_data callbacks->user_data
+#define callbacks ((json_callback_t *) callbacks_ptr)
 
-char *json_lex_get_filename( yyscan_t *yyscanner );
-void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
-		 const char *error_string, ... );
+void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
+		 void *callbacks_ptr, const char *error_string, ... );
 
 
 /* Enabling traces.  */
@@ -146,14 +138,14 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 44 "json_parse.y"
+#line 37 "json_parse.y"
 {
   int integer;
   unsigned char *string;
   double number;
 }
-/* Line 193 of yacc.c.  */
-#line 157 "json_parse.c"
+/* Line 187 of yacc.c.  */
+#line 149 "json_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -178,7 +170,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 182 "json_parse.c"
+#line 174 "json_parse.c"
 
 #ifdef short
 # undef short
@@ -471,9 +463,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    58,    58,    59,    63,    63,    65,    65,    68,    68,
-      74,    75,    79,    79,    84,    84,    86,    86,    89,    89,
-      95,    96,   100,   101,   102,   103,   104,   105,   106,   107
+       0,    51,    51,    52,    56,    56,    58,    58,    61,    61,
+      67,    68,    72,    72,    78,    78,    80,    80,    83,    83,
+      89,    90,    94,    95,    97,    98,    99,   100,   101,   102
 };
 #endif
 
@@ -615,7 +607,7 @@ do								\
     }								\
   else								\
     {								\
-      yyerror (&yylloc, scanner, callbacks, YY_("syntax error: cannot back up")); \
+      yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("syntax error: cannot back up")); \
       YYERROR;							\
     }								\
 while (YYID (0))
@@ -695,7 +687,7 @@ do {									  \
     {									  \
       YYFPRINTF (stderr, "%s ", Title);					  \
       yy_symbol_print (stderr,						  \
-		  Type, Value, Location, scanner, callbacks); \
+		  Type, Value, Location, scanner, parser, callbacks_ptr); \
       YYFPRINTF (stderr, "\n");						  \
     }									  \
 } while (YYID (0))
@@ -709,23 +701,25 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, json_callback_t *callbacks)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
+yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
     yyscan_t scanner;
-    json_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   if (!yyvaluep)
     return;
   YYUSE (yylocationp);
   YYUSE (scanner);
-  YYUSE (callbacks);
+  YYUSE (parser);
+  YYUSE (callbacks_ptr);
 # ifdef YYPRINT
   if (yytype < YYNTOKENS)
     YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
@@ -747,16 +741,17 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbac
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, json_callback_t *callbacks)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
+yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
     yyscan_t scanner;
-    json_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -766,7 +761,7 @@ yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
 
   YY_LOCATION_PRINT (yyoutput, *yylocationp);
   YYFPRINTF (yyoutput, ": ");
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks);
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -806,15 +801,16 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, yyscan_t scanner, json_callback_t *callbacks)
+yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yy_reduce_print (yyvsp, yylsp, yyrule, scanner, callbacks)
+yy_reduce_print (yyvsp, yylsp, yyrule, scanner, parser, callbacks_ptr)
     YYSTYPE *yyvsp;
     YYLTYPE *yylsp;
     int yyrule;
     yyscan_t scanner;
-    json_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -828,7 +824,7 @@ yy_reduce_print (yyvsp, yylsp, yyrule, scanner, callbacks)
       fprintf (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
-		       , &(yylsp[(yyi + 1) - (yynrhs)])		       , scanner, callbacks);
+		       , &(yylsp[(yyi + 1) - (yynrhs)])		       , scanner, parser, callbacks_ptr);
       fprintf (stderr, "\n");
     }
 }
@@ -836,7 +832,7 @@ yy_reduce_print (yyvsp, yylsp, yyrule, scanner, callbacks)
 # define YY_REDUCE_PRINT(Rule)		\
 do {					\
   if (yydebug)				\
-    yy_reduce_print (yyvsp, yylsp, Rule, scanner, callbacks); \
+    yy_reduce_print (yyvsp, yylsp, Rule, scanner, parser, callbacks_ptr); \
 } while (YYID (0))
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1087,22 +1083,24 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, yyscan_t scanner, json_callback_t *callbacks)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yydestruct (yymsg, yytype, yyvaluep, yylocationp, scanner, callbacks)
+yydestruct (yymsg, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr)
     const char *yymsg;
     int yytype;
     YYSTYPE *yyvaluep;
     YYLTYPE *yylocationp;
     yyscan_t scanner;
-    json_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   YYUSE (yyvaluep);
   YYUSE (yylocationp);
   YYUSE (scanner);
-  YYUSE (callbacks);
+  YYUSE (parser);
+  YYUSE (callbacks_ptr);
 
   if (!yymsg)
     yymsg = "Deleting";
@@ -1127,7 +1125,7 @@ int yyparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int yyparse (yyscan_t scanner, json_callback_t *callbacks);
+int yyparse (yyscan_t scanner, parser_t *parser, void *callbacks_ptr);
 #else
 int yyparse ();
 #endif
@@ -1156,12 +1154,13 @@ yyparse (YYPARSE_PARAM)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 int
-yyparse (yyscan_t scanner, json_callback_t *callbacks)
+yyparse (yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 int
-yyparse (scanner, callbacks)
+yyparse (scanner, parser, callbacks_ptr)
     yyscan_t scanner;
-    json_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 #endif
 {
@@ -1432,108 +1431,110 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 63 "json_parse.y"
-    { object_start_handler( user_data ); }
+#line 56 "json_parse.y"
+    { callbacks->object_start_handler( callbacks->user_data ); }
     break;
 
   case 5:
-#line 64 "json_parse.y"
-    { object_end_handler( user_data ); }
+#line 57 "json_parse.y"
+    { callbacks->object_end_handler( callbacks->user_data ); }
     break;
 
   case 6:
-#line 65 "json_parse.y"
-    { object_start_handler( user_data ); }
+#line 58 "json_parse.y"
+    { callbacks->object_start_handler( callbacks->user_data ); }
     break;
 
   case 7:
-#line 67 "json_parse.y"
-    { object_end_handler( user_data ); }
+#line 60 "json_parse.y"
+    { callbacks->object_end_handler( callbacks->user_data ); }
     break;
 
   case 8:
-#line 68 "json_parse.y"
-    { object_start_handler( user_data ); }
+#line 61 "json_parse.y"
+    { callbacks->object_start_handler( callbacks->user_data ); }
     break;
 
   case 9:
-#line 70 "json_parse.y"
-    { object_end_handler( user_data ); }
+#line 63 "json_parse.y"
+    { callbacks->object_end_handler( callbacks->user_data ); }
     break;
 
   case 12:
-#line 79 "json_parse.y"
-    { property_start_handler( user_data, (yyvsp[(1) - (1)].string) ); }
+#line 72 "json_parse.y"
+    { callbacks->property_start_handler( callbacks->user_data,
+                                                  (yyvsp[(1) - (1)].string) ); }
     break;
 
   case 13:
-#line 80 "json_parse.y"
-    { property_end_handler( user_data ); }
+#line 74 "json_parse.y"
+    { callbacks->property_end_handler( callbacks->user_data ); }
     break;
 
   case 14:
-#line 84 "json_parse.y"
-    { array_start_handler( user_data ); }
+#line 78 "json_parse.y"
+    { callbacks->array_start_handler( callbacks->user_data ); }
     break;
 
   case 15:
-#line 85 "json_parse.y"
-    { array_end_handler( user_data ); }
+#line 79 "json_parse.y"
+    { callbacks->array_end_handler( callbacks->user_data ); }
     break;
 
   case 16:
-#line 86 "json_parse.y"
-    { array_start_handler( user_data ); }
+#line 80 "json_parse.y"
+    { callbacks->array_start_handler( callbacks->user_data ); }
     break;
 
   case 17:
-#line 88 "json_parse.y"
-    { array_end_handler( user_data ); }
+#line 82 "json_parse.y"
+    { callbacks->array_end_handler( callbacks->user_data ); }
     break;
 
   case 18:
-#line 89 "json_parse.y"
-    { array_start_handler( user_data ); }
+#line 83 "json_parse.y"
+    { callbacks->array_start_handler( callbacks->user_data ); }
     break;
 
   case 19:
-#line 91 "json_parse.y"
-    { array_end_handler( user_data ); }
+#line 85 "json_parse.y"
+    { callbacks->array_end_handler( callbacks->user_data ); }
     break;
 
   case 22:
-#line 100 "json_parse.y"
-    { string_handler( user_data, (yyvsp[(1) - (1)].string) ); }
+#line 94 "json_parse.y"
+    { callbacks->string_handler( callbacks->user_data, (yyvsp[(1) - (1)].string) ); }
     break;
 
   case 23:
-#line 101 "json_parse.y"
-    { integer_handler( user_data, (yyvsp[(1) - (1)].integer) ); }
+#line 95 "json_parse.y"
+    { callbacks->integer_handler( callbacks->user_data,
+                                            (yyvsp[(1) - (1)].integer) ); }
     break;
 
   case 24:
-#line 102 "json_parse.y"
-    { number_handler( user_data, (yyvsp[(1) - (1)].number) ); }
+#line 97 "json_parse.y"
+    { callbacks->number_handler( callbacks->user_data, (yyvsp[(1) - (1)].number) ); }
     break;
 
   case 27:
-#line 105 "json_parse.y"
-    { boolean_handler( user_data, 1 ); }
+#line 100 "json_parse.y"
+    { callbacks->boolean_handler( callbacks->user_data, 1 ); }
     break;
 
   case 28:
-#line 106 "json_parse.y"
-    { boolean_handler( user_data, 0 ); }
+#line 101 "json_parse.y"
+    { callbacks->boolean_handler( callbacks->user_data, 0 ); }
     break;
 
   case 29:
-#line 107 "json_parse.y"
-    { null_handler( user_data ); }
+#line 102 "json_parse.y"
+    { callbacks->null_handler( callbacks->user_data ); }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1537 "json_parse.c"
+#line 1538 "json_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1569,7 +1570,7 @@ yyerrlab:
     {
       ++yynerrs;
 #if ! YYERROR_VERBOSE
-      yyerror (&yylloc, scanner, callbacks, YY_("syntax error"));
+      yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("syntax error"));
 #else
       {
 	YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
@@ -1593,11 +1594,11 @@ yyerrlab:
 	if (0 < yysize && yysize <= yymsg_alloc)
 	  {
 	    (void) yysyntax_error (yymsg, yystate, yychar);
-	    yyerror (&yylloc, scanner, callbacks, yymsg);
+	    yyerror (&yylloc, scanner, parser, callbacks_ptr, yymsg);
 	  }
 	else
 	  {
-	    yyerror (&yylloc, scanner, callbacks, YY_("syntax error"));
+	    yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("syntax error"));
 	    if (yysize != 0)
 	      goto yyexhaustedlab;
 	  }
@@ -1621,7 +1622,7 @@ yyerrlab:
       else
 	{
 	  yydestruct ("Error: discarding",
-		      yytoken, &yylval, &yylloc, scanner, callbacks);
+		      yytoken, &yylval, &yylloc, scanner, parser, callbacks_ptr);
 	  yychar = YYEMPTY;
 	}
     }
@@ -1678,7 +1679,7 @@ yyerrlab1:
 
       yyerror_range[0] = *yylsp;
       yydestruct ("Error: popping",
-		  yystos[yystate], yyvsp, yylsp, scanner, callbacks);
+		  yystos[yystate], yyvsp, yylsp, scanner, parser, callbacks_ptr);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -1721,7 +1722,7 @@ yyabortlab:
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
-  yyerror (&yylloc, scanner, callbacks, YY_("memory exhausted"));
+  yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("memory exhausted"));
   yyresult = 2;
   /* Fall through.  */
 #endif
@@ -1729,7 +1730,7 @@ yyexhaustedlab:
 yyreturn:
   if (yychar != YYEOF && yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval, &yylloc, scanner, callbacks);
+		 yytoken, &yylval, &yylloc, scanner, parser, callbacks_ptr);
   /* Do not reclaim the symbols of the rule which action triggered
      this YYABORT or YYACCEPT.  */
   YYPOPSTACK (yylen);
@@ -1737,7 +1738,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-		  yystos[*yyssp], yyvsp, yylsp, scanner, callbacks);
+		  yystos[*yyssp], yyvsp, yylsp, scanner, parser, callbacks_ptr);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -1753,19 +1754,63 @@ yyreturn:
 }
 
 
-#line 110 "json_parse.y"
+#line 105 "json_parse.y"
 
 
-void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
-		 const char *error_string, ... )
+void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
+		 void *callbacks_ptr, const char *error_string, ... )
 {
   va_list args;
-  fprintf( stderr, "%s: %d.%d-%d.%d ", json_lex_get_filename( scanner ),
+  char *filename;
+  fprintf( stderr, "%s: %d.%d-%d.%d ", parser->get_filename( parser ),
 	   yylloc->first_line, yylloc->first_column, yylloc->last_line,
 	   yylloc->last_column );
   va_start( args, error_string);
   vfprintf( stderr, error_string, args );
   va_end( args );
   fprintf( stderr, "\n" );
+}
+
+parser_t *json_parser_create( apr_pool_t *mp )
+{
+  parser_t *parser = parser_create( mp,
+				    json_lex_init,
+				    json_set_extra,
+				    json_lex_destroy,
+				    json__scan_buffer,
+				    json__delete_buffer,
+				    json_parse );
+  json_writer_t *writer = json_writer_create( mp );
+
+  json_callback_t *json_callbacks = apr_palloc( mp, sizeof(json_callback_t) );
+  json_callbacks->object_start_handler = json_writer_object_start;
+  json_callbacks->object_end_handler = json_writer_object_end;
+  json_callbacks->array_start_handler = json_writer_array_start;
+  json_callbacks->array_end_handler = json_writer_array_end;
+  json_callbacks->property_start_handler = json_writer_property_start;
+  json_callbacks->property_end_handler = json_writer_property_end;
+  json_callbacks->string_handler = json_writer_string_write;
+  json_callbacks->integer_handler = json_writer_integer_write;
+  json_callbacks->number_handler = json_writer_number_write;
+  json_callbacks->boolean_handler = json_writer_boolean_write;
+  json_callbacks->null_handler = json_writer_null_write;
+  json_callbacks->user_data = writer;
+
+  parser_set_user_data( parser, json_callbacks );
+
+  return parser;
+}
+
+int json_parser_parse_file( parser_t *parser, const char *file, json_t **obj )
+{
+  *obj = NULL;
+  json_callback_t *json_callbacks = parser_get_user_data( parser );
+  json_writer_t *writer = json_callbacks->user_data;
+
+  if ( parser_parse_file( parser, file ) == 0 ) {
+    *obj = writer->json;
+  }
+
+  return parser->parse_result;
 }
 

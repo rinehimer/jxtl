@@ -8,6 +8,7 @@
 #include "json.h"
 #include "jxtl_path.h"
 #include "json_writer.h"
+#include "json_parser.h"
 
 #include "jxtl.h"
 #include "jxtl_parse.h"
@@ -484,16 +485,20 @@ void jxtl_init( int argc, char const * const *argv , apr_pool_t *mp,
  * Load data from either json_file or xml_file.  One of those has to be
  * non-null.
  */
-int jxtl_load_data( const char *json_file, const char *xml_file,
-                    int skip_root, json_writer_t *writer )
+int jxtl_load_data( apr_pool_t *mp, const char *json_file,
+                    const char *xml_file, int skip_root, json_t **obj )
 {
   int ret = 1;
+  json_writer_t *writer = json_writer_create( mp );
+  parser_t *json_parser;
 
   if ( xml_file ) {
     ret = xml_file_to_json( xml_file, writer, skip_root );
+    *obj = writer->json;
   }
   else if ( json_file ) {
-    ret = json_file_parse( json_file, writer );
+    json_parser = json_parser_create( mp );
+    ret = json_parser_parse_file( json_parser, json_file, obj );
   }
 
   return ret;
@@ -510,7 +515,6 @@ int main( int argc, char const * const *argv )
   const char *json_file = NULL;
   const char *xml_file = NULL;
   int skip_root;
-  json_writer_t *writer;
 
   apr_app_initialize( NULL, NULL, NULL );
   apr_pool_create( &mp, NULL );
@@ -545,11 +549,10 @@ int main( int argc, char const * const *argv )
     &jxtl_data
   };
 
-  writer = json_writer_create( mp );
   jxtl_data.path_builder = jxtl_path_builder_create( mp );
 
-  if ( jxtl_load_data( json_file, xml_file, skip_root, writer ) == 0 ) {
-    jxtl_data.json = writer->json;
+  if ( jxtl_load_data( mp, json_file, xml_file, skip_root,
+		       &jxtl_data.json ) == 0 ) {
     jxtl_lex_init( &jxtl_scanner );
     lex_extra_init( &lex_extra, template_file );
     jxtl_set_extra( &lex_extra, jxtl_scanner );

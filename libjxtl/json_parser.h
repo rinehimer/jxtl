@@ -1,7 +1,10 @@
 #ifndef JSON_PARSER_H
 #define JSON_PARSER_H
 
-#include "json_writer.h"
+#include <apr_pools.h>
+
+#include "json.h"
+#include "parser.h"
 
 typedef struct json_callback_t {
   void ( *object_start_handler )( void *user_data );
@@ -18,6 +21,7 @@ typedef struct json_callback_t {
   void *user_data;
 } json_callback_t;
 
-int json_file_parse( const char *json_file, json_writer_t *writer );
+parser_t *json_parser_create( apr_pool_t *mp );
+int json_parser_parse_file( parser_t *parser, const char *file, json_t **obj );
 
 #endif
