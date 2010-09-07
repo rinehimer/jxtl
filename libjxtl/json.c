@@ -22,7 +22,7 @@ json_t *json_string_create( apr_pool_t *mp, unsigned char *string )
 {
   json_t *json;
   JSON_CREATE( mp, json );
-  json->value.string = apr_pstrdup( mp, string );
+  json->value.string = (unsigned char *) apr_pstrdup( mp, (char *) string );
   json->type = JSON_STRING;
   return json;
 }

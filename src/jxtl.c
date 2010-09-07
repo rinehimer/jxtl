@@ -85,6 +85,10 @@ static void json_value_print( json_t *json )
     printf( "%g", json->value.number );
     break;
 
+  case JSON_BOOLEAN:
+    printf( "%s", JSON_IS_TRUE_BOOLEAN( json ) ? "true" : "false" );
+    break;
+
   default:
     fprintf( stderr, "error: cannot get value of object or array\n" );
     break;
