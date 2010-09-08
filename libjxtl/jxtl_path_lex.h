@@ -332,7 +332,7 @@ extern int jxtl_path_lex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_
 #undef YY_DECL
 #endif
 
-#line 66 "jxtl_path_lex.l"
+#line 55 "jxtl_path_lex.l"
 
 
 #line 339 "jxtl_path_lex.h"

@@ -1,12 +1,13 @@
 #ifndef JXTL_PATH_H
 #define JXTL_PATH_H
 
+#include <apr_tables.h>
 #include <apr_pools.h>
 
 #include "jxtl_path_parse.h"
 #include "jxtl_path_lex.h"
 
-#include "lex_extra.h"
+#include "parser.h"
 #include "json.h"
 
 /*
@@ -48,38 +49,21 @@ typedef struct jxtl_path_expr_t {
   int negate;
 }jxtl_path_expr_t;
 
-
-typedef struct jxtl_data {
-  apr_pool_t *mp;
-  /** Array to store the current expression.  */
-  apr_array_header_t *expr_array;
-  /** Root of the path expression. */
-  jxtl_path_expr_t *root;
-  /** The current expression. */ 
-  jxtl_path_expr_t *curr;
-}jxtl_data;
-
-typedef struct jxtl_path_builder_t {
-  apr_pool_t *mp;
-  jxtl_path_callback_t callbacks;
-  yyscan_t scanner;
-  lex_extra_t lex_extra;
-  jxtl_data data;
-}jxtl_path_builder_t;
-
 typedef struct jxtl_path_obj_t {
   apr_pool_t *mp;
   apr_array_header_t *nodes;
 }jxtl_path_obj_t;
 
-jxtl_path_builder_t *jxtl_path_builder_create( apr_pool_t *mp );
-jxtl_path_obj_t *jxtl_path_obj_create( apr_pool_t *mp );
+parser_t *jxtl_path_parser_create( apr_pool_t *mp );
+int *jxtl_path_parser_parse_buffer( parser_t *parser,
+                                    const unsigned char *path,
+                                    jxtl_path_expr_t **expr );
 
-jxtl_path_expr_t *jxtl_path_compile( jxtl_path_builder_t *path_builder,
-				     const unsigned char *path );
 int jxtl_path_eval( apr_pool_t *mp, const unsigned char *path, json_t *json,
 		    jxtl_path_obj_t **obj_ptr );
 int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
                              json_t *json, jxtl_path_obj_t **obj_ptr );
+
+
 
 #endif

@@ -9,11 +9,18 @@
 #include "jxtl_path.h"
 #include "jxtl_path_parse.h"
 #include "jxtl_path_lex.h"
-#include "lex_extra.h"
+#include "parser.h"
 
 #define NODELIST_SIZE 1024
 
-jxtl_path_obj_t *jxtl_path_obj_create( apr_pool_t *mp )
+static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
+                                     json_t *json,
+                                     apr_array_header_t *nodes );
+static void jxtl_path_test_node( jxtl_path_expr_t *expr,
+                                 json_t *json,
+                                 apr_array_header_t *nodes );
+
+static jxtl_path_obj_t *jxtl_path_obj_create( apr_pool_t *mp )
 {
   jxtl_path_obj_t *path_obj;
 
@@ -23,196 +30,6 @@ jxtl_path_obj_t *jxtl_path_obj_create( apr_pool_t *mp )
 
   return path_obj;
 }
-
-static void expr_add( jxtl_data *data, jxtl_path_expr_t *expr )
-{
-  if ( !data->root ) {
-    data->root = expr;
-  }
-
-  if ( !data->curr ) {
-    data->curr = expr;
-  }
-  else {
-    data->curr->next = expr;
-    data->curr = expr;
-  }
-}
-
-static void jxtl_path_expr_create( jxtl_data *data,
-				   jxtl_path_expr_type type,
-				   unsigned char *identifier )
-{
-  jxtl_path_expr_t *expr;
-
-  expr = apr_palloc( data->mp, sizeof( jxtl_path_expr_t ) );
-  expr->type = type;
-  expr->identifier = identifier;
-  expr->root = ( data->root ) ? data->root : expr;
-  expr->next = NULL;
-  expr->predicate = NULL;
-  expr->negate = 0;
-  expr_add( data, expr );
-}
-
-/*****************************************************************************
- * Parser callbacks
- *****************************************************************************/
-
-/**
- * Request to lookup an identifier.
- */
-void jxtl_path_identifier( void *user_data, unsigned char *ident )
-{
-  jxtl_data *data = (jxtl_data *) user_data;
-  jxtl_path_expr_create( data, JXTL_PATH_LOOKUP,
-                         (unsigned char *) apr_pstrdup( data->mp,
-                                                        (char *) ident ) );
-}
-
-/**
- * Request for the root object.
- */
-void jxtl_path_root_object( void *user_data )
-{
-  jxtl_path_expr_create( user_data, JXTL_PATH_ROOT_OBJ, NULL );
-}
-
-void jxtl_path_parent_object( void *user_data )
-{
-  jxtl_path_expr_create( user_data, JXTL_PATH_PARENT_OBJ, NULL );
-}
-
-/**
- * Request for the current object.
- */
-void jxtl_path_current_object( void *user_data )
-{
-  jxtl_path_expr_create( user_data, JXTL_PATH_CURRENT_OBJ, NULL );
-
-}
-
-/**
- * Request for all children.
- */
-void jxtl_path_any_object( void *user_data )
-{
-  jxtl_path_expr_create( user_data, JXTL_PATH_ANY_OBJ, NULL );
-}
-
-/**
- * Start a predicate.  Push the current expression node on our stack and set
- * root and curr to NULL.
- */
-void jxtl_path_predicate_start( void *user_data )
-{
-  jxtl_data *data = (jxtl_data *) user_data;
-
-  APR_ARRAY_PUSH( data->expr_array, jxtl_path_expr_t * ) = data->curr;
-
-  data->root = NULL;
-  data->curr = NULL;
-}
-
-/**
- * End a predicate.  Pop off the previous expression node, set it's predicate
- * to be this expression and reset the curr and root pointers from what we
- * popped.
- */
-void jxtl_path_predicate_end( void *user_data )
-{
-  jxtl_data *data = (jxtl_data *) user_data;
-  jxtl_path_expr_t *expr;
-  expr = APR_ARRAY_POP( data->expr_array, jxtl_path_expr_t * );
-
-  expr->predicate = data->root;
-  data->curr = expr;
-  data->root = expr->root;
-}
-
-/**
- * Negate the current expression.
- */
-void jxtl_path_negate( void *user_data )
-{
-  jxtl_data *data = (jxtl_data *) user_data;
-  data->root->negate = 1;
-}
-
-/*****************************************************************************
- * End of parser callback functions.
- *****************************************************************************/
-
-jxtl_path_builder_t *jxtl_path_builder_create( apr_pool_t *mp )
-{
-  jxtl_path_builder_t *path_builder;
-
-  path_builder = apr_palloc( mp, sizeof(jxtl_path_builder_t) );
-  path_builder->mp = mp;
-  path_builder->data.expr_array = apr_array_make( mp, 32,
-                                                  sizeof(jxtl_path_expr_t *) );
-  path_builder->data.mp = path_builder->mp;
-  path_builder->data.root = NULL;
-  path_builder->data.curr = NULL;
-
-  path_builder->callbacks.identifier_handler = jxtl_path_identifier;
-  path_builder->callbacks.root_object_handler = jxtl_path_root_object;
-  path_builder->callbacks.parent_object_handler = jxtl_path_parent_object;
-  path_builder->callbacks.current_object_handler = jxtl_path_current_object;
-  path_builder->callbacks.any_object_handler = jxtl_path_any_object;
-  path_builder->callbacks.predicate_start_handler = jxtl_path_predicate_start;
-  path_builder->callbacks.predicate_end_handler = jxtl_path_predicate_end;
-  path_builder->callbacks.negate_handler = jxtl_path_negate;
-  path_builder->callbacks.user_data = &path_builder->data;
-
-  jxtl_path_lex_init( &path_builder->scanner );
-  apr_pool_cleanup_register( mp, path_builder->scanner, jxtl_path_lex_destroy,
-                             apr_pool_cleanup_null );
-  lex_extra_init( &path_builder->lex_extra, NULL );
-  jxtl_path_set_extra( &path_builder->lex_extra, path_builder->scanner );
-
-  return path_builder;
-}
-
-/**
- * Compile a JSON Path expression.
- */
-jxtl_path_expr_t *jxtl_path_compile( jxtl_path_builder_t *path_builder,
-                                     const unsigned char *path )
-{
-  YY_BUFFER_STATE buffer_state;
-  int parse_result;
-  char *eval_str;
-  int eval_str_len;
-
-  APR_ARRAY_CLEAR( path_builder->data.expr_array );
-  path_builder->data.root = NULL;
-  path_builder->data.curr = NULL;
-
-  /*
-   * Set up eval_str for flex.  Flex requires the last two bytes of a string
-   * passed to yy_scan_buffer be the null terminator.
-   */
-  eval_str_len = strlen( (char*) path ) + 2;
-  eval_str = apr_palloc( path_builder->mp, eval_str_len );
-  apr_cpystrn( eval_str, (char *) path, eval_str_len - 1 );
-  eval_str[eval_str_len - 1] = '\0';
-
-  buffer_state = jxtl_path__scan_buffer( eval_str, eval_str_len,
-                                         path_builder->scanner );
-  parse_result = jxtl_path_parse( path_builder->scanner,
-                                  &path_builder->callbacks );
-  jxtl_path__delete_buffer( buffer_state, path_builder->scanner );
-  
-  return path_builder->data.root;
-}
-
-static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
-                                     json_t *json,
-                                     apr_array_header_t *nodes );
-static void jxtl_path_test_node( jxtl_path_expr_t *expr,
-                                 json_t *json,
-                                 apr_array_header_t *nodes );
 
 /**
  * Finish a predicate.  If it evaluated to true and the expression is done,
@@ -357,30 +174,6 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
 }
 
 /**
- * Evaluate the given path expression in the context of json.
- * Returns the number of nodes selected.
- */
-int jxtl_path_eval( apr_pool_t *mp, const unsigned char *path, json_t *json,
-		    jxtl_path_obj_t **obj_ptr )
-{
-  jxtl_path_builder_t *path_builder;
-  jxtl_path_expr_t *expr;
-  jxtl_path_obj_t *obj;
-  int negate;
-
-  APR_ARRAY_CLEAR( obj->nodes );
-
-  path_builder = jxtl_path_builder_create( mp );
-  obj = jxtl_path_obj_create( mp );
-  expr = jxtl_path_compile( path_builder, path );
-  negate = expr->negate;
-  jxtl_path_eval_internal( expr, json, obj->nodes );
-  *obj_ptr = obj;
-
-  return ( negate ) ? !obj->nodes->nelts : obj->nodes->nelts;
-}
-
-/**
  * Evaluate a pre-compiled expression.  Returns the number of nodes.
  */
 int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
@@ -392,4 +185,25 @@ int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
   *obj_ptr = obj;
 
   return expr->negate ? !obj->nodes->nelts : obj->nodes->nelts;
+}
+
+/**
+ * Evaluate the given path expression in the context of json.
+ * Returns the number of nodes selected or -1 if there was an error parsing
+ * the expression.
+ */
+int jxtl_path_eval( apr_pool_t *mp, const unsigned char *path, json_t *json,
+		    jxtl_path_obj_t **obj_ptr )
+{
+  jxtl_path_expr_t *expr;
+  parser_t *parser;
+
+  parser = jxtl_path_parser_create( mp );
+
+  if ( jxtl_path_parser_parse_buffer( parser, path, &expr ) == APR_SUCCESS ) {
+    return jxtl_path_compiled_eval( mp, expr, json, obj_ptr );
+  }
+  else {
+    return -1;
+  }
 }

@@ -17,10 +17,10 @@
 #define YY_DECL int json_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
 
 #define json_lex_error( ... ) \
-  json_error( yylloc, yyscanner, NULL, __VA_ARGS__ )
+  json_error( yylloc, yyscanner, PARSER, NULL, __VA_ARGS__ )
 
-void json_error( YYLTYPE *yylloc, yyscan_t scanner, json_callback_t *callbacks,
-		 const char *error_string, ... );
+void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
+                 json_callback_t *callbacks, const char *error_string, ... );
 %}
 
 %option prefix="json_"

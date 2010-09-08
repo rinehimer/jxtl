@@ -96,23 +96,15 @@
  */
 #define YY_DECL
 
+#include "apr_macros.h"
 #include "jxtl_path_parse.h"
 #include "jxtl_path_lex.h"
 #include "jxtl_path.h"
 
-#define identifier_handler callbacks->identifier_handler
-#define root_object_handler callbacks->root_object_handler
-#define parent_object_handler callbacks->parent_object_handler
-#define current_object_handler callbacks->current_object_handler
-#define any_object_handler callbacks->any_object_handler
-#define predicate_start_handler callbacks->predicate_start_handler
-#define predicate_end_handler callbacks->predicate_end_handler
-#define negate_handler callbacks->negate_handler
-#define user_data callbacks->user_data
+#define callbacks ((jxtl_path_callback_t *) callbacks_ptr)
 
-void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner,
-		      jxtl_path_callback_t *callbacks,
-		      const char *error_string, ... );
+void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
+                      void *callbacks_ptr, const char *error_string, ... );
 
 
 /* Enabling traces.  */
@@ -135,13 +127,13 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner,
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 41 "jxtl_path_parse.y"
+#line 34 "jxtl_path_parse.y"
 {
   int ival;
   unsigned char *string;
 }
-/* Line 193 of yacc.c.  */
-#line 145 "jxtl_path_parse.c"
+/* Line 187 of yacc.c.  */
+#line 137 "jxtl_path_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -166,7 +158,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 170 "jxtl_path_parse.c"
+#line 162 "jxtl_path_parse.c"
 
 #ifdef short
 # undef short
@@ -453,8 +445,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    54,    54,    55,    59,    59,    60,    64,    64,    65,
-      66,    67,    67,    68,    71,    73,    73
+       0,    47,    47,    48,    52,    52,    53,    57,    57,    59,
+      60,    61,    61,    62,    65,    67,    67
 };
 #endif
 
@@ -583,7 +575,7 @@ do								\
     }								\
   else								\
     {								\
-      yyerror (&yylloc, scanner, callbacks, YY_("syntax error: cannot back up")); \
+      yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("syntax error: cannot back up")); \
       YYERROR;							\
     }								\
 while (YYID (0))
@@ -663,7 +655,7 @@ do {									  \
     {									  \
       YYFPRINTF (stderr, "%s ", Title);					  \
       yy_symbol_print (stderr,						  \
-		  Type, Value, Location, scanner, callbacks); \
+		  Type, Value, Location, scanner, parser, callbacks_ptr); \
       YYFPRINTF (stderr, "\n");						  \
     }									  \
 } while (YYID (0))
@@ -677,23 +669,25 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, jxtl_path_callback_t *callbacks)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
+yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
     yyscan_t scanner;
-    jxtl_path_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   if (!yyvaluep)
     return;
   YYUSE (yylocationp);
   YYUSE (scanner);
-  YYUSE (callbacks);
+  YYUSE (parser);
+  YYUSE (callbacks_ptr);
 # ifdef YYPRINT
   if (yytype < YYNTOKENS)
     YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
@@ -715,16 +709,17 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbac
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, jxtl_path_callback_t *callbacks)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
+yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
     yyscan_t scanner;
-    jxtl_path_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -734,7 +729,7 @@ yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
 
   YY_LOCATION_PRINT (yyoutput, *yylocationp);
   YYFPRINTF (yyoutput, ": ");
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks);
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -774,15 +769,16 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, yyscan_t scanner, jxtl_path_callback_t *callbacks)
+yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yy_reduce_print (yyvsp, yylsp, yyrule, scanner, callbacks)
+yy_reduce_print (yyvsp, yylsp, yyrule, scanner, parser, callbacks_ptr)
     YYSTYPE *yyvsp;
     YYLTYPE *yylsp;
     int yyrule;
     yyscan_t scanner;
-    jxtl_path_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -796,7 +792,7 @@ yy_reduce_print (yyvsp, yylsp, yyrule, scanner, callbacks)
       fprintf (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
-		       , &(yylsp[(yyi + 1) - (yynrhs)])		       , scanner, callbacks);
+		       , &(yylsp[(yyi + 1) - (yynrhs)])		       , scanner, parser, callbacks_ptr);
       fprintf (stderr, "\n");
     }
 }
@@ -804,7 +800,7 @@ yy_reduce_print (yyvsp, yylsp, yyrule, scanner, callbacks)
 # define YY_REDUCE_PRINT(Rule)		\
 do {					\
   if (yydebug)				\
-    yy_reduce_print (yyvsp, yylsp, Rule, scanner, callbacks); \
+    yy_reduce_print (yyvsp, yylsp, Rule, scanner, parser, callbacks_ptr); \
 } while (YYID (0))
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1055,22 +1051,24 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, yyscan_t scanner, jxtl_path_callback_t *callbacks)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yydestruct (yymsg, yytype, yyvaluep, yylocationp, scanner, callbacks)
+yydestruct (yymsg, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr)
     const char *yymsg;
     int yytype;
     YYSTYPE *yyvaluep;
     YYLTYPE *yylocationp;
     yyscan_t scanner;
-    jxtl_path_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   YYUSE (yyvaluep);
   YYUSE (yylocationp);
   YYUSE (scanner);
-  YYUSE (callbacks);
+  YYUSE (parser);
+  YYUSE (callbacks_ptr);
 
   if (!yymsg)
     yymsg = "Deleting";
@@ -1095,7 +1093,7 @@ int yyparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int yyparse (yyscan_t scanner, jxtl_path_callback_t *callbacks);
+int yyparse (yyscan_t scanner, parser_t *parser, void *callbacks_ptr);
 #else
 int yyparse ();
 #endif
@@ -1124,12 +1122,13 @@ yyparse (YYPARSE_PARAM)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 int
-yyparse (yyscan_t scanner, jxtl_path_callback_t *callbacks)
+yyparse (yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 int
-yyparse (scanner, callbacks)
+yyparse (scanner, parser, callbacks_ptr)
     yyscan_t scanner;
-    jxtl_path_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 #endif
 {
@@ -1400,43 +1399,44 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 54 "jxtl_path_parse.y"
-    { negate_handler( user_data ); }
+#line 47 "jxtl_path_parse.y"
+    { callbacks->negate_handler( callbacks->user_data ); }
     break;
 
   case 4:
-#line 59 "jxtl_path_parse.y"
-    { root_object_handler( user_data ); }
+#line 52 "jxtl_path_parse.y"
+    { callbacks->root_object_handler( callbacks->user_data ); }
     break;
 
   case 7:
-#line 64 "jxtl_path_parse.y"
-    { identifier_handler( user_data, (yyvsp[(1) - (1)].string) ); }
+#line 57 "jxtl_path_parse.y"
+    { callbacks->identifier_handler( callbacks->user_data,
+                                                  (yyvsp[(1) - (1)].string) ); }
     break;
 
   case 9:
-#line 65 "jxtl_path_parse.y"
-    { current_object_handler( user_data ); }
+#line 59 "jxtl_path_parse.y"
+    { callbacks->current_object_handler( callbacks->user_data ); }
     break;
 
   case 10:
-#line 66 "jxtl_path_parse.y"
-    { parent_object_handler( user_data ); }
+#line 60 "jxtl_path_parse.y"
+    { callbacks->parent_object_handler( callbacks->user_data ); }
     break;
 
   case 11:
-#line 67 "jxtl_path_parse.y"
-    { any_object_handler( user_data ); }
+#line 61 "jxtl_path_parse.y"
+    { callbacks->any_object_handler( callbacks->user_data ); }
     break;
 
   case 15:
-#line 73 "jxtl_path_parse.y"
-    { predicate_start_handler( user_data ); }
+#line 67 "jxtl_path_parse.y"
+    { callbacks->predicate_start_handler( callbacks->user_data ); }
     break;
 
   case 16:
-#line 74 "jxtl_path_parse.y"
-    { predicate_end_handler( user_data ); }
+#line 69 "jxtl_path_parse.y"
+    { callbacks->predicate_end_handler( callbacks->user_data ); }
     break;
 
 
@@ -1477,7 +1477,7 @@ yyerrlab:
     {
       ++yynerrs;
 #if ! YYERROR_VERBOSE
-      yyerror (&yylloc, scanner, callbacks, YY_("syntax error"));
+      yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("syntax error"));
 #else
       {
 	YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
@@ -1501,11 +1501,11 @@ yyerrlab:
 	if (0 < yysize && yysize <= yymsg_alloc)
 	  {
 	    (void) yysyntax_error (yymsg, yystate, yychar);
-	    yyerror (&yylloc, scanner, callbacks, yymsg);
+	    yyerror (&yylloc, scanner, parser, callbacks_ptr, yymsg);
 	  }
 	else
 	  {
-	    yyerror (&yylloc, scanner, callbacks, YY_("syntax error"));
+	    yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("syntax error"));
 	    if (yysize != 0)
 	      goto yyexhaustedlab;
 	  }
@@ -1529,7 +1529,7 @@ yyerrlab:
       else
 	{
 	  yydestruct ("Error: discarding",
-		      yytoken, &yylval, &yylloc, scanner, callbacks);
+		      yytoken, &yylval, &yylloc, scanner, parser, callbacks_ptr);
 	  yychar = YYEMPTY;
 	}
     }
@@ -1586,7 +1586,7 @@ yyerrlab1:
 
       yyerror_range[0] = *yylsp;
       yydestruct ("Error: popping",
-		  yystos[yystate], yyvsp, yylsp, scanner, callbacks);
+		  yystos[yystate], yyvsp, yylsp, scanner, parser, callbacks_ptr);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -1629,7 +1629,7 @@ yyabortlab:
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
-  yyerror (&yylloc, scanner, callbacks, YY_("memory exhausted"));
+  yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("memory exhausted"));
   yyresult = 2;
   /* Fall through.  */
 #endif
@@ -1637,7 +1637,7 @@ yyexhaustedlab:
 yyreturn:
   if (yychar != YYEOF && yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval, &yylloc, scanner, callbacks);
+		 yytoken, &yylval, &yylloc, scanner, parser, callbacks_ptr);
   /* Do not reclaim the symbols of the rule which action triggered
      this YYABORT or YYACCEPT.  */
   YYPOPSTACK (yylen);
@@ -1645,7 +1645,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-		  yystos[*yyssp], yyvsp, yylsp, scanner, callbacks);
+		  yystos[*yyssp], yyvsp, yylsp, scanner, parser, callbacks_ptr);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -1661,12 +1661,129 @@ yyreturn:
 }
 
 
-#line 77 "jxtl_path_parse.y"
+#line 72 "jxtl_path_parse.y"
 
 
-void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner,
-		      jxtl_path_callback_t *callbacks,
-		      const char *error_string, ... )
+typedef struct jxtl_path_data_t {
+  apr_pool_t *mp;
+  /** Array to store the current expression.  */
+  apr_array_header_t *expr_array;
+  /** Root of the path expression. */
+  jxtl_path_expr_t *root;
+  /** The current expression. */ 
+  jxtl_path_expr_t *curr;
+}jxtl_path_data_t;
+
+static void jxtl_path_expr_create( jxtl_path_data_t *data,
+				   jxtl_path_expr_type type,
+				   unsigned char *identifier )
+{
+  jxtl_path_expr_t *expr;
+
+  expr = apr_palloc( data->mp, sizeof( jxtl_path_expr_t ) );
+  expr->type = type;
+  expr->identifier = identifier;
+  expr->root = ( data->root ) ? data->root : expr;
+  expr->next = NULL;
+  expr->predicate = NULL;
+  expr->negate = 0;
+
+  if ( !data->root ) {
+    data->root = expr;
+  }
+
+  if ( !data->curr ) {
+    data->curr = expr;
+  }
+  else {
+    data->curr->next = expr;
+    data->curr = expr;
+  }
+}
+
+/**
+ * Request to lookup an identifier.
+ */
+static void jxtl_path_identifier( void *user_data, unsigned char *ident )
+{
+  jxtl_path_data_t *data = (jxtl_path_data_t *) user_data;
+  jxtl_path_expr_create( data, JXTL_PATH_LOOKUP,
+                         (unsigned char *) apr_pstrdup( data->mp,
+                                                        (char *) ident ) );
+}
+
+/**
+ * Request for the root object.
+ */
+static void jxtl_path_root_object( void *user_data )
+{
+  jxtl_path_expr_create( user_data, JXTL_PATH_ROOT_OBJ, NULL );
+}
+
+static void jxtl_path_parent_object( void *user_data )
+{
+  jxtl_path_expr_create( user_data, JXTL_PATH_PARENT_OBJ, NULL );
+}
+
+/**
+ * Request for the current object.
+ */
+static void jxtl_path_current_object( void *user_data )
+{
+  jxtl_path_expr_create( user_data, JXTL_PATH_CURRENT_OBJ, NULL );
+
+}
+
+/**
+ * Request for all children.
+ */
+static void jxtl_path_any_object( void *user_data )
+{
+  jxtl_path_expr_create( user_data, JXTL_PATH_ANY_OBJ, NULL );
+}
+
+/**
+ * Start a predicate.  Push the current expression node on our stack and set
+ * root and curr to NULL.
+ */
+static void jxtl_path_predicate_start( void *user_data )
+{
+  jxtl_path_data_t *data = (jxtl_path_data_t *) user_data;
+
+  APR_ARRAY_PUSH( data->expr_array, jxtl_path_expr_t * ) = data->curr;
+
+  data->root = NULL;
+  data->curr = NULL;
+}
+
+/**
+ * End a predicate.  Pop off the previous expression node, set it's predicate
+ * to be this expression and reset the curr and root pointers from what we
+ * popped.
+ */
+static void jxtl_path_predicate_end( void *user_data )
+{
+  jxtl_path_data_t *data = (jxtl_path_data_t *) user_data;
+  jxtl_path_expr_t *expr;
+  expr = APR_ARRAY_POP( data->expr_array, jxtl_path_expr_t * );
+
+  expr->predicate = data->root;
+  data->curr = expr;
+  data->root = expr->root;
+}
+
+/**
+ * Negate the current expression.
+ */
+static void jxtl_path_negate( void *user_data )
+{
+  jxtl_path_data_t *data = (jxtl_path_data_t *) user_data;
+  data->root->negate = 1;
+}
+
+
+void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
+		      void *callbacks_ptr, const char *error_string, ... )
 {
   va_list args;
   fprintf( stderr, "%d: ", yylloc->first_line );
@@ -1674,5 +1791,60 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner,
   vfprintf( stderr, error_string, args );
   va_end( args );
   fprintf( stderr, " near column %d\n", yylloc->first_column + 1 );
+}
+
+parser_t *jxtl_path_parser_create( apr_pool_t *mp )
+{
+  parser_t *parser = parser_create( mp,
+				    jxtl_path_lex_init,
+				    jxtl_path_set_extra,
+				    jxtl_path_lex_destroy,
+				    jxtl_path__scan_buffer,
+				    jxtl_path__delete_buffer,
+				    jxtl_path_parse );
+  jxtl_path_callback_t *jxtl_callbacks;
+  jxtl_path_data_t *jxtl_data;
+
+  jxtl_callbacks = apr_palloc( mp, sizeof(jxtl_path_callback_t) );
+  
+  jxtl_callbacks->identifier_handler = jxtl_path_identifier;
+  jxtl_callbacks->root_object_handler = jxtl_path_root_object;
+  jxtl_callbacks->parent_object_handler = jxtl_path_parent_object;
+  jxtl_callbacks->current_object_handler = jxtl_path_current_object;
+  jxtl_callbacks->any_object_handler = jxtl_path_any_object;
+  jxtl_callbacks->predicate_start_handler = jxtl_path_predicate_start;
+  jxtl_callbacks->predicate_end_handler = jxtl_path_predicate_end;
+  jxtl_callbacks->negate_handler = jxtl_path_negate;
+
+  jxtl_data = apr_palloc( mp, sizeof(jxtl_path_data_t) );
+  jxtl_data->expr_array = apr_array_make( mp, 32, sizeof(jxtl_path_expr_t *) );
+  jxtl_data->mp = mp;
+  jxtl_data->root = NULL;
+  jxtl_data->curr = NULL;
+
+  jxtl_callbacks->user_data = jxtl_data;
+
+  parser_set_user_data( parser, jxtl_callbacks );
+
+  return parser;
+}
+
+int *jxtl_path_parser_parse_buffer( parser_t *parser,
+                                    const unsigned char *path,
+                                    jxtl_path_expr_t **expr )
+{
+  jxtl_path_callback_t *jxtl_callbacks = parser_get_user_data( parser );
+  jxtl_path_data_t *jxtl_data = jxtl_callbacks->user_data;
+
+  APR_ARRAY_CLEAR( jxtl_data->expr_array );
+  jxtl_data->root = NULL;
+  jxtl_data->curr = NULL;
+  *expr = NULL;
+
+  if ( parser_parse_buffer( parser, path ) == 0 ) {
+    *expr = jxtl_data->root;
+  }
+
+  return parser->parse_result;
 }
 

@@ -9,6 +9,7 @@
 #include "jxtl_path.h"
 #include "json_writer.h"
 #include "json_parser.h"
+#include "parser.h"
 
 #include "jxtl.h"
 #include "jxtl_parse.h"
@@ -63,8 +64,8 @@ typedef struct jxtl_data_t {
   apr_array_header_t *current_array;
   /** Array of content arrays. */
   apr_array_header_t *content_array;
-  /** Reusable path builder. */
-  jxtl_path_builder_t *path_builder;
+  /** Reusable parser. */
+  parser_t *jxtl_path_parser;
 } jxtl_data_t;
 
 static void json_value_print( json_t *json )
@@ -255,7 +256,7 @@ void jxtl_section_start( void *user_data, unsigned char *expr )
   jxtl_section_t *section;
 
   section = apr_palloc( data->mp, sizeof( jxtl_section_t ) );
-  section->expr = jxtl_path_compile( data->path_builder, expr );
+  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &section->expr );
   section->content = apr_array_make( data->mp, 1024,
                                      sizeof( jxtl_content_t * ) );
   section->separator = apr_array_make( data->mp, 1024,
@@ -296,7 +297,7 @@ void jxtl_if_start( void *user_data, unsigned char *expr )
 
   if_block = apr_array_make( data->mp, 8, sizeof( jxtl_if_t * ) );
   jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
-  jxtl_if->expr = jxtl_path_compile( data->path_builder, expr );
+  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &jxtl_if->expr );
   jxtl_if->content = apr_array_make( data->mp, 1024,
                                      sizeof( jxtl_content_t * ) );
   APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
@@ -318,7 +319,7 @@ void jxtl_elseif( void *user_data, unsigned char *expr )
   content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
   if_block = (apr_array_header_t *) content->value;
   jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
-  jxtl_if->expr = jxtl_path_compile( data->path_builder, expr );
+  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &jxtl_if->expr );
   jxtl_if->content = apr_array_make( data->mp, 1024,
                                      sizeof( jxtl_content_t * ) );
   APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
@@ -402,16 +403,20 @@ void jxtl_value_func( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   json_t *json_value;
+  jxtl_path_expr_t *path_expr;
 
   if ( !apr_is_empty_array( data->content_array ) ) {
-    jxtl_content_push( data, JXTL_VALUE,
-                       jxtl_path_compile( data->path_builder, expr ) );
-  }
+    jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &path_expr );
+    jxtl_content_push( data, JXTL_VALUE, path_expr );
+   }
   else {
     jxtl_path_obj_t *path_obj;
-    jxtl_path_eval( data->mp, expr, data->json, &path_obj );
-    json_value = APR_ARRAY_IDX( path_obj->nodes, 0, json_t * );
-    json_value_print( json_value );
+    if ( jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
+                                        &path_expr ) == APR_SUCCESS ) {
+      jxtl_path_compiled_eval( data->mp, path_expr, data->json, &path_obj );
+      json_value = APR_ARRAY_IDX( path_obj->nodes, 0, json_t * );
+      json_value_print( json_value );
+    }
     apr_pool_clear( data->mp );
   }
 }
@@ -553,7 +558,7 @@ int main( int argc, char const * const *argv )
     &jxtl_data
   };
 
-  jxtl_data.path_builder = jxtl_path_builder_create( mp );
+  jxtl_data.jxtl_path_parser = jxtl_path_parser_create( mp );
 
   if ( jxtl_load_data( mp, json_file, xml_file, skip_root,
 		       &jxtl_data.json ) == 0 ) {
