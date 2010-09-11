@@ -40,13 +40,15 @@ struct parser_t {
   /* Number of bytes read from the file. */
   apr_size_t bytes;
   /* A scanner object. */
-  void *scanner;
+  yyscan_t scanner;
   /* Result of parsing. */
   int parse_result;
+  /* If errors occur during parsing and we want to save them. */
+  apr_array_header_t *error_array;
   /* User data. */
   void *user_data;
   const char * ( *get_filename )( struct parser_t * );
-  /* Function pointers */
+  /* Pointers to scanner and parser functions. */
   flex_init_func flex_init;
   flex_set_extra_func flex_set_extra;
   flex_destroy_func flex_destroy;
@@ -76,10 +78,31 @@ parser_t *parser_create( apr_pool_t *mp,
 
 /**
  * Parse a file.
- * @param A parser.
- * @param The filename to parse.
+ * @param parser A parser.
+ * @param file The filename to parse.
  * @return A status code.
  */
 apr_status_t parser_parse_file( parser_t *parser, const char *file );
+
+/**
+ * Set the user data for a parser.  This will be passed to the bison_parse_func
+ * as the third parameter.
+ * @param parser A parser.
+ * @param user_data Pointer to the user data.
+ */
+void parser_set_user_data( parser_t *parser, void *user_data );
+
+/**
+ * Return the stored user data for this parser.
+ * @param parser A parser.
+ * @return A pointer to the user data.
+ */
+void *parser_get_user_data( parser_t *parser );
+
+/**
+ * Print out any errors saved off during parsing.
+ * @param parser A parser.
+ */
+void parser_print_error( parser_t *parser );
 
 #endif

@@ -1,3 +1,4 @@
+#include <apr_general.h>
 #include <apr_getopt.h>
 #include <apr_pools.h>
 #include <apr_strings.h>
@@ -250,7 +251,7 @@ void jxtl_text_func( void *user_data, unsigned char *text )
   }
 }
 
-void jxtl_section_start( void *user_data, unsigned char *expr )
+int jxtl_section_start( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_section_t *section;
@@ -265,6 +266,8 @@ void jxtl_section_start( void *user_data, unsigned char *expr )
   APR_ARRAY_PUSH( data->content_array,
                   apr_array_header_t * ) = data->current_array;
   data->current_array = section->content;
+
+  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
 }
 
 /**
@@ -289,7 +292,7 @@ void jxtl_section_end( void *user_data )
   }
 }
 
-void jxtl_if_start( void *user_data, unsigned char *expr )
+int jxtl_if_start( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_if_t *jxtl_if;
@@ -306,9 +309,11 @@ void jxtl_if_start( void *user_data, unsigned char *expr )
   APR_ARRAY_PUSH( data->content_array,
                   apr_array_header_t * ) = data->current_array;
   data->current_array = jxtl_if->content;
+
+  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
 }
 
-void jxtl_elseif( void *user_data, unsigned char *expr )
+int jxtl_elseif( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   apr_array_header_t *content_array, *if_block;
@@ -324,6 +329,8 @@ void jxtl_elseif( void *user_data, unsigned char *expr )
                                      sizeof( jxtl_content_t * ) );
   APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
   data->current_array = jxtl_if->content;
+
+  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
 }
 
 void jxtl_else( void *user_data )
@@ -399,7 +406,7 @@ void jxtl_separator_end( void *user_data )
  * @param user_data The jxtl_data.
  * @param name The name of the value to lookup.
  */
-void jxtl_value_func( void *user_data, unsigned char *expr )
+int jxtl_value_func( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   json_t *json_value;
@@ -419,6 +426,8 @@ void jxtl_value_func( void *user_data, unsigned char *expr )
     }
     apr_pool_clear( data->mp );
   }
+
+  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
 }
 
 void jxtl_usage( const char *prog_name,

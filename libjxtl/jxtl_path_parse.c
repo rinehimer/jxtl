@@ -1701,6 +1701,10 @@ static void jxtl_path_expr_create( jxtl_path_data_t *data,
   }
 }
 
+/*****************************************************************************
+ Begin parser callback functions.
+ *****************************************************************************/
+
 /**
  * Request to lookup an identifier.
  */
@@ -1781,16 +1785,19 @@ static void jxtl_path_negate( void *user_data )
   data->root->negate = 1;
 }
 
+/*****************************************************************************
+ End parser callback functions.
+ *****************************************************************************/
 
 void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 		      void *callbacks_ptr, const char *error_string, ... )
 {
   va_list args;
-  fprintf( stderr, "%d: ", yylloc->first_line );
+  char *str;
   va_start( args, error_string);
-  vfprintf( stderr, error_string, args );
+  str = apr_pvsprintf( parser->mp, error_string, args );
+  APR_ARRAY_PUSH( parser->error_array, char * ) = str;
   va_end( args );
-  fprintf( stderr, " near column %d\n", yylloc->first_column + 1 );
 }
 
 parser_t *jxtl_path_parser_create( apr_pool_t *mp )

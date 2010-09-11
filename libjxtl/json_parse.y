@@ -108,11 +108,11 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 		 void *callbacks_ptr, const char *error_string, ... )
 {
   va_list args;
-  char *filename;
+
   fprintf( stderr, "%s: %d.%d-%d.%d ", parser->get_filename( parser ),
 	   yylloc->first_line, yylloc->first_column, yylloc->last_line,
 	   yylloc->last_column );
-  va_start( args, error_string);
+  va_start( args, error_string );
   vfprintf( stderr, error_string, args );
   va_end( args );
   fprintf( stderr, "\n" );
