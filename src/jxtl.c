@@ -20,6 +20,7 @@
 
 /** Constants used for calling the print function */
 typedef enum section_print_type {
+  PRINT_NORMAL,
   PRINT_SECTION,
   PRINT_SEPARATOR
 } section_print_type;
@@ -165,7 +166,7 @@ static void jxtl_content_print( apr_pool_t *mp,
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
         if ( !jxtl_if->expr ||
              jxtl_path_compiled_eval( mp, jxtl_if->expr, json, &path_obj ) ) {
-          jxtl_content_print( mp, jxtl_if->content, json, print_type );
+          jxtl_content_print( mp, jxtl_if->content, json, PRINT_SECTION );
           break;
         }
       }
@@ -239,16 +240,7 @@ static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
 void jxtl_text_func( void *user_data, unsigned char *text )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-
-  if ( !apr_is_empty_array( data->content_array ) ) {
-    /* Save off the text if we are nested. */
-    jxtl_content_push( data, JXTL_TEXT,
-                       apr_pstrdup( data->mp, (char *) text ) );
-  }
-  else {
-    /* Not inside any sections print the text. */
-    printf( "%s", text );
-  }
+  jxtl_content_push( data, JXTL_TEXT, apr_pstrdup( data->mp, (char *) text ) );
 }
 
 int jxtl_section_start( void *user_data, unsigned char *expr )
@@ -281,15 +273,6 @@ void jxtl_section_end( void *user_data )
 
   data->current_array = APR_ARRAY_POP( data->content_array,
                                        apr_array_header_t * );
-  
-  if ( apr_is_empty_array( data->content_array ) ) {
-    /* Process saved document fragment */
-    jxtl_content_print( data->mp, data->current_array, data->json,
-                        PRINT_SECTION );
-    /* Clear the pool when we finish a section. */
-    APR_ARRAY_CLEAR( data->current_array );
-    apr_pool_clear( data->mp );
-  }
 }
 
 int jxtl_if_start( void *user_data, unsigned char *expr )
@@ -358,12 +341,6 @@ void jxtl_if_end( void *user_data )
   
   data->current_array = APR_ARRAY_POP( data->content_array,
                                        apr_array_header_t * );
-  if ( apr_is_empty_array( data->content_array ) ) {
-    jxtl_content_print( data->mp, data->current_array, data->json,
-                        PRINT_SECTION );
-    APR_ARRAY_CLEAR( data->current_array );
-    apr_pool_clear( data->mp );
-  }
 }
 
 /**
@@ -412,20 +389,8 @@ int jxtl_value_func( void *user_data, unsigned char *expr )
   json_t *json_value;
   jxtl_path_expr_t *path_expr;
 
-  if ( !apr_is_empty_array( data->content_array ) ) {
-    jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &path_expr );
-    jxtl_content_push( data, JXTL_VALUE, path_expr );
-   }
-  else {
-    jxtl_path_obj_t *path_obj;
-    if ( jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
-                                        &path_expr ) == APR_SUCCESS ) {
-      jxtl_path_compiled_eval( data->mp, path_expr, data->json, &path_obj );
-      json_value = APR_ARRAY_IDX( path_obj->nodes, 0, json_t * );
-      json_value_print( json_value );
-    }
-    apr_pool_clear( data->mp );
-  }
+  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &path_expr );
+  jxtl_content_push( data, JXTL_VALUE, path_expr );
 
   return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
 }
@@ -551,7 +516,10 @@ int main( int argc, char const * const *argv )
   jxtl_data.content_array = apr_array_make( mp, 32,
                                             sizeof(apr_array_header_t *) );
   jxtl_data.current_array = apr_array_make( mp, 1024,
-                                            sizeof(jxtl_section_t *) );
+                                            sizeof(apr_array_header_t *) );
+  apr_array_header_t *content = apr_array_make( mp, 1024,
+                                                sizeof( jxtl_content_t * ) );
+  APR_ARRAY_PUSH( jxtl_data.current_array, apr_array_header_t * ) = content;
 
   jxtl_callback_t callbacks = {
     jxtl_text_func,
@@ -575,6 +543,8 @@ int main( int argc, char const * const *argv )
     lex_extra_init( &lex_extra, template_file );
     jxtl_set_extra( &lex_extra, jxtl_scanner );
     parse_result = jxtl_parse( jxtl_scanner, &callbacks );
+    jxtl_content_print( jxtl_data.mp, jxtl_data.current_array, jxtl_data.json,
+                        PRINT_NORMAL );
     lex_extra_destroy( &lex_extra );
     jxtl_lex_destroy( jxtl_scanner );
   }
