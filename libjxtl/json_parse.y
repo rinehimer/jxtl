@@ -1,5 +1,6 @@
 %{
 #include <stdarg.h>
+#include <apr_pools.h>
 
 /*
  * Define YY_DECL before including json_lex.h so that it knows we are doing a

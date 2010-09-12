@@ -107,6 +107,9 @@
 #line 1 "jxtl_parse.y"
 
 #include <stdarg.h>
+#include <apr_pools.h>
+#include <apr_strings.h>
+#include <apr_tables.h>
 
 /*
  * Define YY_DECL before including jxtl_lex.h so that it knows we are doing a
@@ -114,24 +117,17 @@
  */
 #define YY_DECL
 
+#include "apr_macros.h"
+#include "json.h"
 #include "jxtl_parse.h"
 #include "jxtl_lex.h"
 #include "jxtl.h"
+#include "parser.h"
 
-#define text_handler callbacks->text_handler
-#define section_start_handler callbacks->section_start_handler
-#define section_end_handler callbacks->section_end_handler
-#define separator_start_handler callbacks->separator_start_handler
-#define separator_end_handler callbacks->separator_end_handler
-#define if_start_handler callbacks->if_start_handler
-#define elseif_handler callbacks->elseif_handler
-#define else_handler callbacks->else_handler
-#define if_end_handler callbacks->if_end_handler
-#define value_handler callbacks->value_handler
-#define user_data callbacks->user_data
+#define callbacks ((jxtl_callback_t *) callbacks_ptr)
 
-void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, jxtl_callback_t *callbacks,
-                 const char *error_string, ... );
+void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
+                 void *callbacks_ptr, const char *error_string, ... );
 
 
 /* Enabling traces.  */
@@ -154,13 +150,13 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, jxtl_callback_t *callbacks,
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 41 "jxtl_parse.y"
+#line 38 "jxtl_parse.y"
 {
   int ival;
   unsigned char *string;
 }
 /* Line 187 of yacc.c.  */
-#line 164 "jxtl_parse.c"
+#line 160 "jxtl_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -185,7 +181,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 189 "jxtl_parse.c"
+#line 185 "jxtl_parse.c"
 
 #ifdef short
 # undef short
@@ -479,9 +475,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    56,    56,    59,    61,    62,    63,    64,    68,    74,
+       0,    53,    53,    56,    58,    62,    63,    64,    68,    74,
       73,    84,    83,    94,    93,    99,    98,   103,   107,   112,
-     114,   115,   116,   117,   120,   122,   123,   127
+     114,   118,   119,   120,   123,   125,   126,   130
 };
 #endif
 
@@ -630,7 +626,7 @@ do								\
     }								\
   else								\
     {								\
-      yyerror (&yylloc, scanner, callbacks, YY_("syntax error: cannot back up")); \
+      yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("syntax error: cannot back up")); \
       YYERROR;							\
     }								\
 while (YYID (0))
@@ -710,7 +706,7 @@ do {									  \
     {									  \
       YYFPRINTF (stderr, "%s ", Title);					  \
       yy_symbol_print (stderr,						  \
-		  Type, Value, Location, scanner, callbacks); \
+		  Type, Value, Location, scanner, parser, callbacks_ptr); \
       YYFPRINTF (stderr, "\n");						  \
     }									  \
 } while (YYID (0))
@@ -724,23 +720,25 @@ do {									  \
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, jxtl_callback_t *callbacks)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
+yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
     yyscan_t scanner;
-    jxtl_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   if (!yyvaluep)
     return;
   YYUSE (yylocationp);
   YYUSE (scanner);
-  YYUSE (callbacks);
+  YYUSE (parser);
+  YYUSE (callbacks_ptr);
 # ifdef YYPRINT
   if (yytype < YYNTOKENS)
     YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
@@ -762,16 +760,17 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbac
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, jxtl_callback_t *callbacks)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
+yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr)
     FILE *yyoutput;
     int yytype;
     YYSTYPE const * const yyvaluep;
     YYLTYPE const * const yylocationp;
     yyscan_t scanner;
-    jxtl_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   if (yytype < YYNTOKENS)
@@ -781,7 +780,7 @@ yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks)
 
   YY_LOCATION_PRINT (yyoutput, *yylocationp);
   YYFPRINTF (yyoutput, ": ");
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, callbacks);
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -821,15 +820,16 @@ do {								\
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, yyscan_t scanner, jxtl_callback_t *callbacks)
+yy_reduce_print (YYSTYPE *yyvsp, YYLTYPE *yylsp, int yyrule, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yy_reduce_print (yyvsp, yylsp, yyrule, scanner, callbacks)
+yy_reduce_print (yyvsp, yylsp, yyrule, scanner, parser, callbacks_ptr)
     YYSTYPE *yyvsp;
     YYLTYPE *yylsp;
     int yyrule;
     yyscan_t scanner;
-    jxtl_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   int yynrhs = yyr2[yyrule];
@@ -843,7 +843,7 @@ yy_reduce_print (yyvsp, yylsp, yyrule, scanner, callbacks)
       fprintf (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
-		       , &(yylsp[(yyi + 1) - (yynrhs)])		       , scanner, callbacks);
+		       , &(yylsp[(yyi + 1) - (yynrhs)])		       , scanner, parser, callbacks_ptr);
       fprintf (stderr, "\n");
     }
 }
@@ -851,7 +851,7 @@ yy_reduce_print (yyvsp, yylsp, yyrule, scanner, callbacks)
 # define YY_REDUCE_PRINT(Rule)		\
 do {					\
   if (yydebug)				\
-    yy_reduce_print (yyvsp, yylsp, Rule, scanner, callbacks); \
+    yy_reduce_print (yyvsp, yylsp, Rule, scanner, parser, callbacks_ptr); \
 } while (YYID (0))
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1102,22 +1102,24 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, yyscan_t scanner, jxtl_callback_t *callbacks)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 static void
-yydestruct (yymsg, yytype, yyvaluep, yylocationp, scanner, callbacks)
+yydestruct (yymsg, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr)
     const char *yymsg;
     int yytype;
     YYSTYPE *yyvaluep;
     YYLTYPE *yylocationp;
     yyscan_t scanner;
-    jxtl_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 {
   YYUSE (yyvaluep);
   YYUSE (yylocationp);
   YYUSE (scanner);
-  YYUSE (callbacks);
+  YYUSE (parser);
+  YYUSE (callbacks_ptr);
 
   if (!yymsg)
     yymsg = "Deleting";
@@ -1142,7 +1144,7 @@ int yyparse ();
 #endif
 #else /* ! YYPARSE_PARAM */
 #if defined __STDC__ || defined __cplusplus
-int yyparse (yyscan_t scanner, jxtl_callback_t *callbacks);
+int yyparse (yyscan_t scanner, parser_t *parser, void *callbacks_ptr);
 #else
 int yyparse ();
 #endif
@@ -1171,12 +1173,13 @@ yyparse (YYPARSE_PARAM)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 int
-yyparse (yyscan_t scanner, jxtl_callback_t *callbacks)
+yyparse (yyscan_t scanner, parser_t *parser, void *callbacks_ptr)
 #else
 int
-yyparse (scanner, callbacks)
+yyparse (scanner, parser, callbacks_ptr)
     yyscan_t scanner;
-    jxtl_callback_t *callbacks;
+    parser_t *parser;
+    void *callbacks_ptr;
 #endif
 #endif
 {
@@ -1447,70 +1450,74 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 61 "jxtl_parse.y"
-    { text_handler( user_data, (yyvsp[(2) - (2)].string) ); }
+#line 59 "jxtl_parse.y"
+    {
+      callbacks->text_handler( callbacks->user_data, (yyvsp[(2) - (2)].string) );
+    }
     break;
 
   case 8:
 #line 69 "jxtl_parse.y"
-    { value_handler( user_data, (yyvsp[(2) - (3)].string) ); }
+    { callbacks->value_handler( callbacks->user_data, (yyvsp[(2) - (3)].string) ); }
     break;
 
   case 9:
 #line 74 "jxtl_parse.y"
-    { section_start_handler( user_data, (yyvsp[(3) - (3)].string) ); }
+    { callbacks->section_start_handler( callbacks->user_data, (yyvsp[(3) - (3)].string) ); }
     break;
 
   case 10:
 #line 79 "jxtl_parse.y"
-    { section_end_handler( user_data ); }
+    { callbacks->section_end_handler( callbacks->user_data ); }
     break;
 
   case 11:
 #line 84 "jxtl_parse.y"
     {
-      if_start_handler( user_data, (yyvsp[(3) - (4)].string) );
+      callbacks->if_start_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) );
     }
     break;
 
   case 13:
 #line 94 "jxtl_parse.y"
     {
-      elseif_handler( user_data, (yyvsp[(3) - (4)].string) );
+      callbacks->elseif_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) );
     }
     break;
 
   case 15:
 #line 99 "jxtl_parse.y"
     {
-      else_handler( user_data );
+      callbacks->else_handler( callbacks->user_data );
     }
     break;
 
   case 18:
 #line 108 "jxtl_parse.y"
     {
-      if_end_handler( user_data );
+      callbacks->if_end_handler( callbacks->user_data );
     }
     break;
 
   case 20:
-#line 114 "jxtl_parse.y"
-    { text_handler( user_data, (yyvsp[(2) - (2)].string) ); }
+#line 115 "jxtl_parse.y"
+    {
+      callbacks->text_handler( callbacks->user_data, (yyvsp[(2) - (2)].string) );
+    }
     break;
 
   case 27:
-#line 128 "jxtl_parse.y"
+#line 131 "jxtl_parse.y"
     {
-      separator_start_handler( user_data );
-      text_handler( user_data, (yyvsp[(3) - (3)].string) );
-      separator_end_handler( user_data );
+      callbacks->separator_start_handler( callbacks->user_data );
+      callbacks->text_handler( callbacks->user_data, (yyvsp[(3) - (3)].string) );
+      callbacks->separator_end_handler( callbacks->user_data );
     }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1514 "jxtl_parse.c"
+#line 1521 "jxtl_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1546,7 +1553,7 @@ yyerrlab:
     {
       ++yynerrs;
 #if ! YYERROR_VERBOSE
-      yyerror (&yylloc, scanner, callbacks, YY_("syntax error"));
+      yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("syntax error"));
 #else
       {
 	YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
@@ -1570,11 +1577,11 @@ yyerrlab:
 	if (0 < yysize && yysize <= yymsg_alloc)
 	  {
 	    (void) yysyntax_error (yymsg, yystate, yychar);
-	    yyerror (&yylloc, scanner, callbacks, yymsg);
+	    yyerror (&yylloc, scanner, parser, callbacks_ptr, yymsg);
 	  }
 	else
 	  {
-	    yyerror (&yylloc, scanner, callbacks, YY_("syntax error"));
+	    yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("syntax error"));
 	    if (yysize != 0)
 	      goto yyexhaustedlab;
 	  }
@@ -1598,7 +1605,7 @@ yyerrlab:
       else
 	{
 	  yydestruct ("Error: discarding",
-		      yytoken, &yylval, &yylloc, scanner, callbacks);
+		      yytoken, &yylval, &yylloc, scanner, parser, callbacks_ptr);
 	  yychar = YYEMPTY;
 	}
     }
@@ -1655,7 +1662,7 @@ yyerrlab1:
 
       yyerror_range[0] = *yylsp;
       yydestruct ("Error: popping",
-		  yystos[yystate], yyvsp, yylsp, scanner, callbacks);
+		  yystos[yystate], yyvsp, yylsp, scanner, parser, callbacks_ptr);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -1698,7 +1705,7 @@ yyabortlab:
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
-  yyerror (&yylloc, scanner, callbacks, YY_("memory exhausted"));
+  yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("memory exhausted"));
   yyresult = 2;
   /* Fall through.  */
 #endif
@@ -1706,7 +1713,7 @@ yyexhaustedlab:
 yyreturn:
   if (yychar != YYEOF && yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval, &yylloc, scanner, callbacks);
+		 yytoken, &yylval, &yylloc, scanner, parser, callbacks_ptr);
   /* Do not reclaim the symbols of the rule which action triggered
      this YYABORT or YYACCEPT.  */
   YYPOPSTACK (yylen);
@@ -1714,7 +1721,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-		  yystos[*yyssp], yyvsp, yylsp, scanner, callbacks);
+		  yystos[*yyssp], yyvsp, yylsp, scanner, parser, callbacks_ptr);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -1730,17 +1737,277 @@ yyreturn:
 }
 
 
-#line 135 "jxtl_parse.y"
+#line 138 "jxtl_parse.y"
 
 
-void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, jxtl_callback_t *callbacks,
-                 const char *error_string, ... )
+/**
+ * Structure to hold data during parsing.  One of these will be passed to the
+ * callback functions.
+ */
+typedef struct jxtl_data_t {
+  /** Memory pool */
+  apr_pool_t *mp;
+  /** Pointer to the JSON object */
+  json_t *json;
+  /** Pointer to the current content array. */
+  apr_array_header_t *current_array;
+  /** Array of content arrays. */
+  apr_array_header_t *content_array;
+  /** Reusable parser. */
+  parser_t *jxtl_path_parser;
+} jxtl_data_t;
+
+void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
+                 void *callbacks_ptr, const char *error_string, ... )
 {
   va_list args;
-  fprintf( stderr, "%d: ", yylloc->first_line );
-  va_start( args, error_string);
+  fprintf( stderr, "%s: %d.%d-%d.%d ", parser->get_filename( parser ),
+	   yylloc->first_line, yylloc->first_column, yylloc->last_line,
+	   yylloc->last_column );
+  va_start( args, error_string );
   vfprintf( stderr, error_string, args );
   va_end( args );
-  fprintf( stderr, " near column %d\n", yylloc->first_column + 1 );
+}
+
+/*
+ * Convenience function to create a new content object and it on the current
+ * array.
+ */
+static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
+                               void *value )
+{
+  jxtl_content_t *content = NULL;
+
+  content = apr_palloc( data->mp, sizeof( jxtl_content_t ) );
+  content->type = type;
+  content->value = value;
+
+  APR_ARRAY_PUSH( data->current_array, jxtl_content_t * ) = content;
+}
+
+/*****************************************************************************
+ * Parser callbacks
+ *****************************************************************************/
+
+/**
+ * Parser callback for when it finds text.
+ * @param user_data The jxtl_data.
+ * @param text The text.
+ */
+static void jxtl_text_func( void *user_data, unsigned char *text )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  jxtl_content_push( data, JXTL_TEXT, apr_pstrdup( data->mp, (char *) text ) );
+}
+
+static int jxtl_section_start( void *user_data, unsigned char *expr )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  jxtl_section_t *section;
+
+  section = apr_palloc( data->mp, sizeof( jxtl_section_t ) );
+  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &section->expr );
+  section->content = apr_array_make( data->mp, 1024,
+                                     sizeof( jxtl_content_t * ) );
+  section->separator = apr_array_make( data->mp, 1024,
+                                       sizeof( jxtl_content_t * ) );
+  jxtl_content_push( data, JXTL_SECTION, section );
+  APR_ARRAY_PUSH( data->content_array,
+                  apr_array_header_t * ) = data->current_array;
+  data->current_array = section->content;
+
+  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
+}
+
+/**
+ * Parser callback for when a section ends.
+ * @param user_data The jxtl_data.
+ * @param name The name of the section.
+ */
+static void jxtl_section_end( void *user_data )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+
+  data->current_array = APR_ARRAY_POP( data->content_array,
+                                       apr_array_header_t * );
+}
+
+static int jxtl_if_start( void *user_data, unsigned char *expr )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  jxtl_if_t *jxtl_if;
+  apr_array_header_t *if_block;
+
+  if_block = apr_array_make( data->mp, 8, sizeof( jxtl_if_t * ) );
+  jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
+  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &jxtl_if->expr );
+  jxtl_if->content = apr_array_make( data->mp, 1024,
+                                     sizeof( jxtl_content_t * ) );
+  APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
+  jxtl_content_push( data, JXTL_IF, if_block );
+  
+  APR_ARRAY_PUSH( data->content_array,
+                  apr_array_header_t * ) = data->current_array;
+  data->current_array = jxtl_if->content;
+
+  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
+}
+
+static int jxtl_elseif( void *user_data, unsigned char *expr )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  apr_array_header_t *content_array, *if_block;
+  jxtl_if_t *jxtl_if;
+  jxtl_content_t *content;
+
+  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
+  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
+  if_block = (apr_array_header_t *) content->value;
+  jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
+  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &jxtl_if->expr );
+  jxtl_if->content = apr_array_make( data->mp, 1024,
+                                     sizeof( jxtl_content_t * ) );
+  APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
+  data->current_array = jxtl_if->content;
+
+  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
+}
+
+static void jxtl_else( void *user_data )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  apr_array_header_t *content_array, *if_block;
+  jxtl_if_t *jxtl_if;
+  jxtl_content_t *content;
+  
+  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
+  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
+  if_block = (apr_array_header_t *) content->value;
+
+  jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
+  jxtl_if->expr = NULL;
+  jxtl_if->content = apr_array_make( data->mp, 1024,
+                                     sizeof( jxtl_content_t * ) );
+  APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
+  data->current_array = jxtl_if->content;
+}
+
+static void jxtl_if_end( void *user_data )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  
+  data->current_array = APR_ARRAY_POP( data->content_array,
+                                       apr_array_header_t * );
+}
+
+/**
+ * Parser callback for when it encounters a separator directive.  All this does
+ * is take the current section and set its current_array to the separator.
+ * @param user_data The jxtl_data.
+ */
+static void jxtl_separator_start( void *user_data )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  apr_array_header_t *content_array;
+  jxtl_content_t *content;
+  jxtl_section_t *section;
+
+  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
+
+  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
+  section = content->value;
+  APR_ARRAY_PUSH( data->content_array,
+                  apr_array_header_t * ) = data->current_array;
+  data->current_array = section->separator;
+}
+
+/**
+ * Parser callback for when a separator directive is ended.  Just sets the
+ * current_array of the section back to the content.
+ * @param user_data The jxtl_data.
+ */
+static void jxtl_separator_end( void *user_data )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  data->current_array = APR_ARRAY_POP( data->content_array,
+                                       apr_array_header_t * );
+}
+
+/**
+ * Parser callback function for when it encounters a value reference in the
+ * template, i.e. {{value}}.  If we are not nested at all, it is printed
+ * immediately.  Otherwise, the name is just saved off for later processing.
+ * @param user_data The jxtl_data.
+ * @param name The name of the value to lookup.
+ */
+static int jxtl_value_func( void *user_data, unsigned char *expr )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  json_t *json_value;
+  jxtl_path_expr_t *path_expr;
+
+  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &path_expr );
+  jxtl_content_push( data, JXTL_VALUE, path_expr );
+
+  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
+}
+
+parser_t *jxtl_parser_create( apr_pool_t *mp )
+{
+  parser_t *parser = parser_create( mp,
+				    jxtl_lex_init,
+				    jxtl_set_extra,
+				    jxtl_lex_destroy,
+				    jxtl__scan_buffer,
+				    jxtl__delete_buffer,
+				    jxtl_parse );
+  jxtl_data_t *jxtl_data = apr_palloc( mp, sizeof(jxtl_data_t) );
+
+  apr_pool_create( &jxtl_data->mp, mp );
+  jxtl_data->mp = mp;
+  jxtl_data->json = NULL;
+  jxtl_data->content_array = apr_array_make( mp, 32,
+                                            sizeof(apr_array_header_t *) );
+  jxtl_data->current_array = apr_array_make( mp, 1024,
+                                            sizeof(apr_array_header_t *) );
+  jxtl_data->jxtl_path_parser = jxtl_path_parser_create( mp );
+
+  jxtl_callback_t *jxtl_callbacks = apr_palloc( mp, sizeof(jxtl_callback_t) );
+  jxtl_callbacks->text_handler = jxtl_text_func;
+  jxtl_callbacks->section_start_handler = jxtl_section_start;
+  jxtl_callbacks->section_end_handler = jxtl_section_end;
+  jxtl_callbacks->if_start_handler = jxtl_if_start;
+  jxtl_callbacks->elseif_handler = jxtl_elseif;
+  jxtl_callbacks->else_handler = jxtl_else;
+  jxtl_callbacks->if_end_handler = jxtl_if_end;
+  jxtl_callbacks->separator_start_handler = jxtl_separator_start;
+  jxtl_callbacks->separator_end_handler = jxtl_separator_end;
+  jxtl_callbacks->value_handler = jxtl_value_func;
+  jxtl_callbacks->user_data = jxtl_data;
+
+  parser_set_user_data( parser, jxtl_callbacks );
+
+  return parser;
+}
+
+int jxtl_parser_parse_file( parser_t *parser, const char *file,
+                            apr_array_header_t **content_array )
+{
+  jxtl_callback_t *jxtl_callbacks = parser_get_user_data( parser );
+  jxtl_data_t *jxtl_data = jxtl_callbacks->user_data;
+  apr_array_header_t *content;
+
+  *content_array = NULL;
+  APR_ARRAY_CLEAR( jxtl_data->content_array );
+  APR_ARRAY_CLEAR( jxtl_data->current_array );
+
+  content = apr_array_make( parser->mp, 1024, sizeof(jxtl_content_t *) );
+  APR_ARRAY_PUSH( jxtl_data->current_array, apr_array_header_t * ) = content;
+
+  if ( parser_parse_file( parser, file ) == 0 ) {
+    *content_array = jxtl_data->current_array;
+  }
+
+  return parser->parse_result;
 }
 

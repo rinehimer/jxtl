@@ -38,8 +38,7 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = jxtl$(EXEEXT) xml2json$(EXEEXT)
 subdir = src
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in jxtl_lex.c \
-	jxtl_parse.c
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -50,8 +49,7 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_jxtl_OBJECTS = jxtl-jxtl.$(OBJEXT) jxtl-jxtl_parse.$(OBJEXT) \
-	jxtl-jxtl_lex.$(OBJEXT)
+am_jxtl_OBJECTS = jxtl-jxtl.$(OBJEXT)
 jxtl_OBJECTS = $(am_jxtl_OBJECTS)
 am__DEPENDENCIES_1 = ${top_srcdir}/libjxtl/libjxtl.la
 jxtl_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -69,11 +67,6 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
-LTLEXCOMPILE = $(LIBTOOL) --mode=compile $(LEX) $(LFLAGS) $(AM_LFLAGS)
-YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
-LTYACCCOMPILE = $(LIBTOOL) --mode=compile $(YACC) $(YFLAGS) \
-	$(AM_YFLAGS)
 SOURCES = $(jxtl_SOURCES) $(xml2json_SOURCES)
 DIST_SOURCES = $(jxtl_SOURCES) $(xml2json_SOURCES)
 ETAGS = etags
@@ -144,7 +137,7 @@ SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
 YACC = @YACC@
-YFLAGS = 
+YFLAGS = @YFLAGS@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
@@ -193,7 +186,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 INCLUDES = -I${top_srcdir}/libjxtl
-jxtl_SOURCES = jxtl.c jxtl_parse.y jxtl_lex.l
+jxtl_SOURCES = jxtl.c
 xml2json_SOURCES = xml2json.c
 LIBJXTL = ${top_srcdir}/libjxtl/libjxtl.la
 jxtl_CFLAGS = -g ${APR_CFLAGS} ${APU_CFLAGS}
@@ -205,7 +198,7 @@ xml2json_LDADD = ${LIBJXTL}
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .l .lo .o .obj .y
+.SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -277,8 +270,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jxtl-jxtl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jxtl-jxtl_lex.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jxtl-jxtl_parse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml2json-xml2json.Po@am__quote@
 
 .c.o:
@@ -316,34 +307,6 @@ jxtl-jxtl.obj: jxtl.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_CFLAGS) $(CFLAGS) -c -o jxtl-jxtl.obj `if test -f 'jxtl.c'; then $(CYGPATH_W) 'jxtl.c'; else $(CYGPATH_W) '$(srcdir)/jxtl.c'; fi`
 
-jxtl-jxtl_parse.o: jxtl_parse.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_CFLAGS) $(CFLAGS) -MT jxtl-jxtl_parse.o -MD -MP -MF "$(DEPDIR)/jxtl-jxtl_parse.Tpo" -c -o jxtl-jxtl_parse.o `test -f 'jxtl_parse.c' || echo '$(srcdir)/'`jxtl_parse.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/jxtl-jxtl_parse.Tpo" "$(DEPDIR)/jxtl-jxtl_parse.Po"; else rm -f "$(DEPDIR)/jxtl-jxtl_parse.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jxtl_parse.c' object='jxtl-jxtl_parse.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_CFLAGS) $(CFLAGS) -c -o jxtl-jxtl_parse.o `test -f 'jxtl_parse.c' || echo '$(srcdir)/'`jxtl_parse.c
-
-jxtl-jxtl_parse.obj: jxtl_parse.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_CFLAGS) $(CFLAGS) -MT jxtl-jxtl_parse.obj -MD -MP -MF "$(DEPDIR)/jxtl-jxtl_parse.Tpo" -c -o jxtl-jxtl_parse.obj `if test -f 'jxtl_parse.c'; then $(CYGPATH_W) 'jxtl_parse.c'; else $(CYGPATH_W) '$(srcdir)/jxtl_parse.c'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/jxtl-jxtl_parse.Tpo" "$(DEPDIR)/jxtl-jxtl_parse.Po"; else rm -f "$(DEPDIR)/jxtl-jxtl_parse.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jxtl_parse.c' object='jxtl-jxtl_parse.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_CFLAGS) $(CFLAGS) -c -o jxtl-jxtl_parse.obj `if test -f 'jxtl_parse.c'; then $(CYGPATH_W) 'jxtl_parse.c'; else $(CYGPATH_W) '$(srcdir)/jxtl_parse.c'; fi`
-
-jxtl-jxtl_lex.o: jxtl_lex.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_CFLAGS) $(CFLAGS) -MT jxtl-jxtl_lex.o -MD -MP -MF "$(DEPDIR)/jxtl-jxtl_lex.Tpo" -c -o jxtl-jxtl_lex.o `test -f 'jxtl_lex.c' || echo '$(srcdir)/'`jxtl_lex.c; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/jxtl-jxtl_lex.Tpo" "$(DEPDIR)/jxtl-jxtl_lex.Po"; else rm -f "$(DEPDIR)/jxtl-jxtl_lex.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jxtl_lex.c' object='jxtl-jxtl_lex.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_CFLAGS) $(CFLAGS) -c -o jxtl-jxtl_lex.o `test -f 'jxtl_lex.c' || echo '$(srcdir)/'`jxtl_lex.c
-
-jxtl-jxtl_lex.obj: jxtl_lex.c
-@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_CFLAGS) $(CFLAGS) -MT jxtl-jxtl_lex.obj -MD -MP -MF "$(DEPDIR)/jxtl-jxtl_lex.Tpo" -c -o jxtl-jxtl_lex.obj `if test -f 'jxtl_lex.c'; then $(CYGPATH_W) 'jxtl_lex.c'; else $(CYGPATH_W) '$(srcdir)/jxtl_lex.c'; fi`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/jxtl-jxtl_lex.Tpo" "$(DEPDIR)/jxtl-jxtl_lex.Po"; else rm -f "$(DEPDIR)/jxtl-jxtl_lex.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jxtl_lex.c' object='jxtl-jxtl_lex.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(jxtl_CFLAGS) $(CFLAGS) -c -o jxtl-jxtl_lex.obj `if test -f 'jxtl_lex.c'; then $(CYGPATH_W) 'jxtl_lex.c'; else $(CYGPATH_W) '$(srcdir)/jxtl_lex.c'; fi`
-
 xml2json-xml2json.o: xml2json.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xml2json_CFLAGS) $(CFLAGS) -MT xml2json-xml2json.o -MD -MP -MF "$(DEPDIR)/xml2json-xml2json.Tpo" -c -o xml2json-xml2json.o `test -f 'xml2json.c' || echo '$(srcdir)/'`xml2json.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/xml2json-xml2json.Tpo" "$(DEPDIR)/xml2json-xml2json.Po"; else rm -f "$(DEPDIR)/xml2json-xml2json.Tpo"; exit 1; fi
@@ -357,27 +320,6 @@ xml2json-xml2json.obj: xml2json.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='xml2json.c' object='xml2json-xml2json.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xml2json_CFLAGS) $(CFLAGS) -c -o xml2json-xml2json.obj `if test -f 'xml2json.c'; then $(CYGPATH_W) 'xml2json.c'; else $(CYGPATH_W) '$(srcdir)/xml2json.c'; fi`
-
-.y.c:
-	$(YACCCOMPILE) $<
-	if test -f y.tab.h; then \
-	  to=`echo "$*_H" | sed \
-                -e 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/' \
-                -e 's/[^ABCDEFGHIJKLMNOPQRSTUVWXYZ]/_/g'`; \
-	  sed -e "/^#/!b" -e "s/Y_TAB_H/$$to/g" -e "s|y\.tab\.h|$*.h|" \
-            y.tab.h >$*.ht; \
-	  rm -f y.tab.h; \
-	  if cmp -s $*.ht $*.h; then \
-	    rm -f $*.ht ;\
-	  else \
-	    mv $*.ht $*.h; \
-	  fi; \
-	fi
-	if test -f y.output; then \
-	  mv y.output $*.output; \
-	fi
-	sed '/^#/ s|y\.tab\.c|$@|' y.tab.c >$@t && mv $@t $@
-	rm -f y.tab.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -495,8 +437,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-rm -f jxtl_lex.c
-	-rm -f jxtl_parse.c
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
@@ -559,17 +499,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-info-am
 
-
-${jxtl_OBJECTS}: jxtl_parse.h jxtl_parse.c jxtl_lex.h jxtl_lex.c
-
-jxtl_parse.c jxtl_parse.h: jxtl_parse.y
-jxtl_lex.c jxtl_lex.h: jxtl_lex.l
-
-%.c %.h: %.l
-	${LEXCOMPILE} $<
-
-.l.c:
-	${LEXCOMPILE} $<
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

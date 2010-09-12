@@ -15,6 +15,8 @@ libjxtlinc_HEADERS = apr_macros.h \
 libjxtl_la_SOURCES = json.c \
                      json_lex.l \
                      json_parse.y \
+                     jxtl_lex.l \
+                     jxtl_parse.y \
                      jxtl_path.c \
                      jxtl_path_lex.l \
                      jxtl_path_parse.y \
@@ -26,6 +28,7 @@ libjxtl_la_SOURCES = json.c \
                      xml2json.c
 
 $(libjxtl_la_OBJECTS): json_parse.c json_parse.h json_lex.c json_lex.h \
+                       jxtl_parse.c jxtl_parse.h jxtl_lex.c jxtl_lex.h \
                        jxtl_path_parse.c jxtl_path_parse.h jxtl_path_lex.c \
                        jxtl_path_lex.h
 
@@ -38,6 +41,8 @@ json_lex.c json_lex.h: json_lex.l
 json_parse.c json_parse.h: json_parse.y
 jxtl_path_lex.c jxtl_path_lex.h: jxtl_path_lex.l
 jxtl_path_parse.c jxtl_path_parse.h: jxtl_path_parse.y
+jxtl_parse.c jxtl_parse.h: jxtl_parse.y
+jxtl_lex.c jxtl_lex.h: jxtl_lex.l
 
 %.c %.h: %.l
 	$(LEXCOMPILE) $<

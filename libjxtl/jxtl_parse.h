@@ -70,7 +70,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 41 "jxtl_parse.y"
+#line 38 "jxtl_parse.y"
 {
   int ival;
   unsigned char *string;

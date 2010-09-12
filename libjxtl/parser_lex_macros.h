@@ -7,6 +7,8 @@
 #ifndef PARSER_LEX_MACROS_H
 #define PARSER_LEX_MACROS_H
 
+#include "parser.h"
+
 #define PARSER ((parser_t *) yyextra)
 #define PARSER_MP PARSER->mp
 #define PARSER_STR_ARRAY PARSER->str_array

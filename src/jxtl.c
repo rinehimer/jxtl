@@ -25,51 +25,6 @@ typedef enum section_print_type {
   PRINT_SEPARATOR
 } section_print_type;
 
-typedef enum jxtl_content_type {
-  JXTL_TEXT,
-  JXTL_SECTION,
-  JXTL_VALUE,
-  JXTL_IF
-} jxtl_content_type;
-
-typedef struct jxtl_if_t {
-  jxtl_path_expr_t *expr;
-  apr_array_header_t *content;
-} jxtl_if_t;
-
-typedef struct jxtl_section_t {
-  /** Compiled path expression. */
-  jxtl_path_expr_t *expr;
-  /** Array of the content in the section. */
-  apr_array_header_t *content;
-  /** Array of content for the separator. */
-  apr_array_header_t *separator;
-} jxtl_section_t;
-
-typedef struct jxtl_content_t {
-  /** What this content contains in its value pointer. */
-  jxtl_content_type type;
-  /** A string, pointer to a jxtl_section_t, jxtl_if_t or a jxtl_path_expr_t */
-  void *value;
-} jxtl_content_t;
-
-/**
- * Structure to hold data during parsing.  One of these will be passed to the
- * callback functions.
- */
-typedef struct jxtl_data_t {
-  /** Memory pool */
-  apr_pool_t *mp;
-  /** Pointer to the JSON object */
-  json_t *json;
-  /** Pointer to the current content array. */
-  apr_array_header_t *current_array;
-  /** Array of content arrays. */
-  apr_array_header_t *content_array;
-  /** Reusable parser. */
-  parser_t *jxtl_path_parser;
-} jxtl_data_t;
-
 static void json_value_print( json_t *json )
 {
   if ( !json )
@@ -212,189 +167,6 @@ static void jxtl_section_print( apr_pool_t *mp,
   }
 }
 
-/*
- * Convenience function to create a new content object and it on the current
- * array.
- */
-static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
-                               void *value )
-{
-  jxtl_content_t *content = NULL;
-
-  content = apr_palloc( data->mp, sizeof( jxtl_content_t ) );
-  content->type = type;
-  content->value = value;
-
-  APR_ARRAY_PUSH( data->current_array, jxtl_content_t * ) = content;
-}
-
-/*****************************************************************************
- * Parser callbacks
- *****************************************************************************/
-
-/**
- * Parser callback for when it finds text.
- * @param user_data The jxtl_data.
- * @param text The text.
- */
-void jxtl_text_func( void *user_data, unsigned char *text )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_content_push( data, JXTL_TEXT, apr_pstrdup( data->mp, (char *) text ) );
-}
-
-int jxtl_section_start( void *user_data, unsigned char *expr )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_section_t *section;
-
-  section = apr_palloc( data->mp, sizeof( jxtl_section_t ) );
-  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &section->expr );
-  section->content = apr_array_make( data->mp, 1024,
-                                     sizeof( jxtl_content_t * ) );
-  section->separator = apr_array_make( data->mp, 1024,
-                                       sizeof( jxtl_content_t * ) );
-  jxtl_content_push( data, JXTL_SECTION, section );
-  APR_ARRAY_PUSH( data->content_array,
-                  apr_array_header_t * ) = data->current_array;
-  data->current_array = section->content;
-
-  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
-}
-
-/**
- * Parser callback for when a section ends.
- * @param user_data The jxtl_data.
- * @param name The name of the section.
- */
-void jxtl_section_end( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-
-  data->current_array = APR_ARRAY_POP( data->content_array,
-                                       apr_array_header_t * );
-}
-
-int jxtl_if_start( void *user_data, unsigned char *expr )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_if_t *jxtl_if;
-  apr_array_header_t *if_block;
-
-  if_block = apr_array_make( data->mp, 8, sizeof( jxtl_if_t * ) );
-  jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
-  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &jxtl_if->expr );
-  jxtl_if->content = apr_array_make( data->mp, 1024,
-                                     sizeof( jxtl_content_t * ) );
-  APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
-  jxtl_content_push( data, JXTL_IF, if_block );
-  
-  APR_ARRAY_PUSH( data->content_array,
-                  apr_array_header_t * ) = data->current_array;
-  data->current_array = jxtl_if->content;
-
-  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
-}
-
-int jxtl_elseif( void *user_data, unsigned char *expr )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  apr_array_header_t *content_array, *if_block;
-  jxtl_if_t *jxtl_if;
-  jxtl_content_t *content;
-
-  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
-  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
-  if_block = (apr_array_header_t *) content->value;
-  jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
-  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &jxtl_if->expr );
-  jxtl_if->content = apr_array_make( data->mp, 1024,
-                                     sizeof( jxtl_content_t * ) );
-  APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
-  data->current_array = jxtl_if->content;
-
-  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
-}
-
-void jxtl_else( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  apr_array_header_t *content_array, *if_block;
-  jxtl_if_t *jxtl_if;
-  jxtl_content_t *content;
-  
-  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
-  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
-  if_block = (apr_array_header_t *) content->value;
-
-  jxtl_if = apr_palloc( data->mp, sizeof( jxtl_if_t ) );
-  jxtl_if->expr = NULL;
-  jxtl_if->content = apr_array_make( data->mp, 1024,
-                                     sizeof( jxtl_content_t * ) );
-  APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
-  data->current_array = jxtl_if->content;
-}
-
-void jxtl_if_end( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  
-  data->current_array = APR_ARRAY_POP( data->content_array,
-                                       apr_array_header_t * );
-}
-
-/**
- * Parser callback for when it encounters a separator directive.  All this does
- * is take the current section and set its current_array to the separator.
- * @param user_data The jxtl_data.
- */
-void jxtl_separator_start( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  apr_array_header_t *content_array;
-  jxtl_content_t *content;
-  jxtl_section_t *section;
-
-  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
-
-  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
-  section = content->value;
-  APR_ARRAY_PUSH( data->content_array,
-                  apr_array_header_t * ) = data->current_array;
-  data->current_array = section->separator;
-}
-
-/**
- * Parser callback for when a separator directive is ended.  Just sets the
- * current_array of the section back to the content.
- * @param user_data The jxtl_data.
- */
-void jxtl_separator_end( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  data->current_array = APR_ARRAY_POP( data->content_array,
-                                       apr_array_header_t * );
-}
-
-/**
- * Parser callback function for when it encounters a value reference in the
- * template, i.e. {{value}}.  If we are not nested at all, it is printed
- * immediately.  Otherwise, the name is just saved off for later processing.
- * @param user_data The jxtl_data.
- * @param name The name of the value to lookup.
- */
-int jxtl_value_func( void *user_data, unsigned char *expr )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  json_t *json_value;
-  jxtl_path_expr_t *path_expr;
-
-  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &path_expr );
-  jxtl_content_push( data, JXTL_VALUE, path_expr );
-
-  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
-}
-
 void jxtl_usage( const char *prog_name,
                  const apr_getopt_option_t *options )
 {
@@ -490,14 +262,13 @@ int jxtl_load_data( apr_pool_t *mp, const char *json_file,
 int main( int argc, char const * const *argv )
 {
   apr_pool_t *mp;
-  int parse_result;
-  lex_extra_t lex_extra;
-  yyscan_t jxtl_scanner;
-  jxtl_data_t jxtl_data;
   const char *template_file = NULL;
   const char *json_file = NULL;
   const char *xml_file = NULL;
   int skip_root;
+  json_t *json;
+  parser_t *jxtl_parser;
+  apr_array_header_t *content_array;
 
   apr_app_initialize( NULL, NULL, NULL );
   apr_pool_create( &mp, NULL );
@@ -505,52 +276,17 @@ int main( int argc, char const * const *argv )
   jxtl_init( argc, argv, mp, &template_file, &json_file, &xml_file,
              &skip_root );
 
-  /*
-   * Setup our callback object.  Note that the stack is created using this
-   * memory pool, and not its internal one.  The reason is then when we are
-   * done processing sections, we want to be able to clear all of that memory
-   * quickly and leave the section array allocated.
-   */
-  apr_pool_create( &jxtl_data.mp, NULL );
-  jxtl_data.json = NULL;
-  jxtl_data.content_array = apr_array_make( mp, 32,
-                                            sizeof(apr_array_header_t *) );
-  jxtl_data.current_array = apr_array_make( mp, 1024,
-                                            sizeof(apr_array_header_t *) );
-  apr_array_header_t *content = apr_array_make( mp, 1024,
-                                                sizeof( jxtl_content_t * ) );
-  APR_ARRAY_PUSH( jxtl_data.current_array, apr_array_header_t * ) = content;
+  jxtl_parser = jxtl_parser_create( mp );
 
-  jxtl_callback_t callbacks = {
-    jxtl_text_func,
-    jxtl_section_start,
-    jxtl_section_end,
-    jxtl_if_start,
-    jxtl_elseif,
-    jxtl_else,
-    jxtl_if_end,
-    jxtl_separator_start,
-    jxtl_separator_end,
-    jxtl_value_func,
-    &jxtl_data
-  };
-
-  jxtl_data.jxtl_path_parser = jxtl_path_parser_create( mp );
-
-  if ( jxtl_load_data( mp, json_file, xml_file, skip_root,
-		       &jxtl_data.json ) == 0 ) {
-    jxtl_lex_init( &jxtl_scanner );
-    lex_extra_init( &lex_extra, template_file );
-    jxtl_set_extra( &lex_extra, jxtl_scanner );
-    parse_result = jxtl_parse( jxtl_scanner, &callbacks );
-    jxtl_content_print( jxtl_data.mp, jxtl_data.current_array, jxtl_data.json,
-                        PRINT_NORMAL );
-    lex_extra_destroy( &lex_extra );
-    jxtl_lex_destroy( jxtl_scanner );
+  if ( ( jxtl_load_data( mp, json_file, xml_file, skip_root,
+                         &json ) == APR_SUCCESS ) &&
+       ( jxtl_parser_parse_file( jxtl_parser, template_file,
+                                 &content_array ) == APR_SUCCESS ) ) {
+    jxtl_content_print( mp, content_array, json, PRINT_NORMAL );
   }
 
-  apr_pool_destroy( jxtl_data.mp );
   apr_pool_destroy( mp );
   apr_terminate();
-  return parse_result;
+
+  return 0;
 }

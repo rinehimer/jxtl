@@ -97,6 +97,7 @@
 #line 1 "json_parse.y"
 
 #include <stdarg.h>
+#include <apr_pools.h>
 
 /*
  * Define YY_DECL before including json_lex.h so that it knows we are doing a
@@ -138,14 +139,14 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 37 "json_parse.y"
+#line 38 "json_parse.y"
 {
   int integer;
   unsigned char *string;
   double number;
 }
 /* Line 187 of yacc.c.  */
-#line 149 "json_parse.c"
+#line 150 "json_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -170,7 +171,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 174 "json_parse.c"
+#line 175 "json_parse.c"
 
 #ifdef short
 # undef short
@@ -463,9 +464,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    51,    51,    52,    56,    56,    58,    58,    61,    61,
-      67,    68,    72,    72,    78,    78,    80,    80,    83,    83,
-      89,    90,    94,    95,    97,    98,    99,   100,   101,   102
+       0,    52,    52,    53,    57,    57,    59,    59,    62,    62,
+      68,    69,    73,    73,    79,    79,    81,    81,    84,    84,
+      90,    91,    95,    96,    98,    99,   100,   101,   102,   103
 };
 #endif
 
@@ -1431,110 +1432,110 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 56 "json_parse.y"
+#line 57 "json_parse.y"
     { callbacks->object_start_handler( callbacks->user_data ); }
     break;
 
   case 5:
-#line 57 "json_parse.y"
+#line 58 "json_parse.y"
     { callbacks->object_end_handler( callbacks->user_data ); }
     break;
 
   case 6:
-#line 58 "json_parse.y"
+#line 59 "json_parse.y"
     { callbacks->object_start_handler( callbacks->user_data ); }
     break;
 
   case 7:
-#line 60 "json_parse.y"
+#line 61 "json_parse.y"
     { callbacks->object_end_handler( callbacks->user_data ); }
     break;
 
   case 8:
-#line 61 "json_parse.y"
+#line 62 "json_parse.y"
     { callbacks->object_start_handler( callbacks->user_data ); }
     break;
 
   case 9:
-#line 63 "json_parse.y"
+#line 64 "json_parse.y"
     { callbacks->object_end_handler( callbacks->user_data ); }
     break;
 
   case 12:
-#line 72 "json_parse.y"
+#line 73 "json_parse.y"
     { callbacks->property_start_handler( callbacks->user_data,
                                                   (yyvsp[(1) - (1)].string) ); }
     break;
 
   case 13:
-#line 74 "json_parse.y"
+#line 75 "json_parse.y"
     { callbacks->property_end_handler( callbacks->user_data ); }
     break;
 
   case 14:
-#line 78 "json_parse.y"
+#line 79 "json_parse.y"
     { callbacks->array_start_handler( callbacks->user_data ); }
     break;
 
   case 15:
-#line 79 "json_parse.y"
+#line 80 "json_parse.y"
     { callbacks->array_end_handler( callbacks->user_data ); }
     break;
 
   case 16:
-#line 80 "json_parse.y"
+#line 81 "json_parse.y"
     { callbacks->array_start_handler( callbacks->user_data ); }
     break;
 
   case 17:
-#line 82 "json_parse.y"
+#line 83 "json_parse.y"
     { callbacks->array_end_handler( callbacks->user_data ); }
     break;
 
   case 18:
-#line 83 "json_parse.y"
+#line 84 "json_parse.y"
     { callbacks->array_start_handler( callbacks->user_data ); }
     break;
 
   case 19:
-#line 85 "json_parse.y"
+#line 86 "json_parse.y"
     { callbacks->array_end_handler( callbacks->user_data ); }
     break;
 
   case 22:
-#line 94 "json_parse.y"
+#line 95 "json_parse.y"
     { callbacks->string_handler( callbacks->user_data, (yyvsp[(1) - (1)].string) ); }
     break;
 
   case 23:
-#line 95 "json_parse.y"
+#line 96 "json_parse.y"
     { callbacks->integer_handler( callbacks->user_data,
                                             (yyvsp[(1) - (1)].integer) ); }
     break;
 
   case 24:
-#line 97 "json_parse.y"
+#line 98 "json_parse.y"
     { callbacks->number_handler( callbacks->user_data, (yyvsp[(1) - (1)].number) ); }
     break;
 
   case 27:
-#line 100 "json_parse.y"
+#line 101 "json_parse.y"
     { callbacks->boolean_handler( callbacks->user_data, 1 ); }
     break;
 
   case 28:
-#line 101 "json_parse.y"
+#line 102 "json_parse.y"
     { callbacks->boolean_handler( callbacks->user_data, 0 ); }
     break;
 
   case 29:
-#line 102 "json_parse.y"
+#line 103 "json_parse.y"
     { callbacks->null_handler( callbacks->user_data ); }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1538 "json_parse.c"
+#line 1539 "json_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1754,7 +1755,7 @@ yyreturn:
 }
 
 
-#line 105 "json_parse.y"
+#line 106 "json_parse.y"
 
 
 void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,

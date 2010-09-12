@@ -39,8 +39,8 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = libjxtl
 DIST_COMMON = $(libjxtlinc_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in json_lex.c json_parse.c jxtl_path_lex.c \
-	jxtl_path_parse.c
+	$(srcdir)/Makefile.in json_lex.c json_parse.c jxtl_lex.c \
+	jxtl_parse.c jxtl_path_lex.c jxtl_path_parse.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -59,7 +59,8 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libjxtl_la_LIBADD =
 am_libjxtl_la_OBJECTS = libjxtl_la-json.lo libjxtl_la-json_lex.lo \
-	libjxtl_la-json_parse.lo libjxtl_la-jxtl_path.lo \
+	libjxtl_la-json_parse.lo libjxtl_la-jxtl_lex.lo \
+	libjxtl_la-jxtl_parse.lo libjxtl_la-jxtl_path.lo \
 	libjxtl_la-jxtl_path_lex.lo libjxtl_la-jxtl_path_parse.lo \
 	libjxtl_la-json_writer.lo libjxtl_la-lex_extra.lo \
 	libjxtl_la-parser.lo libjxtl_la-utf.lo libjxtl_la-xml2json.lo
@@ -216,6 +217,8 @@ libjxtlinc_HEADERS = apr_macros.h \
 libjxtl_la_SOURCES = json.c \
                      json_lex.l \
                      json_parse.y \
+                     jxtl_lex.l \
+                     jxtl_parse.y \
                      jxtl_path.c \
                      jxtl_path_lex.l \
                      jxtl_path_parse.y \
@@ -301,6 +304,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-json_lex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-json_parse.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-json_writer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_lex.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_parse.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_path.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_path_lex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_path_parse.Plo@am__quote@
@@ -350,6 +355,20 @@ libjxtl_la-json_parse.lo: json_parse.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='json_parse.c' object='libjxtl_la-json_parse.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -c -o libjxtl_la-json_parse.lo `test -f 'json_parse.c' || echo '$(srcdir)/'`json_parse.c
+
+libjxtl_la-jxtl_lex.lo: jxtl_lex.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -MT libjxtl_la-jxtl_lex.lo -MD -MP -MF "$(DEPDIR)/libjxtl_la-jxtl_lex.Tpo" -c -o libjxtl_la-jxtl_lex.lo `test -f 'jxtl_lex.c' || echo '$(srcdir)/'`jxtl_lex.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libjxtl_la-jxtl_lex.Tpo" "$(DEPDIR)/libjxtl_la-jxtl_lex.Plo"; else rm -f "$(DEPDIR)/libjxtl_la-jxtl_lex.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jxtl_lex.c' object='libjxtl_la-jxtl_lex.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -c -o libjxtl_la-jxtl_lex.lo `test -f 'jxtl_lex.c' || echo '$(srcdir)/'`jxtl_lex.c
+
+libjxtl_la-jxtl_parse.lo: jxtl_parse.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -MT libjxtl_la-jxtl_parse.lo -MD -MP -MF "$(DEPDIR)/libjxtl_la-jxtl_parse.Tpo" -c -o libjxtl_la-jxtl_parse.lo `test -f 'jxtl_parse.c' || echo '$(srcdir)/'`jxtl_parse.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libjxtl_la-jxtl_parse.Tpo" "$(DEPDIR)/libjxtl_la-jxtl_parse.Plo"; else rm -f "$(DEPDIR)/libjxtl_la-jxtl_parse.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jxtl_parse.c' object='libjxtl_la-jxtl_parse.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -c -o libjxtl_la-jxtl_parse.lo `test -f 'jxtl_parse.c' || echo '$(srcdir)/'`jxtl_parse.c
 
 libjxtl_la-jxtl_path.lo: jxtl_path.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -MT libjxtl_la-jxtl_path.lo -MD -MP -MF "$(DEPDIR)/libjxtl_la-jxtl_path.Tpo" -c -o libjxtl_la-jxtl_path.lo `test -f 'jxtl_path.c' || echo '$(srcdir)/'`jxtl_path.c; \
@@ -545,6 +564,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 	-rm -f json_lex.c
 	-rm -f json_parse.c
+	-rm -f jxtl_lex.c
+	-rm -f jxtl_parse.c
 	-rm -f jxtl_path_lex.c
 	-rm -f jxtl_path_parse.c
 clean: clean-am
@@ -615,6 +636,7 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES \
 
 
 $(libjxtl_la_OBJECTS): json_parse.c json_parse.h json_lex.c json_lex.h \
+                       jxtl_parse.c jxtl_parse.h jxtl_lex.c jxtl_lex.h \
                        jxtl_path_parse.c jxtl_path_parse.h jxtl_path_lex.c \
                        jxtl_path_lex.h
 
@@ -622,6 +644,8 @@ json_lex.c json_lex.h: json_lex.l
 json_parse.c json_parse.h: json_parse.y
 jxtl_path_lex.c jxtl_path_lex.h: jxtl_path_lex.l
 jxtl_path_parse.c jxtl_path_parse.h: jxtl_path_parse.y
+jxtl_parse.c jxtl_parse.h: jxtl_parse.y
+jxtl_lex.c jxtl_lex.h: jxtl_lex.l
 
 %.c %.h: %.l
 	$(LEXCOMPILE) $<
