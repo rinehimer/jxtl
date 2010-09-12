@@ -5,7 +5,15 @@
 #include <apr_tables.h>
 
 #include "parser.h"
+#include "json.h"
 #include "jxtl_path.h"
+
+/** Constants used for calling the print function */
+typedef enum section_print_type {
+  PRINT_NORMAL,
+  PRINT_SECTION,
+  PRINT_SEPARATOR
+} section_print_type;
 
 typedef enum jxtl_content_type {
   JXTL_TEXT,
@@ -52,5 +60,8 @@ typedef struct {
 parser_t *jxtl_parser_create( apr_pool_t *mp );
 int jxtl_parser_parse_file( parser_t *parser, const char *file,
                             apr_array_header_t **content_array );
+
+void jxtl_content_print( apr_pool_t *mp, apr_array_header_t *content_array,
+                         json_t *json, section_print_type print_type );
 
 #endif
