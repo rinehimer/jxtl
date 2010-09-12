@@ -15,7 +15,6 @@
 #include "jxtl.h"
 #include "jxtl_parse.h"
 #include "jxtl_lex.h"
-#include "lex_extra.h"
 #include "xml2json.h"
 
 /** Constants used for calling the print function */

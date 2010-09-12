@@ -11,7 +11,6 @@
 #include "json_parse.h"
 #include "json_lex.h"
 #include "json_writer.h"
-#include "lex_extra.h"
 
 #define JSON_CREATE( mp, json )					   \
   json = apr_palloc( mp, sizeof( json_t ) );                       \
