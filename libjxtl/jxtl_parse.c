@@ -155,7 +155,7 @@ typedef union YYSTYPE
   int ival;
   unsigned char *string;
 }
-/* Line 187 of yacc.c.  */
+/* Line 193 of yacc.c.  */
 #line 160 "jxtl_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -1766,6 +1766,7 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 	   yylloc->last_column );
   va_start( args, error_string );
   vfprintf( stderr, error_string, args );
+  fprintf( stderr, "\n" );
   va_end( args );
 }
 

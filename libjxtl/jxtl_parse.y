@@ -163,6 +163,7 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 	   yylloc->last_column );
   va_start( args, error_string );
   vfprintf( stderr, error_string, args );
+  fprintf( stderr, "\n" );
   va_end( args );
 }
 
