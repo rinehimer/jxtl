@@ -34,9 +34,10 @@ void jxtl_usage( const char *prog_name,
  * Read in the command line arguments to set the template file and the
  * data_file.
  */
-void jxtl_init( int argc, char const * const *argv , apr_pool_t *mp,
+void jxtl_init( int argc, char const * const *argv, apr_pool_t *mp,
                 const char **template_file, const char **json_file,
-                const char **xml_file, int *skip_root )
+                const char **xml_file, int *skip_root,
+                const char **output_file )
 {
   apr_getopt_t *options;
   apr_status_t ret;
@@ -48,6 +49,7 @@ void jxtl_init( int argc, char const * const *argv , apr_pool_t *mp,
     { "xml", 'x', 1, "XML data dictionary for template" },
     { "skiproot", 's', 0,
       "Skip the root element if using an XML data dictionary" },
+    { "output", 'o', 1, "file to save output to" },
     { 0, 0, 0, 0 }
   };
 
@@ -71,6 +73,10 @@ void jxtl_init( int argc, char const * const *argv , apr_pool_t *mp,
 
     case 's':
       *skip_root = 1;
+      break;
+      
+    case 'o':
+      *output_file = arg;
       break;
 
     case 't':
@@ -115,6 +121,7 @@ int main( int argc, char const * const *argv )
   const char *template_file = NULL;
   const char *json_file = NULL;
   const char *xml_file = NULL;
+  const char *out_file = NULL;
   int skip_root;
   json_t *json;
   parser_t *jxtl_parser;
@@ -124,7 +131,7 @@ int main( int argc, char const * const *argv )
   apr_pool_create( &mp, NULL );
 
   jxtl_init( argc, argv, mp, &template_file, &json_file, &xml_file,
-             &skip_root );
+             &skip_root, &out_file );
 
   jxtl_parser = jxtl_parser_create( mp );
 
@@ -132,7 +139,7 @@ int main( int argc, char const * const *argv )
                          &json ) == APR_SUCCESS ) &&
        ( jxtl_parser_parse_file( jxtl_parser, template_file,
                                  &content_array ) == APR_SUCCESS ) ) {
-    jxtl_content_print( mp, content_array, json, PRINT_NORMAL );
+    jxtl_print_content_to_file( mp, content_array, json, out_file );
   }
 
   apr_pool_destroy( mp );
