@@ -8,13 +8,6 @@
 #include "json.h"
 #include "jxtl_path.h"
 
-/** Constants used for calling the print function */
-typedef enum section_print_type {
-  PRINT_NORMAL,
-  PRINT_SECTION,
-  PRINT_SEPARATOR
-} section_print_type;
-
 typedef enum jxtl_content_type {
   JXTL_TEXT,
   JXTL_SECTION,

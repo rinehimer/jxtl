@@ -1,11 +1,20 @@
 #include <apr_general.h>
 #include <apr_pools.h>
+#include <apr_tables.h>
 
+#include "apr_macros.h"
 #include "jxtl.h"
 #include "jxtl_path.h"
 #include "json.h"
 
-static void json_print_value( json_t *json, apr_file_t *out )
+/** Constants used for calling the print function */
+typedef enum section_print_type {
+  PRINT_NORMAL,
+  PRINT_SECTION,
+  PRINT_SEPARATOR
+} section_print_type;
+
+static void print_json_value( json_t *json, apr_file_t *out )
 {
   if ( !json )
     return;
@@ -28,13 +37,16 @@ static void json_print_value( json_t *json, apr_file_t *out )
                      JSON_IS_TRUE_BOOLEAN( json ) ? "true" : "false" );
     break;
 
+  case JSON_NULL:
+    break;
+
   default:
     fprintf( stderr, "error: cannot get value of object or array\n" );
     break;
   }
 }
 
-static void text_print( char *text, jxtl_content_t *prev_content,
+static void print_text( char *text, jxtl_content_t *prev_content,
                         jxtl_content_t *next_content,
                         section_print_type print_type,
                         apr_file_t *out )
@@ -116,7 +128,7 @@ static void jxtl_print_content( apr_pool_t *mp,
                    NULL;
     switch ( content->type ) {
     case JXTL_TEXT:
-      text_print( content->value, prev_content, next_content, print_type,
+      print_text( content->value, prev_content, next_content, print_type,
                   out );
       break;
 
@@ -144,7 +156,7 @@ static void jxtl_print_content( apr_pool_t *mp,
     case JXTL_VALUE:
       if ( jxtl_path_compiled_eval( mp, content->value, json, &path_obj ) ) {
         json_value = APR_ARRAY_IDX( path_obj->nodes, 0, json_t * );
-        json_print_value( json_value, out );
+        print_json_value( json_value, out );
       }
       break;
     }
@@ -153,8 +165,8 @@ static void jxtl_print_content( apr_pool_t *mp,
 }
 
 int jxtl_print_content_to_file( apr_pool_t *mp,
-                                 apr_array_header_t *content_array,
-                                 json_t *json, const char *file )
+                                apr_array_header_t *content_array,
+                                json_t *json, const char *file )
 {
   apr_file_t *out;
   apr_status_t status;
@@ -167,7 +179,7 @@ int jxtl_print_content_to_file( apr_pool_t *mp,
   else {
     status = apr_file_open_stdout( &out, mp );
   }
-
+  
   if ( status == APR_SUCCESS ) {
     jxtl_print_content( mp, content_array, json, PRINT_NORMAL, out );
   }
