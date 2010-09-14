@@ -1,4 +1,5 @@
 %{
+#include <apr_strings.h>
 #include <stdarg.h>
 
 /*
@@ -243,9 +244,9 @@ parser_t *jxtl_path_parser_create( apr_pool_t *mp )
   return parser;
 }
 
-int *jxtl_path_parser_parse_buffer( parser_t *parser,
-                                    const unsigned char *path,
-                                    jxtl_path_expr_t **expr )
+int jxtl_path_parser_parse_buffer( parser_t *parser,
+                                   const unsigned char *path,
+                                   jxtl_path_expr_t **expr )
 {
   jxtl_path_callback_t *jxtl_callbacks = parser_get_user_data( parser );
   jxtl_path_data_t *jxtl_data = jxtl_callbacks->user_data;

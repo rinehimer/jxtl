@@ -88,6 +88,7 @@
 /* Copy the first part of user declarations.  */
 #line 1 "jxtl_path_parse.y"
 
+#include <apr_strings.h>
 #include <stdarg.h>
 
 /*
@@ -127,13 +128,13 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 34 "jxtl_path_parse.y"
+#line 35 "jxtl_path_parse.y"
 {
   int ival;
   unsigned char *string;
 }
 /* Line 187 of yacc.c.  */
-#line 137 "jxtl_path_parse.c"
+#line 138 "jxtl_path_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -158,7 +159,7 @@ typedef struct YYLTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 162 "jxtl_path_parse.c"
+#line 163 "jxtl_path_parse.c"
 
 #ifdef short
 # undef short
@@ -445,8 +446,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    47,    47,    48,    52,    52,    53,    57,    57,    59,
-      60,    61,    61,    62,    65,    67,    67
+       0,    48,    48,    49,    53,    53,    54,    58,    58,    60,
+      61,    62,    62,    63,    66,    68,    68
 };
 #endif
 
@@ -1399,49 +1400,49 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 47 "jxtl_path_parse.y"
+#line 48 "jxtl_path_parse.y"
     { callbacks->negate_handler( callbacks->user_data ); }
     break;
 
   case 4:
-#line 52 "jxtl_path_parse.y"
+#line 53 "jxtl_path_parse.y"
     { callbacks->root_object_handler( callbacks->user_data ); }
     break;
 
   case 7:
-#line 57 "jxtl_path_parse.y"
+#line 58 "jxtl_path_parse.y"
     { callbacks->identifier_handler( callbacks->user_data,
                                                   (yyvsp[(1) - (1)].string) ); }
     break;
 
   case 9:
-#line 59 "jxtl_path_parse.y"
+#line 60 "jxtl_path_parse.y"
     { callbacks->current_object_handler( callbacks->user_data ); }
     break;
 
   case 10:
-#line 60 "jxtl_path_parse.y"
+#line 61 "jxtl_path_parse.y"
     { callbacks->parent_object_handler( callbacks->user_data ); }
     break;
 
   case 11:
-#line 61 "jxtl_path_parse.y"
+#line 62 "jxtl_path_parse.y"
     { callbacks->any_object_handler( callbacks->user_data ); }
     break;
 
   case 15:
-#line 67 "jxtl_path_parse.y"
+#line 68 "jxtl_path_parse.y"
     { callbacks->predicate_start_handler( callbacks->user_data ); }
     break;
 
   case 16:
-#line 69 "jxtl_path_parse.y"
+#line 70 "jxtl_path_parse.y"
     { callbacks->predicate_end_handler( callbacks->user_data ); }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1445 "jxtl_path_parse.c"
+#line 1446 "jxtl_path_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1661,7 +1662,7 @@ yyreturn:
 }
 
 
-#line 72 "jxtl_path_parse.y"
+#line 73 "jxtl_path_parse.y"
 
 
 typedef struct jxtl_path_data_t {
@@ -1836,9 +1837,9 @@ parser_t *jxtl_path_parser_create( apr_pool_t *mp )
   return parser;
 }
 
-int *jxtl_path_parser_parse_buffer( parser_t *parser,
-                                    const unsigned char *path,
-                                    jxtl_path_expr_t **expr )
+int jxtl_path_parser_parse_buffer( parser_t *parser,
+                                   const unsigned char *path,
+                                   jxtl_path_expr_t **expr )
 {
   jxtl_path_callback_t *jxtl_callbacks = parser_get_user_data( parser );
   jxtl_path_data_t *jxtl_data = jxtl_callbacks->user_data;
