@@ -43,8 +43,8 @@ struct parser_t {
   yyscan_t scanner;
   /* Result of parsing. */
   int parse_result;
-  /* If errors occur during parsing and we want to save them. */
-  apr_array_header_t *error_array;
+  /* If an error occurs during parsing and we want to save it. */
+  char *error_str;
   /* User data. */
   void *user_data;
   const char * ( *get_filename )( struct parser_t * );
@@ -100,9 +100,10 @@ void parser_set_user_data( parser_t *parser, void *user_data );
 void *parser_get_user_data( parser_t *parser );
 
 /**
- * Print out any errors saved off during parsing.
+ * Return the error saved off.
  * @param parser A parser.
  */
-void parser_print_error( parser_t *parser );
+char *parser_get_error( parser_t *parser );
+
 
 #endif

@@ -155,7 +155,7 @@ typedef union YYSTYPE
   int ival;
   unsigned char *string;
 }
-/* Line 193 of yacc.c.  */
+/* Line 187 of yacc.c.  */
 #line 160 "jxtl_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -475,9 +475,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    53,    53,    56,    58,    62,    63,    64,    68,    74,
-      73,    84,    83,    94,    93,    99,    98,   103,   107,   112,
-     114,   118,   119,   120,   123,   125,   126,   130
+       0,    53,    53,    56,    58,    62,    63,    64,    68,    79,
+      78,    95,    94,   108,   107,   116,   115,   120,   124,   129,
+     131,   135,   136,   137,   140,   142,   143,   147
 };
 #endif
 
@@ -1458,56 +1458,73 @@ yyreduce:
 
   case 8:
 #line 69 "jxtl_parse.y"
-    { callbacks->value_handler( callbacks->user_data, (yyvsp[(2) - (3)].string) ); }
+    {
+      if ( !callbacks->value_handler( callbacks->user_data, (yyvsp[(2) - (3)].string) ) ) {
+        jxtl_error( &(yylsp[(2) - (3)]), scanner, parser, callbacks_ptr,
+                    callbacks->get_error_func( callbacks->user_data ) );
+      }
+    }
     break;
 
   case 9:
-#line 74 "jxtl_parse.y"
-    { callbacks->section_start_handler( callbacks->user_data, (yyvsp[(3) - (3)].string) ); }
+#line 79 "jxtl_parse.y"
+    {
+      if ( !callbacks->section_start_handler( callbacks->user_data,
+                                              (yyvsp[(3) - (3)].string) ) ) {
+        jxtl_error( &(yylsp[(2) - (3)]), scanner, parser, callbacks_ptr,
+                    callbacks->get_error_func( callbacks->user_data ) );
+      }
+    }
     break;
 
   case 10:
-#line 79 "jxtl_parse.y"
+#line 90 "jxtl_parse.y"
     { callbacks->section_end_handler( callbacks->user_data ); }
     break;
 
   case 11:
-#line 84 "jxtl_parse.y"
+#line 95 "jxtl_parse.y"
     {
-      callbacks->if_start_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) );
+      if ( !callbacks->if_start_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) ) ) {
+        jxtl_error( &(yylsp[(3) - (4)]), scanner, parser, callbacks_ptr,
+                    callbacks->get_error_func( callbacks->user_data ) );
+      }
     }
     break;
 
   case 13:
-#line 94 "jxtl_parse.y"
+#line 108 "jxtl_parse.y"
     {
-      callbacks->elseif_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) );
+      if ( !callbacks->elseif_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) ) ) {
+        jxtl_error( &(yylsp[(3) - (4)]), scanner, parser, callbacks_ptr,
+                    callbacks->get_error_func( callbacks->user_data ) );
+      }
     }
     break;
 
   case 15:
-#line 99 "jxtl_parse.y"
+#line 116 "jxtl_parse.y"
     {
       callbacks->else_handler( callbacks->user_data );
     }
     break;
 
   case 18:
-#line 108 "jxtl_parse.y"
+#line 125 "jxtl_parse.y"
     {
       callbacks->if_end_handler( callbacks->user_data );
     }
     break;
 
   case 20:
-#line 115 "jxtl_parse.y"
+#line 132 "jxtl_parse.y"
     {
       callbacks->text_handler( callbacks->user_data, (yyvsp[(2) - (2)].string) );
     }
     break;
 
   case 27:
-#line 131 "jxtl_parse.y"
+#line 148 "jxtl_parse.y"
     {
       callbacks->separator_start_handler( callbacks->user_data );
       callbacks->text_handler( callbacks->user_data, (yyvsp[(3) - (3)].string) );
@@ -1517,7 +1534,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1521 "jxtl_parse.c"
+#line 1538 "jxtl_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1737,7 +1754,7 @@ yyreturn:
 }
 
 
-#line 138 "jxtl_parse.y"
+#line 155 "jxtl_parse.y"
 
 
 /**
@@ -1953,6 +1970,12 @@ static int jxtl_value_func( void *user_data, unsigned char *expr )
   return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
 }
 
+static char *jxtl_get_error( void *user_data )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  return parser_get_error( data->jxtl_path_parser );
+}
+
 parser_t *jxtl_parser_create( apr_pool_t *mp )
 {
   parser_t *parser = parser_create( mp,
@@ -1985,7 +2008,8 @@ parser_t *jxtl_parser_create( apr_pool_t *mp )
   jxtl_callbacks->separator_end_handler = jxtl_separator_end;
   jxtl_callbacks->value_handler = jxtl_value_func;
   jxtl_callbacks->user_data = jxtl_data;
-
+  jxtl_callbacks->get_error_func = jxtl_get_error;
+    
   parser_set_user_data( parser, jxtl_callbacks );
 
   return parser;

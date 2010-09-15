@@ -66,12 +66,23 @@ text
 
 value_directive
   : T_DIRECTIVE_START T_PATH_EXPR T_DIRECTIVE_END
-    { callbacks->value_handler( callbacks->user_data, $<string>2 ); }
+    {
+      if ( !callbacks->value_handler( callbacks->user_data, $<string>2 ) ) {
+        jxtl_error( &@2, scanner, parser, callbacks_ptr,
+                    callbacks->get_error_func( callbacks->user_data ) );
+      }
+    }
 ;
 
 section_directive
   : T_DIRECTIVE_START T_SECTION T_PATH_EXPR
-    { callbacks->section_start_handler( callbacks->user_data, $<string>3 ); }
+    {
+      if ( !callbacks->section_start_handler( callbacks->user_data,
+                                              $<string>3 ) ) {
+        jxtl_error( &@2, scanner, parser, callbacks_ptr,
+                    callbacks->get_error_func( callbacks->user_data ) );
+      }
+    }
     options
     T_DIRECTIVE_END
     section_content
@@ -82,7 +93,10 @@ section_directive
 if_directive
   : T_DIRECTIVE_START T_IF T_PATH_EXPR T_DIRECTIVE_END
     {
-      callbacks->if_start_handler( callbacks->user_data, $<string>3 );
+      if ( !callbacks->if_start_handler( callbacks->user_data, $<string>3 ) ) {
+        jxtl_error( &@3, scanner, parser, callbacks_ptr,
+                    callbacks->get_error_func( callbacks->user_data ) );
+      }
     }
     section_content
     rest_of_if
@@ -92,7 +106,10 @@ if_directive
 rest_of_if
   : T_DIRECTIVE_START T_ELSEIF T_PATH_EXPR T_DIRECTIVE_END
     {
-      callbacks->elseif_handler( callbacks->user_data, $<string>3 );
+      if ( !callbacks->elseif_handler( callbacks->user_data, $<string>3 ) ) {
+        jxtl_error( &@3, scanner, parser, callbacks_ptr,
+                    callbacks->get_error_func( callbacks->user_data ) );
+      }
     }
     section_content rest_of_if
   | T_DIRECTIVE_START T_ELSE T_DIRECTIVE_END
@@ -350,6 +367,12 @@ static int jxtl_value_func( void *user_data, unsigned char *expr )
   return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
 }
 
+static char *jxtl_get_error( void *user_data )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  return parser_get_error( data->jxtl_path_parser );
+}
+
 parser_t *jxtl_parser_create( apr_pool_t *mp )
 {
   parser_t *parser = parser_create( mp,
@@ -382,7 +405,8 @@ parser_t *jxtl_parser_create( apr_pool_t *mp )
   jxtl_callbacks->separator_end_handler = jxtl_separator_end;
   jxtl_callbacks->value_handler = jxtl_value_func;
   jxtl_callbacks->user_data = jxtl_data;
-
+  jxtl_callbacks->get_error_func = jxtl_get_error;
+    
   parser_set_user_data( parser, jxtl_callbacks );
 
   return parser;

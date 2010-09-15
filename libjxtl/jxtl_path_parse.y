@@ -201,10 +201,8 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 		      void *callbacks_ptr, const char *error_string, ... )
 {
   va_list args;
-  char *str;
-  va_start( args, error_string);
-  str = apr_pvsprintf( parser->mp, error_string, args );
-  APR_ARRAY_PUSH( parser->error_array, char * ) = str;
+  va_start( args, error_string );
+  parser->error_str = apr_pvsprintf( parser->mp, error_string, args );
   va_end( args );
 }
 

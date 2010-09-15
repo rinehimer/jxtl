@@ -75,7 +75,7 @@ typedef union YYSTYPE
   int ival;
   unsigned char *string;
 }
-/* Line 1529 of yacc.c.  */
+/* Line 1489 of yacc.c.  */
 #line 80 "jxtl_parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

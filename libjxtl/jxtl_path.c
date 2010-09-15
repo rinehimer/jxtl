@@ -180,6 +180,13 @@ int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
                              json_t *json, jxtl_path_obj_t **obj_ptr )
 {
   jxtl_path_obj_t *obj;
+
+  *obj_ptr = NULL;
+
+  if ( !expr ) {
+    return 0;
+  }
+
   obj = jxtl_path_obj_create( mp );
   jxtl_path_eval_internal( expr, json, obj->nodes );
   *obj_ptr = obj;

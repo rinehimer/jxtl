@@ -36,7 +36,10 @@ typedef struct jxtl_section_t {
   apr_array_header_t *separator;
 } jxtl_section_t;
 
-typedef struct {
+/**
+ * Structure that holds the callbacks functions for the jxtl parser.
+ */
+typedef struct jxtl_callback_t {
   void ( *text_handler )( void *user_data, unsigned char *text );
   int ( *section_start_handler )( void *user_data, unsigned char *expr );
   void ( *section_end_handler )( void *user_data );
@@ -47,6 +50,7 @@ typedef struct {
   void ( *separator_start_handler )( void *user_data );
   void ( *separator_end_handler )( void *user_data );
   int ( *value_handler )( void *user_data, unsigned char *expr );
+  char * ( *get_error_func )( void *user_data );
   void *user_data;
 } jxtl_callback_t;
 

@@ -29,7 +29,7 @@ parser_t *parser_create( apr_pool_t *mp,
   parser->flex_delete = flex_delete;
   parser->bison_parse = bison_parse;
 
-  parser->error_array = apr_array_make( mp, 4, sizeof(char *) );
+  parser->error_str = NULL;
   parser->str_array = apr_array_make( mp, 8192, sizeof(char) );
   parser->flex_init( &parser->scanner );
   parser->flex_set_extra( parser, parser->scanner );
@@ -43,7 +43,7 @@ parser_t *parser_create( apr_pool_t *mp,
  */
 static void parser_reset( parser_t *parser )
 {
-  APR_ARRAY_CLEAR( parser->error_array );
+  parser->error_str = NULL;
   APR_ARRAY_CLEAR( parser->str_array );
 }
 
@@ -57,14 +57,9 @@ void *parser_get_user_data( parser_t *parser )
   return parser->user_data;
 }
 
-void parser_print_error( parser_t *parser )
+char *parser_get_error( parser_t *parser )
 {
-  int i;
-  char *str;
-  for ( i = 0; i < parser->error_array->nelts; i++ ) {
-    str = APR_ARRAY_IDX( parser->error_array, i, char * );
-    fprintf( stderr, "%s\n", str );
-  }
+  return parser->error_str;
 }
 
 apr_status_t parser_parse_file( parser_t *parser, const char *file )
