@@ -4,9 +4,6 @@
 #include <apr_tables.h>
 #include <apr_pools.h>
 
-#include "jxtl_path_parse.h"
-#include "jxtl_path_lex.h"
-
 #include "parser.h"
 #include "json.h"
 
