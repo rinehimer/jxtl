@@ -170,14 +170,17 @@ int jxtl_print_content_to_file( apr_pool_t *mp,
 {
   apr_file_t *out;
   apr_status_t status;
+  int is_stdout;
 
-  if ( file ) {
+  is_stdout = ( !file || apr_strnatcasecmp( file, "-" ) == 0 );
+
+  if ( is_stdout ) {
+    status = apr_file_open_stdout( &out, mp );
+  }
+  else {
     status = apr_file_open( &out, file,
                             APR_WRITE | APR_CREATE | APR_BUFFERED |
                             APR_TRUNCATE, APR_OS_DEFAULT, mp );
-  }
-  else {
-    status = apr_file_open_stdout( &out, mp );
   }
   
   if ( status == APR_SUCCESS ) {

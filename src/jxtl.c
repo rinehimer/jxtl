@@ -57,6 +57,7 @@ void jxtl_init( int argc, char const * const *argv, apr_pool_t *mp,
   *json_file = NULL;
   *xml_file = NULL;
   *skip_root = 0;
+  *output_file = NULL;
 
   apr_getopt_init( &options, mp, argc, argv );
 
