@@ -35,17 +35,19 @@ AC_CHECK_FUNCS([strcasecmp strdup])
 ## Apache portable runtime checking
 AC_CHECK_PROG(APR_CONFIG, apr-1-config, apr-1-config, [], [], [])
 AC_CHECK_PROG(APR_CONFIG, apr-config, apr-config, [], [], [exit1])
-AC_CHECK_PROG(APU_CONFIG, apu-1-config, apu-1-config, [], [], [])
-AC_CHECK_PROG(APU_CONFIG, apu-config, apu-config, [], [], [exit1])
 APR_CFLAGS=`$APR_CONFIG --cflags --cppflags --includes`
 APR_LIBS=`$APR_CONFIG --link-ld --libs`
-APU_CFLAGS=`$APU_CONFIG --includes`
-APU_LIBS=`$APU_CONFIG --link-ld --libs`
-
 AC_SUBST(APR_CFLAGS)
 AC_SUBST(APR_LIBS)
+
+AC_CHECK_PROG(APU_CONFIG, apu-1-config, apu-1-config, [], [], [])
+AC_CHECK_PROG(APU_CONFIG, apu-config, apu-config, [], [], [exit1])
+APU_CFLAGS=`$APU_CONFIG --includes`
+APU_LIBS=`$APU_CONFIG --link-ld --libs`
 AC_SUBST(APU_CFLAGS)
 AC_SUBST(APU_LIBS)
+
+AC_CHECK_PROG(SWIG, swig, swig, [], [], [])
 
 AC_CONFIG_FILES([Makefile
                  bindings/perl/Makefile.PL

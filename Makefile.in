@@ -138,6 +138,7 @@ SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+SWIG = @SWIG@
 VERSION = @VERSION@
 YACC = @YACC@
 YFLAGS = @YFLAGS@
@@ -192,6 +193,7 @@ SUBDIRS = libjxtl \
           src \
           test
 
+PERL_BINDINGS_DIR = ${top_srcdir}/bindings/perl
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -629,6 +631,16 @@ uninstall-info: uninstall-info-recursive
 	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
 	tags tags-recursive uninstall uninstall-am uninstall-info-am
 
+
+bindings: swig-perl
+
+swig-perl:
+	${SWIG} -I${top_srcdir}/libjxtl -perl5 ${PERL_BINDINGS_DIR}/libjxtl.i
+	cd ${PERL_BINDINGS_DIR} && perl Makefile.PL
+	${MAKE} -C ${PERL_BINDINGS_DIR}
+
+install-swig-perl:
+	${MAKE} -C ${PERL_BINDINGS_DIR} install
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
