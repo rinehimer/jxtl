@@ -1,0 +1,12 @@
+use ExtUtils::MakeMaker;
+
+$top_srcdir = "@top_srcdir@";
+$apr_cflags = "@APR_CFLAGS@";
+$apr_libs = "@APR_LIBS@";
+$apu_cflags = "@APU_CFLAGS@";
+$apu_libs = "@APU_LIBS@";
+
+WriteMakefile( "NAME" => "LibJXTL",
+               "CCFLAGS" => "$apr_cflags $apu_cflags -I$top_srcdir/libjxtl",
+               "LIBS" => "$apr_libs $apu_libs -ljxtl",
+               "OBJECT" => "libjxtl_wrap.o" );

@@ -48,7 +48,8 @@ AC_SUBST(APU_CFLAGS)
 AC_SUBST(APU_LIBS)
 
 AC_CONFIG_FILES([Makefile
+                 bindings/perl/Makefile.PL
                  libjxtl/Makefile
-		 src/Makefile
+                 src/Makefile
                  test/Makefile])
 AC_OUTPUT
