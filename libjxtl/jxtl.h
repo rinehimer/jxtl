@@ -58,8 +58,11 @@ parser_t *jxtl_parser_create( apr_pool_t *mp );
 int jxtl_parser_parse_file( parser_t *parser, const char *file,
                             apr_array_header_t **content_array );
 
-int jxtl_print_content_to_file( apr_pool_t *mp,
-                                apr_array_header_t *content_array,
-                                json_t *json, const char *file );
+int jxtl_expand_to_file( apr_pool_t *mp,
+                         apr_array_header_t *content_array,
+                         json_t *json, const char *file );
+char *jxtl_expand_to_buffer( apr_pool_t *mp,
+                             apr_array_header_t *content_array,
+                             json_t *json );
 
 #endif
