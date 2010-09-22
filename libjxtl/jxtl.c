@@ -1,3 +1,4 @@
+#include <apr_buckets.h>
 #include <apr_general.h>
 #include <apr_pools.h>
 #include <apr_tables.h>
@@ -14,27 +15,27 @@ typedef enum section_print_type {
   PRINT_SEPARATOR
 } section_print_type;
 
-static void print_json_value( json_t *json, apr_file_t *out )
+static void print_json_value( json_t *json, apr_bucket_brigade *out )
 {
   if ( !json )
     return;
 
   switch ( json->type ) {
   case JSON_STRING:
-    apr_file_printf( out, "%s", json->value.string );
+    apr_brigade_printf( out, NULL, NULL, "%s", json->value.string );
     break;
     
   case JSON_INTEGER:
-    apr_file_printf( out, "%d", json->value.integer );
+    apr_brigade_printf( out, NULL, NULL, "%d", json->value.integer );
     break;
     
   case JSON_NUMBER:
-    apr_file_printf( out, "%g", json->value.number );
+    apr_brigade_printf( out, NULL, NULL, "%g", json->value.number );
     break;
 
   case JSON_BOOLEAN:
-    apr_file_printf( out, "%s",
-                     JSON_IS_TRUE_BOOLEAN( json ) ? "true" : "false" );
+    apr_brigade_printf( out, NULL, NULL, "%s",
+                        JSON_IS_TRUE_BOOLEAN( json ) ? "true" : "false" );
     break;
 
   case JSON_NULL:
@@ -49,7 +50,7 @@ static void print_json_value( json_t *json, apr_file_t *out )
 static void print_text( char *text, jxtl_content_t *prev_content,
                         jxtl_content_t *next_content,
                         section_print_type print_type,
-                        apr_file_t *out )
+                        apr_bucket_brigade *out )
 {
   char *text_ptr = text;
   int len = strlen( text_ptr );
@@ -63,13 +64,13 @@ static void print_text( char *text, jxtl_content_t *prev_content,
        ( text_ptr[len - 1] == '\n' ) ) {
     len--;
   }
-  apr_file_printf( out, "%.*s", len, text_ptr );
+  apr_brigade_printf( out, NULL, NULL, "%.*s", len, text_ptr );
 }
 
 static void jxtl_print_content( apr_pool_t *mp,
                                 apr_array_header_t *content_array,
                                 json_t *json, section_print_type print_type,
-                                apr_file_t *out );
+                                apr_bucket_brigade *out );
 
 /**
  * Print a saved section
@@ -78,7 +79,7 @@ static void jxtl_print_section( apr_pool_t *mp,
                                 jxtl_section_t *section,
                                 json_t *json,
                                 section_print_type print_type,
-                                apr_file_t *out )
+                                apr_bucket_brigade *out )
 {
   int i;
   int num_items;
@@ -105,7 +106,7 @@ static void jxtl_print_section( apr_pool_t *mp,
 static void jxtl_print_content( apr_pool_t *mp,
                                 apr_array_header_t *content_array,
                                 json_t *json, section_print_type print_type,
-                                apr_file_t *out )
+                                apr_bucket_brigade *out )
 {
   int i, j;
   jxtl_content_t *content, *prev_content, *next_content;
@@ -170,6 +171,11 @@ int jxtl_print_content_to_file( apr_pool_t *mp,
 {
   apr_file_t *out;
   apr_status_t status;
+  apr_bucket_alloc_t *bucket_alloc;
+  apr_bucket_brigade *bucket_brigade;
+  struct iovec vec;
+  int nvec;
+  apr_size_t nbytes;
   int is_stdout;
 
   is_stdout = ( !file || apr_strnatcasecmp( file, "-" ) == 0 );
@@ -184,7 +190,18 @@ int jxtl_print_content_to_file( apr_pool_t *mp,
   }
   
   if ( status == APR_SUCCESS ) {
-    jxtl_print_content( mp, content_array, json, PRINT_NORMAL, out );
+    bucket_alloc = apr_bucket_alloc_create( mp );
+    bucket_brigade = apr_brigade_create( mp, bucket_alloc );
+
+    jxtl_print_content( mp, content_array, json, PRINT_NORMAL, bucket_brigade );
+
+    apr_brigade_to_iovec( bucket_brigade, &vec, &nvec );
+    status = apr_file_writev( out, &vec, nvec, &nbytes );
+
+    apr_brigade_destroy( bucket_brigade );
+    apr_bucket_alloc_destroy( bucket_alloc );
+    apr_file_close( out );
   }
+
   return ( status == APR_SUCCESS ) ? TRUE : FALSE;
 }
