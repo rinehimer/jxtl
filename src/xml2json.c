@@ -28,7 +28,7 @@ int main( int argc, char **argv )
   }
   
   if ( xml_file_to_json( argv[1], writer, 1 ) == 0 ) {
-    json_object_print( writer->json, 1 );
+    json_dump( writer->json, 1 );
     ret = 0;
   }
   else {

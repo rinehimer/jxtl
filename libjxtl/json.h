@@ -47,15 +47,15 @@ typedef struct json_t {
 #define JSON_IS_TRUE_BOOLEAN( json )\
  ( JSON_IS_BOOLEAN( json ) && (json)->value.boolean == TRUE )
 
-json_t *json_string_create( apr_pool_t *mp, unsigned char *string );
-json_t *json_integer_create( apr_pool_t *mp, int integer );
-json_t *json_number_create( apr_pool_t *mp, double number );
-json_t *json_object_create( apr_pool_t *mp );
-json_t *json_array_create( apr_pool_t *mp );
-json_t *json_boolean_create( apr_pool_t *mp, int boolean );
-json_t *json_null_create( apr_pool_t *mp );
+json_t *json_create_string( apr_pool_t *mp, unsigned char *string );
+json_t *json_create_integer( apr_pool_t *mp, int integer );
+json_t *json_create_number( apr_pool_t *mp, double number );
+json_t *json_create_object( apr_pool_t *mp );
+json_t *json_create_array( apr_pool_t *mp );
+json_t *json_create_boolean( apr_pool_t *mp, int boolean );
+json_t *json_create_null( apr_pool_t *mp );
 
-void json_object_print( json_t *node, int indent );
+void json_dump( json_t *node, int indent );
 void json_to_xml( json_t *json, int indent );
 
 #endif

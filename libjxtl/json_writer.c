@@ -145,7 +145,7 @@ static void json_add( json_writer_t *writer, json_t *json )
 			     APR_HASH_KEY_STRING );
     if ( tmp_json && tmp_json->type != JSON_ARRAY ) {
       /* Key already exists, make an array and put both objects in it. */
-      new_array = json_array_create( writer->mp );
+      new_array = json_create_array( writer->mp );
       JSON_NAME( new_array ) = JSON_NAME( json );
       JSON_NAME( json ) = NULL;
       JSON_NAME( tmp_json ) = NULL;
@@ -195,7 +195,7 @@ void json_writer_object_start( void *writer_ptr )
     return;
   }
 
-  json = json_object_create( writer->mp );
+  json = json_create_object( writer->mp );
   json_add( writer, json );
 
   APR_ARRAY_PUSH( writer->json_stack, json_t * ) = json;
@@ -221,7 +221,7 @@ void json_writer_array_start( void *writer_ptr )
     return;
   }
 
-  json = json_array_create( writer->mp );
+  json = json_create_array( writer->mp );
   json_add( writer, json );
 
   APR_ARRAY_PUSH( writer->json_stack, json_t * ) = json;
@@ -265,7 +265,7 @@ void json_writer_string_write( void *writer_ptr, unsigned char *value )
     return;
   }
 
-  json_add( writer, json_string_create( writer->mp, value ) );
+  json_add( writer, json_create_string( writer->mp, value ) );
 }
 
 void json_writer_integer_write( void *writer_ptr, int value )
@@ -276,7 +276,7 @@ void json_writer_integer_write( void *writer_ptr, int value )
     return;
   }
 
-  json_add( writer, json_integer_create( writer->mp, value ) );
+  json_add( writer, json_create_integer( writer->mp, value ) );
 }
 
 void json_writer_number_write( void *writer_ptr, double value )
@@ -287,7 +287,7 @@ void json_writer_number_write( void *writer_ptr, double value )
     return;
   }
 
-  json_add( writer, json_number_create( writer->mp, value ) );
+  json_add( writer, json_create_number( writer->mp, value ) );
 }
 
 void json_writer_boolean_write( void *writer_ptr, int value )
@@ -298,7 +298,7 @@ void json_writer_boolean_write( void *writer_ptr, int value )
     return;
   }
 
-  json_add( writer, json_boolean_create( writer->mp, value ) );
+  json_add( writer, json_create_boolean( writer->mp, value ) );
 }
 
 void json_writer_null_write( void *writer_ptr )
@@ -309,5 +309,5 @@ void json_writer_null_write( void *writer_ptr )
     return;
   }
 
-  json_add( writer, json_null_create( writer->mp ) );
+  json_add( writer, json_create_null( writer->mp ) );
 }

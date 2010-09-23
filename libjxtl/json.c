@@ -17,7 +17,7 @@
   json->name = NULL;						   \
   json->parent = NULL
 
-json_t *json_string_create( apr_pool_t *mp, unsigned char *string )
+json_t *json_create_string( apr_pool_t *mp, unsigned char *string )
 {
   json_t *json;
   JSON_CREATE( mp, json );
@@ -26,7 +26,7 @@ json_t *json_string_create( apr_pool_t *mp, unsigned char *string )
   return json;
 }
 
-json_t *json_integer_create( apr_pool_t *mp, int integer )
+json_t *json_create_integer( apr_pool_t *mp, int integer )
 {
   json_t *json;
   JSON_CREATE( mp, json );
@@ -35,7 +35,7 @@ json_t *json_integer_create( apr_pool_t *mp, int integer )
   return json;
 }
 
-json_t *json_number_create( apr_pool_t *mp, double number )
+json_t *json_create_number( apr_pool_t *mp, double number )
 {
   json_t *json;
   JSON_CREATE( mp, json );
@@ -44,7 +44,7 @@ json_t *json_number_create( apr_pool_t *mp, double number )
   return json;
 }
 
-json_t *json_object_create( apr_pool_t *mp )
+json_t *json_create_object( apr_pool_t *mp )
 {
   json_t *json;
 
@@ -54,7 +54,7 @@ json_t *json_object_create( apr_pool_t *mp )
   return json;
 }
 
-json_t *json_array_create( apr_pool_t *mp )
+json_t *json_create_array( apr_pool_t *mp )
 {
   json_t *json;
   JSON_CREATE( mp, json );
@@ -63,7 +63,7 @@ json_t *json_array_create( apr_pool_t *mp )
   return json;
 }
 
-json_t *json_boolean_create( apr_pool_t *mp, int boolean )
+json_t *json_create_boolean( apr_pool_t *mp, int boolean )
 {
   json_t *json;
   JSON_CREATE( mp, json );
@@ -72,7 +72,7 @@ json_t *json_boolean_create( apr_pool_t *mp, int boolean )
   return json;
 }
 
-json_t *json_null_create( apr_pool_t *mp )
+json_t *json_create_null( apr_pool_t *mp )
 {
   json_t *json;
   JSON_CREATE( mp, json );
@@ -87,7 +87,7 @@ static void print_spaces( int num )
   }
 }
 
-static void json_string_print( unsigned char *str )
+static void print_string( unsigned char *str )
 {
   unsigned char *c = str;
 
@@ -129,10 +129,7 @@ static void json_string_print( unsigned char *str )
   printf( "\"" );
 }
 
-static void json_object_print_internal( json_t *json,
-					int first,
-					int depth,
-					int indent )
+static void dump_internal( json_t *json, int first, int depth, int indent )
 {
   apr_array_header_t *arr = NULL;
   int i = 0;
@@ -148,7 +145,7 @@ static void json_object_print_internal( json_t *json,
   }
 
   if ( JSON_NAME( json ) ) {
-    json_string_print( JSON_NAME( json ) );
+    print_string( JSON_NAME( json ) );
     printf( ":" );
      if ( indent )
       print_spaces( 1 );
@@ -156,7 +153,7 @@ static void json_object_print_internal( json_t *json,
 
   switch ( json->type ) {
   case JSON_STRING:
-    json_string_print( json->value.string );
+    print_string( json->value.string );
     break;
 
   case JSON_INTEGER:
@@ -172,7 +169,7 @@ static void json_object_print_internal( json_t *json,
     for ( i = 0, idx = apr_hash_first( NULL, json->value.object ); idx;
 	  i++, idx = apr_hash_next( idx ) ) {
       apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
-      json_object_print_internal( tmp_json, i == 0, depth + 1, indent );
+      dump_internal( tmp_json, i == 0, depth + 1, indent );
     }
     
     if ( indent && i > 0 ) {
@@ -187,7 +184,7 @@ static void json_object_print_internal( json_t *json,
     printf( "[" );
     for ( i = 0; arr && i < arr->nelts; i++ ) {
       tmp_json = APR_ARRAY_IDX( arr, i, json_t * );
-      json_object_print_internal( tmp_json, i == 0, depth + 1, indent );
+      dump_internal( tmp_json, i == 0, depth + 1, indent );
     }
 
     if ( indent && i > 0 ) {
@@ -220,12 +217,12 @@ static void json_object_print_internal( json_t *json,
 /*
  * Externally visible function that invokes the internal print function.
  */
-void json_object_print( json_t *json, int indent )
+void json_dump( json_t *json, int indent )
 {
-  json_object_print_internal( json, 1, 0, indent );
+  dump_internal( json, 1, 0, indent );
 }
 
-static void json_write_string( unsigned char *str )
+static void print_xml_string( unsigned char *str )
 {
   unsigned char *c = str;
 
@@ -258,7 +255,7 @@ static void json_to_xml_internal( json_t *json, int indent )
 
   switch ( json->type ) {
   case JSON_STRING:
-    json_write_string( json->value.string );
+    print_xml_string( json->value.string );
     break;
 
   case JSON_INTEGER:
@@ -309,6 +306,12 @@ static void json_to_xml_internal( json_t *json, int indent )
   }
 }
 
+/*
+ * Figure out if I really want to keep this around, it was really more for
+ * debugging early on.  There could potentially be some use, but it's possible
+ * the XML produced is invalid since it doesn't use an API to generate it.
+ * This function isn't prototyped in json.h header.
+ */
 void json_to_xml( json_t *json, int indent )
 {
   printf( "<?xml version=\"1.0\"?>\n" );
