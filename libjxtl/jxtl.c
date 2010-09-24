@@ -201,7 +201,9 @@ int jxtl_expand_to_file( apr_pool_t *mp,
 
     apr_brigade_destroy( bucket_brigade );
     apr_bucket_alloc_destroy( bucket_alloc );
-    apr_file_close( out );
+    if ( !is_stdout ) {
+      apr_file_close( out );
+    }
   }
 
   return ( status == APR_SUCCESS ) ? TRUE : FALSE;

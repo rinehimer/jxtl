@@ -188,7 +188,9 @@ int xml_file_to_json( const char *filename, json_writer_t *writer,
     json_writer_end_object( writer );
   }
 
-  apr_file_close( file );
+  if ( !is_stdin ) {
+    apr_file_close( file );
+  }
   apr_pool_destroy( xml_mp );
 
   return status;
