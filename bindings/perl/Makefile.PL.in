@@ -9,4 +9,4 @@ $apu_libs = "@APU_LIBS@";
 WriteMakefile( "NAME" => "LibJXTL",
                "CCFLAGS" => "$apr_cflags $apu_cflags -I$top_srcdir/libjxtl",
                "LIBS" => "$apr_libs $apu_libs -ljxtl",
-               "OBJECT" => "libjxtl_wrap.o" );
+               "OBJECT" => "libjxtl_wrap.o perl_util.o" );

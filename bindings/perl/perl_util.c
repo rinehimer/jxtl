@@ -8,8 +8,8 @@
 #include "json_writer.h"
 #include "json.h"
 
-void perl_hash_to_json( SV *input, json_writer_t *writer );
-void perl_array_to_json( SV *input, json_writer_t *writer );
+static void perl_hash_to_json( SV *input, json_writer_t *writer );
+static void perl_array_to_json( SV *input, json_writer_t *writer );
 
 static void perl_variable_to_json_internal( SV *input, json_writer_t *writer )
 {
@@ -29,7 +29,7 @@ static void perl_variable_to_json_internal( SV *input, json_writer_t *writer )
   case SVt_PV:
   case SVt_RV:
     val = SvPV_nolen( input );
-    json_writer_string_write( writer, (unsigned char *) val );
+    json_writer_write_string( writer, (unsigned char *) val );
     break;
       
   case SVt_PVAV:
@@ -52,20 +52,20 @@ static void perl_hash_to_json( SV *input, json_writer_t *writer )
   I32 cnt, retlen;
   SV *item;
 
-  json_writer_object_start( writer );
+  json_writer_start_object( writer );
 
   if ( ( SvROK( input ) && SvTYPE( SvRV( input ) ) == SVt_PVHV ) ) {
     h = (HV *) SvRV( input );
     cnt = hv_iterinit( h );
     while ( cnt-- ) {
       item = hv_iternextsv( h, &prop, &retlen );
-      json_writer_property_start( writer, (unsigned char *) prop );
+      json_writer_start_property( writer, (unsigned char *) prop );
       perl_variable_to_json_internal( item, writer );
-      json_writer_property_end( writer );
+      json_writer_end_property( writer );
     }
   }
 
-  json_writer_object_end( writer );
+  json_writer_end_object( writer );
 }
 
 static void perl_array_to_json( SV *input, json_writer_t *writer )
@@ -74,7 +74,7 @@ static void perl_array_to_json( SV *input, json_writer_t *writer )
   AV *array;
   SV **item;
 
-  json_writer_array_start( writer );
+  json_writer_start_array( writer );
 
   if ( SvROK( input ) && SvTYPE( SvRV( input ) ) == SVt_PVAV ) {
     array = (AV *) SvRV( input );
@@ -86,7 +86,7 @@ static void perl_array_to_json( SV *input, json_writer_t *writer )
     }
   }
 
-  json_writer_array_end( writer );
+  json_writer_end_array( writer );
 }
 
 
