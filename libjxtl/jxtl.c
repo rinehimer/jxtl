@@ -227,7 +227,7 @@ char *jxtl_expand_to_buffer( apr_pool_t *mp,
 
   expanded_template = apr_palloc( mp, length + 1 );
   apr_brigade_flatten( bucket_brigade, expanded_template, &flatten_len );
-  expanded_template[length - 1] = '\0';
+  expanded_template[length] = '\0';
 
   apr_brigade_destroy( bucket_brigade );
   apr_bucket_alloc_destroy( bucket_alloc );
