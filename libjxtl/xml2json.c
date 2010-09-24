@@ -96,16 +96,16 @@ static void write_xml_string( json_writer_t *writer, const char *str  )
   if ( *str != 't' && *str != 'f' ) {
     /* Handle the majority of the cases and avoid unnecessary function call to
        compare the strings. */
-    json_writer_string_write( writer, (unsigned char *) str );
+    json_writer_write_string( writer, (unsigned char *) str );
   }
   else if ( apr_strnatcmp( str, "true" ) == 0 ) {
-    json_writer_boolean_write( writer, TRUE );
+    json_writer_write_boolean( writer, TRUE );
   }
   else if ( apr_strnatcmp( str, "false" ) == 0 ) {
-    json_writer_boolean_write( writer, FALSE );
+    json_writer_write_boolean( writer, FALSE );
   }
   else {
-    json_writer_string_write( writer, (unsigned char *) str );
+    json_writer_write_string( writer, (unsigned char *) str );
   }
 }
 
@@ -123,10 +123,10 @@ static void xml_elem_to_json( apr_pool_t *mp, apr_xml_elem *root,
 
   for ( elem = root; elem; elem = elem->next ) {
     type = xml_elem_type( elem );
-    json_writer_property_start( writer, (unsigned char *) elem->name );
+    json_writer_start_property( writer, (unsigned char *) elem->name );
       
     if ( type == JSON_NULL ) {
-      json_writer_null_write( writer );
+      json_writer_write_null( writer );
     }
     else if ( type == JSON_STRING ) {
       apr_xml_to_text( mp, elem, APR_XML_X2T_INNER, NULL, NULL, &elem_buf,
@@ -134,19 +134,19 @@ static void xml_elem_to_json( apr_pool_t *mp, apr_xml_elem *root,
       write_xml_string( writer, elem_buf );
     }
     else if ( type == JSON_OBJECT ) {
-      json_writer_object_start( writer );
+      json_writer_start_object( writer );
         
       for ( attr = elem->attr; attr; attr = attr->next ) {
-	json_writer_property_start( writer, (unsigned char *) attr->name );
+	json_writer_start_property( writer, (unsigned char *) attr->name );
 	write_xml_string( writer, attr->value );
-	json_writer_property_end( writer );
+	json_writer_end_property( writer );
       }
 
       xml_elem_to_json( mp, elem->first_child, writer );
       
-      json_writer_object_end( writer );
+      json_writer_end_object( writer );
     }
-    json_writer_property_end( writer );
+    json_writer_end_property( writer );
   }
 }
 
@@ -183,9 +183,9 @@ int xml_file_to_json( const char *filename, json_writer_t *writer,
       elem = elem->first_child;
     }
     
-    json_writer_object_start( writer );
+    json_writer_start_object( writer );
     xml_elem_to_json( xml_mp, elem, writer );
-    json_writer_object_end( writer );
+    json_writer_end_object( writer );
   }
 
   apr_file_close( file );

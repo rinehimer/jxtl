@@ -5,15 +5,17 @@
 #include <apr_tables.h>
 
 #include "apr_macros.h"
-#include "parser.h"
 #include "jxtl_parse.h"
+
+#include "parser.h"
+
 #include "parser_lex_macros.h"
 #include "utf.h"
 
 #define YY_DECL int jxtl_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
 
 #define jxtl_error( ... ) \
-  jxtl_error( yylloc, yyscanner, NULL, __VA_ARGS__ )
+  jxtl_error( yylloc, yyscanner, NULL, NULL, __VA_ARGS__ )
 
 #define STRING_COPY {                                           \
     int i;                                                      \

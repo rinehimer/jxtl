@@ -1,4 +1,5 @@
 #include <apr_pools.h>
+#include <apr_strings.h>
 
 #include "apr_macros.h"
 #include "parser.h"

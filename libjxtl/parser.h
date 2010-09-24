@@ -85,6 +85,13 @@ parser_t *parser_create( apr_pool_t *mp,
 apr_status_t parser_parse_file( parser_t *parser, const char *file );
 
 /**
+ * Parse a buffer.
+ * @param parser A parser
+ * @param A null terminated buffer to parse.
+ */
+apr_status_t parser_parse_buffer( parser_t *parser, const char *buffer );
+
+/**
  * Set the user data for a parser.  This will be passed to the bison_parse_func
  * as the third parameter.
  * @param parser A parser.

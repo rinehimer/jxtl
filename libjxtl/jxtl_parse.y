@@ -358,7 +358,6 @@ static void jxtl_separator_end( void *user_data )
 static int jxtl_value_func( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  json_t *json_value;
   jxtl_path_expr_t *path_expr;
 
   jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &path_expr );

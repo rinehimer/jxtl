@@ -20,7 +20,7 @@
   json_error( yylloc, yyscanner, PARSER, NULL, __VA_ARGS__ )
 
 void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
-                 json_callback_t *callbacks, const char *error_string, ... );
+                 void *callbacks_ptr, const char *error_string, ... );
 %}
 
 %option prefix="json_"

@@ -558,7 +558,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[39] =
   json_error( yylloc, yyscanner, PARSER, NULL, __VA_ARGS__ )
 
 void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
-                 json_callback_t *callbacks, const char *error_string, ... );
+                 void *callbacks_ptr, const char *error_string, ... );
 
 #line 564 "json_lex.c"
 

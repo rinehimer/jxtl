@@ -22,24 +22,24 @@ json_writer_ctx_t *json_writer_ctx_create( apr_pool_t *mp )
   return context;
 }
 
-json_state json_writer_ctx_state_get( json_writer_ctx_t *context )
+json_state json_writer_ctx_get_state( json_writer_ctx_t *context )
 {
   return APR_ARRAY_TAIL( context->state_stack,json_state );
 }
 
 int json_writer_ctx_can_start_object_or_array( json_writer_ctx_t *context )
 {
-  json_state state = json_writer_ctx_state_get( context );
+  json_state state = json_writer_ctx_get_state( context );
   return ( state == JSON_INITIAL || state == JSON_PROPERTY ||
 	   state == JSON_IN_ARRAY );
 }
 
-unsigned char *json_writer_ctx_prop_get( json_writer_ctx_t *context )
+unsigned char *json_writer_ctx_get_prop( json_writer_ctx_t *context )
 {
   return APR_ARRAY_TAIL( context->prop_stack, unsigned char * );
 }
 
-int json_writer_ctx_object_start( json_writer_ctx_t *context )
+int json_writer_ctx_start_object( json_writer_ctx_t *context )
 {
   if ( !json_writer_ctx_can_start_object_or_array( context ) )
     return FALSE;
@@ -48,16 +48,16 @@ int json_writer_ctx_object_start( json_writer_ctx_t *context )
   return TRUE;
 }
 
-int json_writer_ctx_object_end( json_writer_ctx_t *context )
+int json_writer_ctx_end_object( json_writer_ctx_t *context )
 {
-  if ( json_writer_ctx_state_get( context ) != JSON_IN_OBJECT )
+  if ( json_writer_ctx_get_state( context ) != JSON_IN_OBJECT )
     return FALSE;
 
   apr_array_pop( context->state_stack );
   return TRUE;
 }
 
-int json_writer_ctx_array_start( json_writer_ctx_t *context )
+int json_writer_ctx_start_array( json_writer_ctx_t *context )
 {
   if ( !json_writer_ctx_can_start_object_or_array( context ) )
     return FALSE;
@@ -66,20 +66,20 @@ int json_writer_ctx_array_start( json_writer_ctx_t *context )
   return TRUE;
 }
 
-int json_writer_ctx_array_end( json_writer_ctx_t *context )
+int json_writer_ctx_end_array( json_writer_ctx_t *context )
 {
-  if ( json_writer_ctx_state_get( context ) != JSON_IN_ARRAY )
+  if ( json_writer_ctx_get_state( context ) != JSON_IN_ARRAY )
     return FALSE;
 
   apr_array_pop( context->state_stack );
   return TRUE;
 }
 
-int json_writer_ctx_property_start( json_writer_ctx_t *context,
+int json_writer_ctx_start_property( json_writer_ctx_t *context,
 				    unsigned char *name )
 {
   unsigned char *name_copy;
-  if ( json_writer_ctx_state_get( context ) != JSON_IN_OBJECT )
+  if ( json_writer_ctx_get_state( context ) != JSON_IN_OBJECT )
     return FALSE;
 
   name_copy = (unsigned char *) apr_pstrdup( context->mp, (char *) name );
@@ -89,7 +89,7 @@ int json_writer_ctx_property_start( json_writer_ctx_t *context,
   return TRUE;
 }
 
-int json_writer_ctx_property_end( json_writer_ctx_t *context )
+int json_writer_ctx_end_property( json_writer_ctx_t *context )
 {
   apr_array_pop( context->prop_stack );
   apr_array_pop( context->state_stack );
@@ -98,7 +98,7 @@ int json_writer_ctx_property_end( json_writer_ctx_t *context )
 
 int json_writer_ctx_can_write_value( json_writer_ctx_t *context )
 {
-  json_state state = json_writer_ctx_state_get( context );
+  json_state state = json_writer_ctx_get_state( context );
   return ( state == JSON_PROPERTY || state == JSON_IN_ARRAY );
 }
 
@@ -140,7 +140,7 @@ static void json_add( json_writer_t *writer, json_t *json )
 
   switch ( obj->type ) {
   case JSON_OBJECT:
-    JSON_NAME( json ) = json_writer_ctx_prop_get( writer->context );
+    JSON_NAME( json ) = json_writer_ctx_get_prop( writer->context );
     tmp_json = apr_hash_get( obj->value.object, JSON_NAME( json ),
 			     APR_HASH_KEY_STRING );
     if ( tmp_json && tmp_json->type != JSON_ARRAY ) {
@@ -186,11 +186,11 @@ static void json_add( json_writer_t *writer, json_t *json )
  * Start an object.
  * @param writer The json_writer object.
  */
-void json_writer_object_start( void *writer_ptr )
+void json_writer_start_object( void *writer_ptr )
 {
   json_t *json;
   json_writer_t *writer = (json_writer_t *) writer_ptr;
-  if ( !json_writer_ctx_object_start( writer->context ) ) {
+  if ( !json_writer_ctx_start_object( writer->context ) ) {
     json_writer_error( "could not start object" );
     return;
   }
@@ -201,10 +201,10 @@ void json_writer_object_start( void *writer_ptr )
   APR_ARRAY_PUSH( writer->json_stack, json_t * ) = json;
 }
 
-void json_writer_object_end( void *writer_ptr )
+void json_writer_end_object( void *writer_ptr )
 {
   json_writer_t *writer = (json_writer_t *) writer_ptr;
-  if ( !json_writer_ctx_object_end( writer->context ) ) {
+  if ( !json_writer_ctx_end_object( writer->context ) ) {
     json_writer_error( "could not end object" );
     return;
   }
@@ -212,11 +212,11 @@ void json_writer_object_end( void *writer_ptr )
   apr_array_pop( writer->json_stack );
 }
 
-void json_writer_array_start( void *writer_ptr )
+void json_writer_start_array( void *writer_ptr )
 {
   json_t *json;
   json_writer_t *writer = (json_writer_t *) writer_ptr;
-  if ( !json_writer_ctx_array_start( writer->context ) ) {
+  if ( !json_writer_ctx_start_array( writer->context ) ) {
     json_writer_error( "could not start array" );
     return;
   }
@@ -227,10 +227,10 @@ void json_writer_array_start( void *writer_ptr )
   APR_ARRAY_PUSH( writer->json_stack, json_t * ) = json;
 }
 
-void json_writer_array_end( void *writer_ptr )
+void json_writer_end_array( void *writer_ptr )
 {
   json_writer_t *writer = (json_writer_t *) writer_ptr;
-  if ( !json_writer_ctx_array_end( writer->context ) ) {
+  if ( !json_writer_ctx_end_array( writer->context ) ) {
     json_writer_error( "could not end array" );
     return;
   }
@@ -243,21 +243,21 @@ void json_writer_array_end( void *writer_ptr )
  * @param writer The json_writer object.
  * @param name The name of the property to save.
  */
-void json_writer_property_start( void *writer_ptr, unsigned char *name )
+void json_writer_start_property( void *writer_ptr, unsigned char *name )
 {
   json_writer_t *writer = (json_writer_t *) writer_ptr;
-  if ( !json_writer_ctx_property_start( writer->context, name ) )
+  if ( !json_writer_ctx_start_property( writer->context, name ) )
     json_writer_error( "could not start property \"%s\"", name );
 }
 
-void json_writer_property_end( void *writer_ptr )
+void json_writer_end_property( void *writer_ptr )
 {
   json_writer_t *writer = (json_writer_t *) writer_ptr;
-  if ( !json_writer_ctx_property_end( writer->context ) )
+  if ( !json_writer_ctx_end_property( writer->context ) )
     json_writer_error( "could not end property" );
 }
 
-void json_writer_string_write( void *writer_ptr, unsigned char *value )
+void json_writer_write_string( void *writer_ptr, unsigned char *value )
 {
   json_writer_t *writer = (json_writer_t *) writer_ptr;
   if ( !json_writer_ctx_can_write_value( writer->context ) ) {
@@ -268,7 +268,7 @@ void json_writer_string_write( void *writer_ptr, unsigned char *value )
   json_add( writer, json_create_string( writer->mp, value ) );
 }
 
-void json_writer_integer_write( void *writer_ptr, int value )
+void json_writer_write_integer( void *writer_ptr, int value )
 {
   json_writer_t *writer = (json_writer_t *) writer_ptr;
   if ( !json_writer_ctx_can_write_value( writer->context ) ) {
@@ -279,7 +279,7 @@ void json_writer_integer_write( void *writer_ptr, int value )
   json_add( writer, json_create_integer( writer->mp, value ) );
 }
 
-void json_writer_number_write( void *writer_ptr, double value )
+void json_writer_write_number( void *writer_ptr, double value )
 {
   json_writer_t *writer = (json_writer_t *) writer_ptr;
   if ( !json_writer_ctx_can_write_value( writer->context ) ) {
@@ -290,7 +290,7 @@ void json_writer_number_write( void *writer_ptr, double value )
   json_add( writer, json_create_number( writer->mp, value ) );
 }
 
-void json_writer_boolean_write( void *writer_ptr, int value )
+void json_writer_write_boolean( void *writer_ptr, int value )
 {
   json_writer_t *writer = (json_writer_t *) writer_ptr;
   if ( !json_writer_ctx_can_write_value( writer->context ) ) {
@@ -301,7 +301,7 @@ void json_writer_boolean_write( void *writer_ptr, int value )
   json_add( writer, json_create_boolean( writer->mp, value ) );
 }
 
-void json_writer_null_write( void *writer_ptr )
+void json_writer_write_null( void *writer_ptr )
 {
   json_writer_t *writer = (json_writer_t *) writer_ptr;
   if ( !json_writer_ctx_can_write_value( writer->context ) ) {

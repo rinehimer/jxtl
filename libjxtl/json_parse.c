@@ -1784,17 +1784,17 @@ parser_t *json_parser_create( apr_pool_t *mp )
   json_writer_t *writer = json_writer_create( mp );
 
   json_callback_t *json_callbacks = apr_palloc( mp, sizeof(json_callback_t) );
-  json_callbacks->object_start_handler = json_writer_object_start;
-  json_callbacks->object_end_handler = json_writer_object_end;
-  json_callbacks->array_start_handler = json_writer_array_start;
-  json_callbacks->array_end_handler = json_writer_array_end;
-  json_callbacks->property_start_handler = json_writer_property_start;
-  json_callbacks->property_end_handler = json_writer_property_end;
-  json_callbacks->string_handler = json_writer_string_write;
-  json_callbacks->integer_handler = json_writer_integer_write;
-  json_callbacks->number_handler = json_writer_number_write;
-  json_callbacks->boolean_handler = json_writer_boolean_write;
-  json_callbacks->null_handler = json_writer_null_write;
+  json_callbacks->object_start_handler = json_writer_start_object;
+  json_callbacks->object_end_handler = json_writer_end_object;
+  json_callbacks->array_start_handler = json_writer_start_array;
+  json_callbacks->array_end_handler = json_writer_end_array;
+  json_callbacks->property_start_handler = json_writer_start_property;
+  json_callbacks->property_end_handler = json_writer_end_property;
+  json_callbacks->string_handler = json_writer_write_string;
+  json_callbacks->integer_handler = json_writer_write_integer;
+  json_callbacks->number_handler = json_writer_write_number;
+  json_callbacks->boolean_handler = json_writer_write_boolean;
+  json_callbacks->null_handler = json_writer_write_null;
   json_callbacks->user_data = writer;
 
   parser_set_user_data( parser, json_callbacks );

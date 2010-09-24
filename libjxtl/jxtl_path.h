@@ -53,7 +53,7 @@ typedef struct jxtl_path_obj_t {
 
 parser_t *jxtl_path_parser_create( apr_pool_t *mp );
 int jxtl_path_parser_parse_buffer( parser_t *parser,
-                                   const unsigned char *path,
+                                   const char *path,
                                    jxtl_path_expr_t **expr );
 
 int jxtl_path_eval( apr_pool_t *mp, const unsigned char *path, json_t *json,

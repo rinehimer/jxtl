@@ -39,7 +39,7 @@ json_writer_ctx_t *json_writer_ctx_create( apr_pool_t *mp );
  * @param The writer context.
  * @return The current state.
  */
-json_state json_writer_ctx_state_get( json_writer_ctx_t *context );
+json_state json_writer_ctx_get_state( json_writer_ctx_t *context );
 
 /**
  * Determine whether or not starting and object is allowed in the current
@@ -54,42 +54,42 @@ int json_writer_ctx_can_start_object_or_array( json_writer_ctx_t *context );
  * @param The writer context.
  * @return The current property.
  */
-unsigned char *json_writer_ctx_prop_get( json_writer_ctx_t *context );
+unsigned char *json_writer_ctx_get_prop( json_writer_ctx_t *context );
 
 /**
  * Attempt to start and object.
  * @param The writer context.
  * @return TRUE if the object was started, FALSE if it could not be started.
  */
-int json_writer_ctx_object_start( json_writer_ctx_t *context );
+int json_writer_ctx_start_object( json_writer_ctx_t *context );
 
 /**
  * Attempt to end an object.
  * @param The writer context.
  * @return TRUE if the object was ended, FALSE if it could not be ended.
  */
-int json_writer_ctx_object_end( json_writer_ctx_t *context );
+int json_writer_ctx_end_object( json_writer_ctx_t *context );
 
 /**
  * Attempt to start an array.
  * @param The writer context.
  * @return TRUE if the array was started, FALSE if it could not be started.
  */
-int json_writer_ctx_array_start( json_writer_ctx_t *context );
+int json_writer_ctx_start_array( json_writer_ctx_t *context );
 
 /**
  * Attempt to end an array.
  * @param The writer context.
  * @return TRUE if the array was ended, FALSE if it could not be ended.
  */
-int json_writer_ctx_array_end( json_writer_ctx_t *context );
+int json_writer_ctx_end_array( json_writer_ctx_t *context );
 
 /**
  * Start a property.
  * @param The writer context.
  * @return TRUE if the property was stated, FALSE if it could not be started.
  */
-int json_writer_ctx_property_start( json_writer_ctx_t *context,
+int json_writer_ctx_start_property( json_writer_ctx_t *context,
 				    unsigned char *name );
 
 /**
@@ -97,7 +97,7 @@ int json_writer_ctx_property_start( json_writer_ctx_t *context,
  * @param The writer context.
  * @return Always returns TRUE right now.
  */
-int json_writer_ctx_property_end( json_writer_ctx_t *context );
+int json_writer_ctx_end_property( json_writer_ctx_t *context );
 
 /**
  * Test whether or not a simple value can be written.
@@ -117,71 +117,71 @@ json_writer_t *json_writer_create( apr_pool_t *mp );
  * Start an object.
  * @param writer_ptr The JSON writer.
  */
-void json_writer_object_start( void *writer_ptr );
+void json_writer_start_object( void *writer_ptr );
 
 /**
  * End an object.
  * @param writer_ptr The JSON writer.
  */
-void json_writer_object_end( void *writer_ptr );
+void json_writer_end_object( void *writer_ptr );
 
 /**
  * Start an array.
  * @param writer_ptr The JSON writer.
  */
-void json_writer_array_start( void *writer_ptr );
+void json_writer_start_array( void *writer_ptr );
 
 /**
  * End an array.
  * @param writer_ptr The JSON writer.
  */
-void json_writer_array_end( void *writer_ptr );
+void json_writer_end_array( void *writer_ptr );
 
 /**
  * Start a property.
  * @param writer_ptr The JSON writer.
  * @param name The name of the property to start.
  */
-void json_writer_property_start( void *writer_ptr, unsigned char *name );
+void json_writer_start_property( void *writer_ptr, unsigned char *name );
 
 /**
  * End a property.
  * @param writer_ptr The JSON writer.
  */
-void json_writer_property_end( void *writer_ptr );
+void json_writer_end_property( void *writer_ptr );
 
 /**
  * Write a string.
  * @param writer_ptr The JSON writer.
  * @param value The string to write.
  */
-void json_writer_string_write( void *writer_ptr, unsigned char *value );
+void json_writer_write_string( void *writer_ptr, unsigned char *value );
 
 /**
  * Write an integer.
  * @param writer_ptr The JSON writer.
  * @param value The integer to write.
  */
-void json_writer_integer_write( void *writer_ptr, int value );
+void json_writer_write_integer( void *writer_ptr, int value );
 
 /**
  * Write a real number.
  * @param writer_ptr The JSON writer.
  * @param value The number to write.
  */
-void json_writer_number_write( void *writer_ptr, double value );
+void json_writer_write_number( void *writer_ptr, double value );
 
 /**
  * Write a boolean.
  * @param writer_ptr The JSON writer.
  * @param value The boolean to write.
  */
-void json_writer_boolean_write( void *writer_ptr, int value );
+void json_writer_write_boolean( void *writer_ptr, int value );
 
 /**
  * Write a null value.
  * @param writer_ptr The JSON writer.
  */
-void json_writer_null_write( void *writer_ptr );
+void json_writer_write_null( void *writer_ptr );
 
 #endif

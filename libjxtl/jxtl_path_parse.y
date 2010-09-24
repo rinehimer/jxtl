@@ -9,6 +9,7 @@
 #define YY_DECL
 
 #include "apr_macros.h"
+#include "parser.h"
 #include "jxtl_path_parse.h"
 #include "jxtl_path_lex.h"
 #include "jxtl_path.h"
@@ -243,7 +244,7 @@ parser_t *jxtl_path_parser_create( apr_pool_t *mp )
 }
 
 int jxtl_path_parser_parse_buffer( parser_t *parser,
-                                   const unsigned char *path,
+                                   const char *path,
                                    jxtl_path_expr_t **expr )
 {
   jxtl_path_callback_t *jxtl_callbacks = parser_get_user_data( parser );
