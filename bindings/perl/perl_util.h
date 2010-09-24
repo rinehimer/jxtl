@@ -5,8 +5,10 @@
 #include <perl.h>
 #include <XSUB.h>
 
+#include <apr_pools.h>
+
 #include "json_writer.h"
 
-json_t *perl_variable_to_json( SV *input );
+json_t *perl_variable_to_json( apr_pool_t *mp, SV *input );
 
 #endif
