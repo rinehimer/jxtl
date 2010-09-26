@@ -140,7 +140,7 @@ int main( int argc, char const * const *argv )
                          &json ) == APR_SUCCESS ) &&
        ( jxtl_parser_parse_file( jxtl_parser, template_file,
                                  &content_array ) == APR_SUCCESS ) ) {
-    jxtl_expand_to_file( mp, content_array, json, out_file );
+    jxtl_expand_to_file( content_array, json, out_file );
   }
 
   apr_pool_destroy( mp );

@@ -9,34 +9,39 @@
 #include "jxtl_path.h"
 #include "json.h"
 
-/** Constants used for calling the print function */
+/** Constants used for calling the expand functions */
 typedef enum section_print_type {
   PRINT_NORMAL,
   PRINT_SECTION,
   PRINT_SEPARATOR
 } section_print_type;
 
-static void print_json_value( json_t *json, apr_bucket_brigade *out )
+static void print_json_value( json_t *json,
+                              char *format,
+                              apr_pool_t *mp,
+                              apr_bucket_brigade *out )
 {
+  char *value = NULL;
+
   if ( !json )
     return;
-
+  
   switch ( json->type ) {
   case JSON_STRING:
-    apr_brigade_printf( out, NULL, NULL, "%s", json->value.string );
+    value = apr_psprintf( mp, "%s", json->value.string );
     break;
     
   case JSON_INTEGER:
-    apr_brigade_printf( out, NULL, NULL, "%d", json->value.integer );
+    value = apr_psprintf( mp, "%d", json->value.integer );
     break;
     
   case JSON_NUMBER:
-    apr_brigade_printf( out, NULL, NULL, "%g", json->value.number );
+    value = apr_psprintf( mp, "%g", json->value.number );
     break;
 
   case JSON_BOOLEAN:
-    apr_brigade_printf( out, NULL, NULL, "%s",
-                        JSON_IS_TRUE_BOOLEAN( json ) ? "true" : "false" );
+    value = apr_psprintf( mp, "%s",
+                          JSON_IS_TRUE_BOOLEAN( json ) ? "true" : "false" );
     break;
 
   case JSON_NULL:
@@ -46,6 +51,8 @@ static void print_json_value( json_t *json, apr_bucket_brigade *out )
     fprintf( stderr, "error: cannot get value of object or array\n" );
     break;
   }
+
+  apr_brigade_printf( out, NULL, NULL, "%s", value );
 }
 
 static void print_text( char *text, jxtl_content_t *prev_content,
@@ -70,7 +77,9 @@ static void print_text( char *text, jxtl_content_t *prev_content,
 
 static void expand_content( apr_pool_t *mp,
                             apr_array_header_t *content_array,
-                            json_t *json, section_print_type print_type,
+                            json_t *json,
+                            char *prev_format,
+                            section_print_type print_type,
                             apr_bucket_brigade *out );
 
 /**
@@ -79,6 +88,7 @@ static void expand_content( apr_pool_t *mp,
 static void expand_section( apr_pool_t *mp,
                             jxtl_section_t *section,
                             json_t *json,
+                            char *format,
                             section_print_type print_type,
                             apr_bucket_brigade *out )
 {
@@ -95,18 +105,21 @@ static void expand_section( apr_pool_t *mp,
   num_printed = 0;
   for ( i = 0; i < path_obj->nodes->nelts; i++ ) {
     json_value = APR_ARRAY_IDX( path_obj->nodes, i, json_t * );
-    expand_content( mp, section->content, json_value, PRINT_SECTION, out );
+    expand_content( mp, section->content, json_value, format,
+                    PRINT_SECTION, out );
     num_printed++;
     /* Only print the separator if it's not the last one */
     if ( num_printed < num_items )
-      expand_content( mp, section->separator, json_value, PRINT_SEPARATOR,
-                      out );
+      expand_content( mp, section->separator, json_value, format,
+                      PRINT_SEPARATOR, out );
   }
 }
 
 static void expand_content( apr_pool_t *mp,
                             apr_array_header_t *content_array,
-                            json_t *json, section_print_type print_type,
+                            json_t *json,
+                            char *prev_format,
+                            section_print_type print_type,
                             apr_bucket_brigade *out )
 {
   int i, j;
@@ -116,6 +129,7 @@ static void expand_content( apr_pool_t *mp,
   jxtl_if_t *jxtl_if;
   apr_array_header_t *if_block;
   jxtl_path_obj_t *path_obj;
+  char *format;
 
   if ( !json )
     return;
@@ -136,7 +150,8 @@ static void expand_content( apr_pool_t *mp,
 
     case JXTL_SECTION:
       tmp_section = (jxtl_section_t *) content->value;
-      expand_section( mp, tmp_section, json, PRINT_SECTION, out );
+      format = ( content->format ) ? content->format : prev_format;
+      expand_section( mp, tmp_section, json, format, PRINT_SECTION, out );
       break;
 
     case JXTL_IF:
@@ -149,16 +164,18 @@ static void expand_content( apr_pool_t *mp,
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
         if ( !jxtl_if->expr ||
              jxtl_path_compiled_eval( mp, jxtl_if->expr, json, &path_obj ) ) {
-          expand_content( mp, jxtl_if->content, json, PRINT_SECTION, out );
+          expand_content( mp, jxtl_if->content, json, prev_format,
+                          PRINT_SECTION, out );
           break;
         }
       }
       break;
 
     case JXTL_VALUE:
+      format = ( content->format ) ? content->format : prev_format;
       if ( jxtl_path_compiled_eval( mp, content->value, json, &path_obj ) ) {
         json_value = APR_ARRAY_IDX( path_obj->nodes, 0, json_t * );
-        print_json_value( json_value, out );
+        print_json_value( json_value, format, mp, out );
       }
       break;
     }
@@ -166,10 +183,10 @@ static void expand_content( apr_pool_t *mp,
   }
 }
 
-int jxtl_expand_to_file( apr_pool_t *mp,
-                         apr_array_header_t *content_array,
+int jxtl_expand_to_file( apr_array_header_t *content_array,
                          json_t *json, const char *file )
 {
+  apr_pool_t *mp;
   apr_file_t *out;
   apr_status_t status;
   apr_bucket_alloc_t *bucket_alloc;
@@ -178,6 +195,8 @@ int jxtl_expand_to_file( apr_pool_t *mp,
   int nvec;
   apr_size_t nbytes;
   int is_stdout;
+
+  apr_pool_create( &mp, NULL );
 
   is_stdout = ( !file || apr_strnatcasecmp( file, "-" ) == 0 );
 
@@ -194,7 +213,8 @@ int jxtl_expand_to_file( apr_pool_t *mp,
     bucket_alloc = apr_bucket_alloc_create( mp );
     bucket_brigade = apr_brigade_create( mp, bucket_alloc );
 
-    expand_content( mp, content_array, json, PRINT_NORMAL, bucket_brigade );
+    expand_content( mp, content_array, json, NULL, PRINT_NORMAL,
+                    bucket_brigade );
 
     apr_brigade_to_iovec( bucket_brigade, &vec, &nvec );
     status = apr_file_writev( out, &vec, nvec, &nbytes );
@@ -205,6 +225,8 @@ int jxtl_expand_to_file( apr_pool_t *mp,
       apr_file_close( out );
     }
   }
+
+  apr_pool_destroy( mp );
 
   return ( status == APR_SUCCESS ) ? TRUE : FALSE;
 }
@@ -218,21 +240,27 @@ char *jxtl_expand_to_buffer( apr_pool_t *mp,
   char *expanded_template;
   apr_off_t length;
   apr_size_t flatten_len;
+  apr_pool_t *tmp_pool;
 
-  bucket_alloc = apr_bucket_alloc_create( mp );
-  bucket_brigade = apr_brigade_create( mp, bucket_alloc );
+  apr_pool_create( &tmp_pool, NULL );
+
+  bucket_alloc = apr_bucket_alloc_create( tmp_pool );
+  bucket_brigade = apr_brigade_create( tmp_pool, bucket_alloc );
   
-  expand_content( mp, content_array, json, PRINT_NORMAL, bucket_brigade );
+  expand_content( tmp_pool, content_array, json, NULL, PRINT_NORMAL,
+                  bucket_brigade );
 
   apr_brigade_length( bucket_brigade, 1, &length );
   flatten_len = length;
 
+  /* Allocate the string from the user's memory pool */
   expanded_template = apr_palloc( mp, length + 1 );
   apr_brigade_flatten( bucket_brigade, expanded_template, &flatten_len );
   expanded_template[length] = '\0';
 
   apr_brigade_destroy( bucket_brigade );
   apr_bucket_alloc_destroy( bucket_alloc );
+  apr_pool_destroy( tmp_pool );
 
   return expanded_template;
 }

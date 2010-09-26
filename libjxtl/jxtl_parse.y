@@ -41,7 +41,7 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 }
 
 %token T_DIRECTIVE_START "{{" T_DIRECTIVE_END "}}"
-       T_SECTION "section" T_SEPARATOR "separator"
+       T_SECTION "section" T_SEPARATOR "separator" T_FORMAT "format"
        T_END "end" T_IF "if" T_ELSEIF "elseif" T_ELSE "else"
 %token <string> T_TEXT "text"  T_PATH_EXPR "path expression" T_STRING "string"
 
@@ -150,6 +150,10 @@ option
       callbacks->text_handler( callbacks->user_data, $<string>3 );
       callbacks->separator_end_handler( callbacks->user_data );
     }
+  | T_FORMAT '=' T_STRING
+    {
+      callbacks->format_handler( callbacks->user_data, $<string>3 );
+    }
 ;
 
 %%
@@ -196,6 +200,7 @@ static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
   content = apr_palloc( data->mp, sizeof( jxtl_content_t ) );
   content->type = type;
   content->value = value;
+  content->format = NULL;
 
   APR_ARRAY_PUSH( data->current_array, jxtl_content_t * ) = content;
 }
@@ -372,6 +377,17 @@ static char *jxtl_get_error( void *user_data )
   return parser_get_error( data->jxtl_path_parser );
 }
 
+static void jxtl_format( void *user_data, char *format )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  apr_array_header_t *content_array;
+  jxtl_content_t *content;
+
+  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
+  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
+  content->format = apr_pstrdup( data->mp, format );
+}
+
 parser_t *jxtl_parser_create( apr_pool_t *mp )
 {
   parser_t *parser = parser_create( mp,
@@ -403,8 +419,9 @@ parser_t *jxtl_parser_create( apr_pool_t *mp )
   jxtl_callbacks->separator_start_handler = jxtl_separator_start;
   jxtl_callbacks->separator_end_handler = jxtl_separator_end;
   jxtl_callbacks->value_handler = jxtl_value_func;
-  jxtl_callbacks->user_data = jxtl_data;
   jxtl_callbacks->get_error_func = jxtl_get_error;
+  jxtl_callbacks->format_handler = jxtl_format;
+  jxtl_callbacks->user_data = jxtl_data;
     
   parser_set_user_data( parser, jxtl_callbacks );
 

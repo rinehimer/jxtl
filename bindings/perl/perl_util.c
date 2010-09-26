@@ -152,7 +152,7 @@ int expand_to_file( const char *template_file, SV *input,
   int ret = FALSE;
 
   if ( prep_for_expand( &mp, template_file, &content_array, &json, input ) ) {
-    jxtl_expand_to_file( mp, content_array, json, output_file );
+    jxtl_expand_to_file( content_array, json, output_file );
     ret = TRUE;
   }
 

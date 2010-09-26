@@ -11,7 +11,12 @@
 #endif
 
 /**
- * Return the last element in the array.
+ * The first element of an array.
+ */
+#define APR_ARRAY_HEAD( ary, type ) APR_ARRAY_IDX( ary, 0, type )
+
+/**
+ * The last element of an array.
  */
 #define APR_ARRAY_TAIL( ary, type ) APR_ARRAY_IDX( ary, ary->nelts - 1, type )
 

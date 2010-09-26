@@ -20,6 +20,8 @@ typedef struct jxtl_content_t {
   jxtl_content_type type;
   /** A string, pointer to a jxtl_section_t, jxtl_if_t or a jxtl_path_expr_t */
   void *value;
+  /** A format to be applied. */
+  char *format;
 } jxtl_content_t;
 
 typedef struct jxtl_if_t {
@@ -50,6 +52,7 @@ typedef struct jxtl_callback_t {
   void ( *separator_start_handler )( void *user_data );
   void ( *separator_end_handler )( void *user_data );
   int ( *value_handler )( void *user_data, unsigned char *expr );
+  void ( *format_handler )( void *user_data, char *format );
   char * ( *get_error_func )( void *user_data );
   void *user_data;
 } jxtl_callback_t;
@@ -58,9 +61,15 @@ parser_t *jxtl_parser_create( apr_pool_t *mp );
 int jxtl_parser_parse_file( parser_t *parser, const char *file,
                             apr_array_header_t **content_array );
 
-int jxtl_expand_to_file( apr_pool_t *mp,
-                         apr_array_header_t *content_array,
+/**
+ * Expand a template to a named file.
+ */
+int jxtl_expand_to_file( apr_array_header_t *content_array,
                          json_t *json, const char *file );
+
+/**
+ * Expand a template into a buffer that is allocated from mp.
+ */
 char *jxtl_expand_to_buffer( apr_pool_t *mp,
                              apr_array_header_t *content_array,
                              json_t *json );

@@ -43,13 +43,14 @@
      T_DIRECTIVE_END = 259,
      T_SECTION = 260,
      T_SEPARATOR = 261,
-     T_END = 262,
-     T_IF = 263,
-     T_ELSEIF = 264,
-     T_ELSE = 265,
-     T_TEXT = 266,
-     T_PATH_EXPR = 267,
-     T_STRING = 268
+     T_FORMAT = 262,
+     T_END = 263,
+     T_IF = 264,
+     T_ELSEIF = 265,
+     T_ELSE = 266,
+     T_TEXT = 267,
+     T_PATH_EXPR = 268,
+     T_STRING = 269
    };
 #endif
 /* Tokens.  */
@@ -57,13 +58,14 @@
 #define T_DIRECTIVE_END 259
 #define T_SECTION 260
 #define T_SEPARATOR 261
-#define T_END 262
-#define T_IF 263
-#define T_ELSEIF 264
-#define T_ELSE 265
-#define T_TEXT 266
-#define T_PATH_EXPR 267
-#define T_STRING 268
+#define T_FORMAT 262
+#define T_END 263
+#define T_IF 264
+#define T_ELSEIF 265
+#define T_ELSE 266
+#define T_TEXT 267
+#define T_PATH_EXPR 268
+#define T_STRING 269
 
 
 
@@ -76,7 +78,7 @@ typedef union YYSTYPE
   unsigned char *string;
 }
 /* Line 1489 of yacc.c.  */
-#line 80 "jxtl_parse.h"
+#line 82 "jxtl_parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

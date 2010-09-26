@@ -86,6 +86,7 @@
 
 <options>{
   "separator" { return T_SEPARATOR; }
+  "format" { return T_FORMAT; }
   "=" { return '='; }
   "," { return ','; }
   "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
