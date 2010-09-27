@@ -86,15 +86,15 @@ static void perl_array_to_json( SV *input, json_writer_t *writer )
   int len;
   AV *array;
   SV **item;
+  int i;
 
   json_writer_start_array( writer );
 
   if ( SvROK( input ) && SvTYPE( SvRV( input ) ) == SVt_PVAV ) {
     array = (AV *) SvRV( input );
     len = av_len( array ) + 1;
-
-    while ( len-- ) {
-      item = av_fetch( array, len, 0 );
+    for ( i = 0; i < len; i++ ) {
+      item = av_fetch( array, i, 0 );
       perl_variable_to_json_internal( *item, writer );
     }
   }
