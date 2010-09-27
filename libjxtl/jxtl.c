@@ -183,6 +183,19 @@ static void expand_content( apr_pool_t *mp,
   }
 }
 
+static int number_of_buckets( apr_bucket_brigade *b )
+{
+  apr_bucket *e;
+  int n = 0;
+  for ( e = APR_BRIGADE_FIRST( b );
+        e != APR_BRIGADE_SENTINEL( b );
+        e = APR_BUCKET_NEXT( e ) ) {
+    n++;
+  }
+
+  return n;
+}
+
 int jxtl_expand_to_file( apr_array_header_t *content_array,
                          json_t *json, const char *file )
 {
@@ -191,8 +204,8 @@ int jxtl_expand_to_file( apr_array_header_t *content_array,
   apr_status_t status;
   apr_bucket_alloc_t *bucket_alloc;
   apr_bucket_brigade *bucket_brigade;
-  struct iovec vec;
-  int nvec;
+  struct iovec *vec;
+  int nvec = 0;
   apr_size_t nbytes;
   int is_stdout;
 
@@ -216,8 +229,10 @@ int jxtl_expand_to_file( apr_array_header_t *content_array,
     expand_content( mp, content_array, json, NULL, PRINT_NORMAL,
                     bucket_brigade );
 
-    apr_brigade_to_iovec( bucket_brigade, &vec, &nvec );
-    status = apr_file_writev( out, &vec, nvec, &nbytes );
+    nvec = number_of_buckets( bucket_brigade );
+    vec = apr_palloc( mp, sizeof(struct iovec) * nvec );
+    apr_brigade_to_iovec( bucket_brigade, vec, &nvec );
+    status = apr_file_writev( out, vec, nvec, &nbytes );
 
     apr_brigade_destroy( bucket_brigade );
     apr_bucket_alloc_destroy( bucket_alloc );
