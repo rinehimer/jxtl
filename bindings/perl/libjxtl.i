@@ -2,6 +2,7 @@
 
 %{
 #include "perl_util.h"
+#include <apr_general.h>
 %}
 
 %init %{

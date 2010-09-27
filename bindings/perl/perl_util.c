@@ -102,7 +102,7 @@ static void perl_array_to_json( SV *input, json_writer_t *writer )
   json_writer_end_array( writer );
 }
 
-json_t *perl_variable_to_json( apr_pool_t *mp, SV *input )
+static json_t *perl_variable_to_json( apr_pool_t *mp, SV *input )
 {
   json_writer_t *writer;
 
@@ -115,11 +115,11 @@ json_t *perl_variable_to_json( apr_pool_t *mp, SV *input )
 static int perl_variable_can_be_json( SV *input )
 {
   return ( SvOK( input ) && SvROK( input ) &&
-           ( SvTYPE( SvRV( input ) ) == SVt_PVHV ) ||
-           ( SvTYPE( SvRV( input ) ) == SVt_PVAV ) );
+           ( ( SvTYPE( SvRV( input ) ) == SVt_PVHV ) ||
+             ( SvTYPE( SvRV( input ) ) == SVt_PVAV ) ) );
 }
 
-static int prep_for_expand( apr_pool_t **mp,
+static int prep_for_expand( apr_pool_t **mp_ptr,
                             const char *template_file,
                             apr_array_header_t **content_array,
                             json_t **json,
@@ -127,21 +127,21 @@ static int prep_for_expand( apr_pool_t **mp,
 {
   parser_t *jxtl_parser;
   int ret = FALSE;
+  apr_pool_t *mp;
 
-  apr_pool_create( mp, NULL );
-  jxtl_parser = jxtl_parser_create( *mp );
+  apr_pool_create( &mp, NULL );
+  jxtl_parser = jxtl_parser_create( mp );
 
   if ( perl_variable_can_be_json( input ) &&
        jxtl_parser_parse_file( jxtl_parser, template_file,
                                content_array ) == APR_SUCCESS ) {
-    *json = perl_variable_to_json( *mp, input );
+    *json = perl_variable_to_json( mp, input );
     ret = TRUE;
   }
 
+  *mp_ptr = mp;
   return ret;
 }
-                            
-                            
 
 int expand_to_file( const char *template_file, SV *input,
                     const char *output_file )

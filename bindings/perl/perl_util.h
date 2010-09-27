@@ -5,10 +5,8 @@
 #include <perl.h>
 #include <XSUB.h>
 
-#include <apr_pools.h>
-
-#include "json_writer.h"
-
-json_t *perl_variable_to_json( apr_pool_t *mp, SV *input );
+int expand_to_file( const char *template_file, SV *input,
+                    const char *output_file );
+SV *expand_to_buffer( const char *template_file, SV *input );
 
 #endif
