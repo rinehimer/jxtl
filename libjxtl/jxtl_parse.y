@@ -399,7 +399,6 @@ parser_t *jxtl_parser_create( apr_pool_t *mp )
 				    jxtl_parse );
   jxtl_data_t *jxtl_data = apr_palloc( mp, sizeof(jxtl_data_t) );
 
-  apr_pool_create( &jxtl_data->mp, mp );
   jxtl_data->mp = mp;
   jxtl_data->json = NULL;
   jxtl_data->content_array = apr_array_make( mp, 32,
