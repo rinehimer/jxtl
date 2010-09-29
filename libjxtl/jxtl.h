@@ -62,6 +62,7 @@ typedef char * ( *jxtl_format_func )( char *value, char *format_name,
 
 typedef struct jxtl_template_t {
   apr_array_header_t *content;
+  void *user_data;
   jxtl_format_func format;
 }jxtl_template_t;
 

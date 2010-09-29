@@ -19,6 +19,7 @@ typedef enum section_print_type {
 static void print_json_value( json_t *json,
                               char *format,
                               apr_pool_t *mp,
+                              jxtl_template_t *template,
                               apr_bucket_brigade *out )
 {
   char *value = NULL;
@@ -52,6 +53,10 @@ static void print_json_value( json_t *json,
     break;
   }
 
+  if ( format && template->format ) {
+    value = template->format( value, format, template->user_data );
+  }
+
   apr_brigade_printf( out, NULL, NULL, "%s", value );
 }
 
@@ -76,6 +81,7 @@ static void print_text( char *text, jxtl_content_t *prev_content,
 }
 
 static void expand_content( apr_pool_t *mp,
+                            jxtl_template_t *template,
                             apr_array_header_t *content_array,
                             json_t *json,
                             char *prev_format,
@@ -86,6 +92,7 @@ static void expand_content( apr_pool_t *mp,
  * Print a saved section
  */
 static void expand_section( apr_pool_t *mp,
+                            jxtl_template_t *template,
                             jxtl_section_t *section,
                             json_t *json,
                             char *format,
@@ -105,17 +112,18 @@ static void expand_section( apr_pool_t *mp,
   num_printed = 0;
   for ( i = 0; i < path_obj->nodes->nelts; i++ ) {
     json_value = APR_ARRAY_IDX( path_obj->nodes, i, json_t * );
-    expand_content( mp, section->content, json_value, format,
+    expand_content( mp, template, section->content, json_value, format,
                     PRINT_SECTION, out );
     num_printed++;
     /* Only print the separator if it's not the last one */
     if ( num_printed < num_items )
-      expand_content( mp, section->separator, json_value, format,
+      expand_content( mp, template, section->separator, json_value, format,
                       PRINT_SEPARATOR, out );
   }
 }
 
 static void expand_content( apr_pool_t *mp,
+                            jxtl_template_t *template,
                             apr_array_header_t *content_array,
                             json_t *json,
                             char *prev_format,
@@ -151,7 +159,8 @@ static void expand_content( apr_pool_t *mp,
     case JXTL_SECTION:
       tmp_section = (jxtl_section_t *) content->value;
       format = ( content->format ) ? content->format : prev_format;
-      expand_section( mp, tmp_section, json, format, PRINT_SECTION, out );
+      expand_section( mp, template, tmp_section, json, format, PRINT_SECTION,
+                      out );
       break;
 
     case JXTL_IF:
@@ -164,7 +173,7 @@ static void expand_content( apr_pool_t *mp,
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
         if ( !jxtl_if->expr ||
              jxtl_path_compiled_eval( mp, jxtl_if->expr, json, &path_obj ) ) {
-          expand_content( mp, jxtl_if->content, json, prev_format,
+          expand_content( mp, template, jxtl_if->content, json, prev_format,
                           PRINT_SECTION, out );
           break;
         }
@@ -175,7 +184,7 @@ static void expand_content( apr_pool_t *mp,
       format = ( content->format ) ? content->format : prev_format;
       if ( jxtl_path_compiled_eval( mp, content->value, json, &path_obj ) ) {
         json_value = APR_ARRAY_IDX( path_obj->nodes, 0, json_t * );
-        print_json_value( json_value, format, mp, out );
+        print_json_value( json_value, format, mp, template, out );
       }
       break;
     }
@@ -200,6 +209,12 @@ void jxtl_template_set_format_func( jxtl_template_t *template,
                                     jxtl_format_func format_func )
 {
   template->format = format_func;
+}
+
+void jxtl_template_set_user_data( jxtl_template_t *template,
+                                  void *user_data )
+{
+  template->user_data = user_data;
 }
 
 int jxtl_expand_to_file( jxtl_template_t *template, json_t *json,
@@ -232,7 +247,7 @@ int jxtl_expand_to_file( jxtl_template_t *template, json_t *json,
     bucket_alloc = apr_bucket_alloc_create( mp );
     bucket_brigade = apr_brigade_create( mp, bucket_alloc );
 
-    expand_content( mp, template->content, json, NULL, PRINT_NORMAL,
+    expand_content( mp, template, template->content, json, NULL, PRINT_NORMAL,
                     bucket_brigade );
 
     nvec = number_of_buckets( bucket_brigade );
@@ -267,8 +282,8 @@ char *jxtl_expand_to_buffer( apr_pool_t *mp, jxtl_template_t *template,
   bucket_alloc = apr_bucket_alloc_create( tmp_pool );
   bucket_brigade = apr_brigade_create( tmp_pool, bucket_alloc );
   
-  expand_content( tmp_pool, template->content, json, NULL, PRINT_NORMAL,
-                  bucket_brigade );
+  expand_content( tmp_pool, template, template->content, json, NULL,
+                  PRINT_NORMAL, bucket_brigade );
 
   apr_brigade_length( bucket_brigade, 1, &length );
   flatten_len = length;

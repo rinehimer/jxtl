@@ -1,0 +1,5 @@
+{{#section brewery ; separator="\n\n", format="upper"}}
+{{name}} Brewery:
+  Year Round Beers:  {{#section beer[!season] ; separator=", ", format="lower"}}{{beer_name}}{{#end}}
+  Seasonal Beers:  {{#section beer[season] ; separator=", "}}{{beer_name}} ({{season}}){{#end}}
+{{#end}}

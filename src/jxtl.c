@@ -1,5 +1,6 @@
 #include <apr_general.h>
 #include <apr_getopt.h>
+#include <apr_lib.h>
 #include <apr_pools.h>
 #include <apr_strings.h>
 #include <apr_tables.h>
@@ -15,6 +16,29 @@
 #include "jxtl_parse.h"
 #include "jxtl_lex.h"
 #include "xml2json.h"
+
+static char *format_func( char *value, char *format_name, void *user_data )
+{
+  apr_array_header_t *format_buf;
+  char *c;
+
+  format_buf = (apr_array_header_t *) user_data;
+  APR_ARRAY_CLEAR( format_buf );
+
+  if ( apr_strnatcasecmp( format_name, "upper" ) == 0 ) {
+    for ( c = value; *c; c++ ) {
+      APR_ARRAY_PUSH( format_buf, char ) = apr_toupper( *c );
+    }
+  }
+  else if ( apr_strnatcasecmp( format_name, "lower" ) == 0 ) {
+    for ( c = value; *c; c++ ) {
+      APR_ARRAY_PUSH( format_buf, char ) = apr_tolower( *c );
+    }
+  }
+  APR_ARRAY_PUSH( format_buf, char ) = '\0';
+
+  return (char *) format_buf->elts;
+}
 
 void jxtl_usage( const char *prog_name,
                  const apr_getopt_option_t *options )
@@ -126,6 +150,7 @@ int main( int argc, char const * const *argv )
   json_t *json;
   parser_t *jxtl_parser;
   jxtl_template_t *template;
+  apr_array_header_t *format_buf;
 
   apr_app_initialize( NULL, NULL, NULL );
   apr_pool_create( &mp, NULL );
@@ -139,6 +164,9 @@ int main( int argc, char const * const *argv )
                          &json ) == APR_SUCCESS ) &&
        ( jxtl_parser_parse_file( jxtl_parser, template_file,
                                  &template ) == APR_SUCCESS ) ) {
+    format_buf = apr_array_make( mp, 8192, sizeof(char) );
+    jxtl_template_set_format_func( template, format_func );
+    jxtl_template_set_user_data( template, format_buf );
     jxtl_expand_to_file( template, json, out_file );
   }
 
