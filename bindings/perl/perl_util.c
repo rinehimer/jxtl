@@ -121,7 +121,7 @@ static int perl_variable_can_be_json( SV *input )
 
 static int prep_for_expand( apr_pool_t **mp_ptr,
                             const char *template_file,
-                            apr_array_header_t **content_array,
+                            jxtl_template_t **template,
                             json_t **json,
                             SV *input )
 {
@@ -134,7 +134,7 @@ static int prep_for_expand( apr_pool_t **mp_ptr,
 
   if ( perl_variable_can_be_json( input ) &&
        jxtl_parser_parse_file( jxtl_parser, template_file,
-                               content_array ) == APR_SUCCESS ) {
+                               template ) == APR_SUCCESS ) {
     *json = perl_variable_to_json( mp, input );
     ret = TRUE;
   }
@@ -148,11 +148,11 @@ int expand_to_file( const char *template_file, SV *input,
 {
   apr_pool_t *mp;
   json_t *json;
-  apr_array_header_t *content_array;
+  jxtl_template_t *template;
   int ret = FALSE;
 
-  if ( prep_for_expand( &mp, template_file, &content_array, &json, input ) ) {
-    jxtl_expand_to_file( content_array, json, output_file );
+  if ( prep_for_expand( &mp, template_file, &template, &json, input ) ) {
+    jxtl_expand_to_file( template, json, output_file );
     ret = TRUE;
   }
 
@@ -165,12 +165,12 @@ SV *expand_to_buffer( const char *template_file, SV *input )
 {
   apr_pool_t *mp;
   json_t *json;
-  apr_array_header_t *content_array;
+  jxtl_template_t *template;
   char *buffer;
   SV *ret = &PL_sv_undef;
 
-  if ( prep_for_expand( &mp, template_file, &content_array, &json, input ) ) {
-    buffer = jxtl_expand_to_buffer( mp, content_array, json );
+  if ( prep_for_expand( &mp, template_file, &template, &json, input ) ) {
+    buffer = jxtl_expand_to_buffer( mp, template, json );
     ret = sv_newmortal();
     sv_setpv( ret, buffer );
   }

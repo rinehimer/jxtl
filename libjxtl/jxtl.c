@@ -196,8 +196,14 @@ static int number_of_buckets( apr_bucket_brigade *b )
   return n;
 }
 
-int jxtl_expand_to_file( apr_array_header_t *content_array,
-                         json_t *json, const char *file )
+void jxtl_template_set_format_func( jxtl_template_t *template,
+                                    jxtl_format_func format_func )
+{
+  template->format = format_func;
+}
+
+int jxtl_expand_to_file( jxtl_template_t *template, json_t *json,
+                         const char *file )
 {
   apr_pool_t *mp;
   apr_file_t *out;
@@ -226,7 +232,7 @@ int jxtl_expand_to_file( apr_array_header_t *content_array,
     bucket_alloc = apr_bucket_alloc_create( mp );
     bucket_brigade = apr_brigade_create( mp, bucket_alloc );
 
-    expand_content( mp, content_array, json, NULL, PRINT_NORMAL,
+    expand_content( mp, template->content, json, NULL, PRINT_NORMAL,
                     bucket_brigade );
 
     nvec = number_of_buckets( bucket_brigade );
@@ -246,8 +252,7 @@ int jxtl_expand_to_file( apr_array_header_t *content_array,
   return ( status == APR_SUCCESS ) ? TRUE : FALSE;
 }
 
-char *jxtl_expand_to_buffer( apr_pool_t *mp,
-                             apr_array_header_t *content_array,
+char *jxtl_expand_to_buffer( apr_pool_t *mp, jxtl_template_t *template,
                              json_t *json )
 {
   apr_bucket_alloc_t *bucket_alloc;
@@ -262,7 +267,7 @@ char *jxtl_expand_to_buffer( apr_pool_t *mp,
   bucket_alloc = apr_bucket_alloc_create( tmp_pool );
   bucket_brigade = apr_brigade_create( tmp_pool, bucket_alloc );
   
-  expand_content( tmp_pool, content_array, json, NULL, PRINT_NORMAL,
+  expand_content( tmp_pool, template->content, json, NULL, PRINT_NORMAL,
                   bucket_brigade );
 
   apr_brigade_length( bucket_brigade, 1, &length );

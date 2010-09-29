@@ -57,21 +57,31 @@ typedef struct jxtl_callback_t {
   void *user_data;
 } jxtl_callback_t;
 
+typedef char * ( *jxtl_format_func )( char *value, char *format_name,
+                                      void *user_data );
+
+typedef struct jxtl_template_t {
+  apr_array_header_t *content;
+  jxtl_format_func format;
+}jxtl_template_t;
+
 parser_t *jxtl_parser_create( apr_pool_t *mp );
 int jxtl_parser_parse_file( parser_t *parser, const char *file,
-                            apr_array_header_t **content_array );
+                            jxtl_template_t **template );
+
+void jxtl_template_set_format_func( jxtl_template_t *template,
+                                    jxtl_format_func format_func );
 
 /**
  * Expand a template to a named file.
  */
-int jxtl_expand_to_file( apr_array_header_t *content_array,
-                         json_t *json, const char *file );
+int jxtl_expand_to_file( jxtl_template_t *template, json_t *json,
+                         const char *file );
 
 /**
  * Expand a template into a buffer that is allocated from mp.
  */
-char *jxtl_expand_to_buffer( apr_pool_t *mp,
-                             apr_array_header_t *content_array,
+char *jxtl_expand_to_buffer( apr_pool_t *mp, jxtl_template_t *template,
                              json_t *json );
 
 #endif

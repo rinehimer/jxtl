@@ -125,7 +125,7 @@ int main( int argc, char const * const *argv )
   int skip_root;
   json_t *json;
   parser_t *jxtl_parser;
-  apr_array_header_t *content_array;
+  jxtl_template_t *template;
 
   apr_app_initialize( NULL, NULL, NULL );
   apr_pool_create( &mp, NULL );
@@ -138,8 +138,8 @@ int main( int argc, char const * const *argv )
   if ( ( jxtl_load_data( mp, json_file, xml_file, skip_root,
                          &json ) == APR_SUCCESS ) &&
        ( jxtl_parser_parse_file( jxtl_parser, template_file,
-                                 &content_array ) == APR_SUCCESS ) ) {
-    jxtl_expand_to_file( content_array, json, out_file );
+                                 &template ) == APR_SUCCESS ) ) {
+    jxtl_expand_to_file( template, json, out_file );
   }
 
   apr_pool_destroy( mp );

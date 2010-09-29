@@ -428,13 +428,14 @@ parser_t *jxtl_parser_create( apr_pool_t *mp )
 }
 
 int jxtl_parser_parse_file( parser_t *parser, const char *file,
-                            apr_array_header_t **content_array )
+                            jxtl_template_t **template_ptr )
 {
   jxtl_callback_t *jxtl_callbacks = parser_get_user_data( parser );
   jxtl_data_t *jxtl_data = jxtl_callbacks->user_data;
+  jxtl_template_t *template;
   apr_array_header_t *content;
 
-  *content_array = NULL;
+  *template_ptr = NULL;
   APR_ARRAY_CLEAR( jxtl_data->content_array );
   APR_ARRAY_CLEAR( jxtl_data->current_array );
 
@@ -442,7 +443,10 @@ int jxtl_parser_parse_file( parser_t *parser, const char *file,
   APR_ARRAY_PUSH( jxtl_data->current_array, apr_array_header_t * ) = content;
 
   if ( parser_parse_file( parser, file ) == 0 ) {
-    *content_array = jxtl_data->current_array;
+    template = apr_palloc( parser->mp, sizeof(jxtl_template_t) );
+    template->content = jxtl_data->current_array;
+    template->format = NULL;
+    *template_ptr = template;
   }
 
   return parser->parse_result;
