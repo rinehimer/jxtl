@@ -60,7 +60,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 38 "json_parse.y"
+#line 37 "json_parse.y"
 {
   int integer;
   unsigned char *string;

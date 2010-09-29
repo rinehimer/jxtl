@@ -14,7 +14,6 @@
 #include "json.h"
 #include "json_writer.h"
 #include "parser.h"
-#include "json_parser.h"
 
 #define callbacks ((json_callback_t *) callbacks_ptr)
 

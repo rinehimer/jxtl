@@ -10,7 +10,6 @@
 #include "parser.h"
 #include "json.h"
 
-#include "json_parser.h"
 #include "parser_lex_macros.h"
 #include "utf.h"
 
