@@ -6,7 +6,8 @@
 #include <XSUB.h>
 
 int expand_to_file( const char *template_file, SV *input,
-                    const char *output_file );
-SV *expand_to_buffer( const char *template_file, SV *input );
+                    const char *output_file, SV *perl_format_func );
+SV *expand_to_buffer( const char *template_file, SV *input,
+                      SV *perl_format_func );
 
 #endif
