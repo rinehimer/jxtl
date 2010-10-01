@@ -57,7 +57,9 @@ static void print_json_value( json_t *json,
     value = template->format( value, format, template->user_data );
   }
 
-  apr_brigade_printf( out, NULL, NULL, "%s", value );
+  if ( value ) { 
+    apr_brigade_printf( out, NULL, NULL, "%s", value );
+  }
 }
 
 static void print_text( char *text, jxtl_content_t *prev_content,

@@ -130,7 +130,7 @@ static char *format_func( char *value, char *format, void *user_data )
   format_data_t *format_data = (format_data_t *) user_data;
   int n;
   SV *perl_ret;
-  char *ret_val;
+  char *ret_val = NULL;
 
   dSP;
   ENTER;

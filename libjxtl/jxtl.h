@@ -73,6 +73,9 @@ int jxtl_parser_parse_file( parser_t *parser, const char *file,
 void jxtl_template_set_format_func( jxtl_template_t *template,
                                     jxtl_format_func format_func );
 
+void jxtl_template_set_user_data( jxtl_template_t *template,
+                                  void *user_data );
+
 /**
  * Expand a template to a named file.
  */
