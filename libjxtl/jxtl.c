@@ -54,7 +54,7 @@ static void print_json_value( json_t *json,
   }
 
   if ( format && template->format ) {
-    value = template->format( value, format, template->user_data );
+    value = template->format( value, format, template->format_data );
   }
 
   if ( value ) { 
@@ -213,10 +213,10 @@ void jxtl_template_set_format_func( jxtl_template_t *template,
   template->format = format_func;
 }
 
-void jxtl_template_set_user_data( jxtl_template_t *template,
-                                  void *user_data )
+void jxtl_template_set_format_data( jxtl_template_t *template,
+				    void *format_data )
 {
-  template->user_data = user_data;
+  template->format_data = format_data;
 }
 
 int jxtl_expand_to_file( jxtl_template_t *template, json_t *json,

@@ -62,7 +62,7 @@ typedef char * ( *jxtl_format_func )( char *value, char *format_name,
 
 typedef struct jxtl_template_t {
   apr_array_header_t *content;
-  void *user_data;
+  void *format_data;
   jxtl_format_func format;
 }jxtl_template_t;
 
@@ -73,8 +73,8 @@ int jxtl_parser_parse_file( parser_t *parser, const char *file,
 void jxtl_template_set_format_func( jxtl_template_t *template,
                                     jxtl_format_func format_func );
 
-void jxtl_template_set_user_data( jxtl_template_t *template,
-                                  void *user_data );
+void jxtl_template_set_format_data( jxtl_template_t *template,
+                                    void *format_data );
 
 /**
  * Expand a template to a named file.

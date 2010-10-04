@@ -125,9 +125,9 @@ typedef struct format_data_t {
   apr_pool_t *mp;
 }format_data_t;
 
-static char *format_func( char *value, char *format, void *user_data )
+static char *format_func( char *value, char *format, void *format_data_ptr )
 {
-  format_data_t *format_data = (format_data_t *) user_data;
+  format_data_t *format_data = (format_data_t *) format_data_ptr;
   int n;
   SV *perl_ret;
   char *ret_val = NULL;
@@ -178,7 +178,7 @@ static int prep_for_expand( apr_pool_t **mp_ptr,
     format_data->perl_format_func = perl_format_func;
     format_data->mp = mp;
     jxtl_template_set_format_func( *template, format_func );
-    jxtl_template_set_user_data( *template, format_data );
+    jxtl_template_set_format_data( *template, format_data );
     ret = TRUE;
   }
 

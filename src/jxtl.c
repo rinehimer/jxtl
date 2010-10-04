@@ -17,12 +17,12 @@
 #include "jxtl_lex.h"
 #include "xml2json.h"
 
-static char *format_func( char *value, char *format_name, void *user_data )
+static char *format_func( char *value, char *format_name, void *format_data )
 {
   apr_array_header_t *format_buf;
   char *c;
 
-  format_buf = (apr_array_header_t *) user_data;
+  format_buf = (apr_array_header_t *) format_data;
   APR_ARRAY_CLEAR( format_buf );
 
   if ( apr_strnatcasecmp( format_name, "upper" ) == 0 ) {
@@ -166,7 +166,7 @@ int main( int argc, char const * const *argv )
                                  &template ) == APR_SUCCESS ) ) {
     format_buf = apr_array_make( mp, 8192, sizeof(char) );
     jxtl_template_set_format_func( template, format_func );
-    jxtl_template_set_user_data( template, format_buf );
+    jxtl_template_set_format_data( template, format_buf );
     jxtl_expand_to_file( template, json, out_file );
   }
 
