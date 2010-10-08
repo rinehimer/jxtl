@@ -69,6 +69,8 @@ typedef struct jxtl_template_t {
 parser_t *jxtl_parser_create( apr_pool_t *mp );
 int jxtl_parser_parse_file( parser_t *parser, const char *file,
                             jxtl_template_t **template );
+int jxtl_parser_parse_buffer( parser_t *parser, const char *buffer,
+                              jxtl_template_t **template );
 
 void jxtl_template_set_format_func( jxtl_template_t *template,
                                     jxtl_format_func format_func );

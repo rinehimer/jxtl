@@ -69,6 +69,8 @@ apr_status_t parser_parse_file( parser_t *parser, const char *file )
   int is_stdin;
   char error_buf[1024];
 
+  parser_reset( parser );
+
   is_stdin = ( file && apr_strnatcasecmp( file, "-" ) == 0 );
 
   if ( !is_stdin ) {
@@ -85,8 +87,6 @@ apr_status_t parser_parse_file( parser_t *parser, const char *file )
     return status;
   }
 
-  parser_reset( parser );
-
   parser->parse_result = parser->bison_parse( parser->scanner, parser,
 					      parser->user_data );
 
@@ -99,13 +99,14 @@ apr_status_t parser_parse_buffer( parser_t *parser, const char *buffer )
   int flex_buffer_len = strlen( buffer ) + 2;
   void *buffer_state;
 
+  parser_reset( parser );
+
   flex_buffer = apr_palloc( parser->mp, flex_buffer_len );
   apr_cpystrn( flex_buffer, buffer, flex_buffer_len - 1 );
   flex_buffer[flex_buffer_len - 1] = '\0';
 
   buffer_state = parser->flex_scan( flex_buffer, flex_buffer_len,
 				    parser->scanner );
-  parser_reset( parser );
 
   parser->parse_result = parser->bison_parse( parser->scanner, parser,
 					      parser->user_data );
