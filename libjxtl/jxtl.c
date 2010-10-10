@@ -27,37 +27,14 @@ static void print_json_value( json_t *json,
   if ( !json )
     return;
   
-  switch ( json->type ) {
-  case JSON_STRING:
-    value = apr_psprintf( mp, "%s", json->value.string );
-    break;
-    
-  case JSON_INTEGER:
-    value = apr_psprintf( mp, "%d", json->value.integer );
-    break;
-    
-  case JSON_NUMBER:
-    value = apr_psprintf( mp, "%g", json->value.number );
-    break;
-
-  case JSON_BOOLEAN:
-    value = apr_psprintf( mp, "%s",
-                          JSON_IS_TRUE_BOOLEAN( json ) ? "true" : "false" );
-    break;
-
-  case JSON_NULL:
-    break;
-
-  default:
-    fprintf( stderr, "error: cannot get value of object or array\n" );
-    break;
-  }
-
   if ( format && template->format ) {
-    value = template->format( value, format, template->format_data );
+    value = template->format( json, format, template->format_data );
+  }
+  else {
+    value = json_get_string_value( mp, json );
   }
 
-  if ( value ) { 
+  if ( value ) {
     apr_brigade_printf( out, NULL, NULL, "%s", value );
   }
 }

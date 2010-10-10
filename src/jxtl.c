@@ -17,27 +17,35 @@
 #include "jxtl_lex.h"
 #include "xml2json.h"
 
-static char *format_func( char *value, char *format_name, void *format_data )
+typedef struct format_data_t {
+  apr_pool_t *mp;
+  apr_array_header_t *string_array;
+}format_data_t;
+
+static char *format_func( json_t *json, char *format_name,
+                          void *format_data_ptr )
 {
-  apr_array_header_t *format_buf;
+  format_data_t *format_data = (format_data_t *) format_data_ptr;
+  char *value;
+  char *ret_value;
   char *c;
 
-  format_buf = (apr_array_header_t *) format_data;
-  APR_ARRAY_CLEAR( format_buf );
+  APR_ARRAY_CLEAR( format_data->string_array );
+  value = json_get_string_value( format_data->mp, json );
+  ret_value = value;
 
   if ( apr_strnatcasecmp( format_name, "upper" ) == 0 ) {
     for ( c = value; *c; c++ ) {
-      APR_ARRAY_PUSH( format_buf, char ) = apr_toupper( *c );
+      *c = apr_toupper( *c );
     }
   }
   else if ( apr_strnatcasecmp( format_name, "lower" ) == 0 ) {
     for ( c = value; *c; c++ ) {
-      APR_ARRAY_PUSH( format_buf, char ) = apr_tolower( *c );
+      *c = apr_tolower( *c );
     }
   }
-  APR_ARRAY_PUSH( format_buf, char ) = '\0';
 
-  return (char *) format_buf->elts;
+  return ret_value;
 }
 
 void jxtl_usage( const char *prog_name,
@@ -150,7 +158,7 @@ int main( int argc, char const * const *argv )
   json_t *json;
   parser_t *jxtl_parser;
   jxtl_template_t *template;
-  apr_array_header_t *format_buf;
+  format_data_t *format_data;
 
   apr_app_initialize( NULL, NULL, NULL );
   apr_pool_create( &mp, NULL );
@@ -164,9 +172,11 @@ int main( int argc, char const * const *argv )
                          &json ) == APR_SUCCESS ) &&
        ( jxtl_parser_parse_file( jxtl_parser, template_file,
                                  &template ) == APR_SUCCESS ) ) {
-    format_buf = apr_array_make( mp, 8192, sizeof(char) );
+    format_data = apr_palloc( mp, sizeof(format_data_t) );
+    format_data->mp = mp;
+    format_data->string_array = apr_array_make( mp, 8192, sizeof(char) );
     jxtl_template_set_format_func( template, format_func );
-    jxtl_template_set_format_data( template, format_buf );
+    jxtl_template_set_format_data( template, format_data );
     jxtl_expand_to_file( template, json, out_file );
   }
 

@@ -310,7 +310,6 @@ static void json_to_xml_internal( json_t *json, int indent )
  * Figure out if I really want to keep this around, it was really more for
  * debugging early on.  There could potentially be some use, but it's possible
  * the XML produced is invalid since it doesn't use an API to generate it.
- * This function isn't prototyped in json.h header.
  */
 void json_to_xml( json_t *json, int indent )
 {
@@ -318,4 +317,33 @@ void json_to_xml( json_t *json, int indent )
   printf( "<json>\n" );
   json_to_xml_internal( json, 1 );
   printf( "</json>\n" );
+}
+
+char *json_get_string_value( apr_pool_t *mp, json_t *json )
+{
+  char *value = NULL;
+
+  switch ( json->type ) {
+  case JSON_STRING:
+    value = apr_psprintf( mp, "%s", json->value.string );
+    break;
+    
+  case JSON_INTEGER:
+    value = apr_psprintf( mp, "%d", json->value.integer );
+    break;
+    
+  case JSON_NUMBER:
+    value = apr_psprintf( mp, "%g", json->value.number );
+    break;
+
+  case JSON_BOOLEAN:
+    value = apr_psprintf( mp, "%s",
+                          JSON_IS_TRUE_BOOLEAN( json ) ? "true" : "false" );
+    break;
+
+  default:
+    break;
+  }
+
+  return value;
 }

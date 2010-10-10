@@ -57,7 +57,7 @@ typedef struct jxtl_callback_t {
   void *user_data;
 } jxtl_callback_t;
 
-typedef char * ( *jxtl_format_func )( char *value, char *format_name,
+typedef char * ( *jxtl_format_func )( json_t *value, char *format_name,
                                       void *user_data );
 
 typedef struct jxtl_template_t {

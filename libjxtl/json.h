@@ -60,6 +60,12 @@ json_t *json_create_null( apr_pool_t *mp );
 void json_dump( json_t *node, int indent );
 void json_to_xml( json_t *json, int indent );
 
+/**
+ * Return the string value of a json object, or NULL if it type JSON_NULL,
+ * JSON_OBJECT or JSON_ARRAY.
+ */
+char *json_get_string_value( apr_pool_t *mp, json_t *json );
+
 typedef struct json_callback_t {
   void ( *object_start_handler )( void *user_data );
   void ( *object_end_handler )( void *user_data );
