@@ -4,10 +4,8 @@
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
+#include "template.h"
 
-int expand_to_file( const char *template_file, SV *input,
-                    const char *output_file, SV *perl_format_func );
-SV *expand_to_buffer( const char *template_file, SV *input,
-                      SV *perl_format_func );
+json_t *perl_variable_to_json( apr_pool_t *mp, SV *input );
 
 #endif

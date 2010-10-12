@@ -103,7 +103,7 @@ static void perl_array_to_json( SV *input, json_writer_t *writer )
   json_writer_end_array( writer );
 }
 
-static json_t *perl_variable_to_json( apr_pool_t *mp, SV *input )
+json_t *perl_variable_to_json( apr_pool_t *mp, SV *input )
 {
   json_writer_t *writer;
 
@@ -121,23 +121,32 @@ static int perl_variable_can_be_json( SV *input )
 }
 
 typedef struct format_data_t {
-  SV *perl_format_func;
   apr_pool_t *mp;
+  SV *perl_format_func;
 }format_data_t;
 
-static char *format_func( char *value, char *format, void *format_data_ptr )
+static char *format_func( json_t *json, char *format, void *format_data_ptr )
 {
   format_data_t *format_data = (format_data_t *) format_data_ptr;
+  char *value = json_get_string_value( format_data->mp, json );
   int n;
+  SV *context = sv_newmortal();
   SV *perl_ret;
   char *ret_val = NULL;
+
+  if ( !value )
+    value = "";
 
   dSP;
   ENTER;
   SAVETMPS;
   PUSHMARK( SP );
+
+  sv_setref_pv( context, "void *", (void *) json );
+
   XPUSHs( sv_2mortal( newSVpv( value, 0 ) ) );
   XPUSHs( sv_2mortal( newSVpv( format, 0 ) ) );
+  XPUSHs( context );
   PUTBACK;
 
   n = call_sv( format_data->perl_format_func, G_SCALAR );
