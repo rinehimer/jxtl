@@ -103,16 +103,6 @@ static void perl_array_to_json( SV *input, json_writer_t *writer )
   json_writer_end_array( writer );
 }
 
-json_t *perl_variable_to_json( apr_pool_t *mp, SV *input )
-{
-  json_writer_t *writer;
-
-  writer = json_writer_create( mp );
-  perl_variable_to_json_internal( input, writer );
-
-  return writer->json;
-}
-
 static int perl_variable_can_be_json( SV *input )
 {
   return ( SvOK( input ) && SvROK( input ) &&
@@ -120,117 +110,18 @@ static int perl_variable_can_be_json( SV *input )
              ( SvTYPE( SvRV( input ) ) == SVt_PVAV ) ) );
 }
 
-typedef struct format_data_t {
-  apr_pool_t *mp;
-  SV *perl_format_func;
-}format_data_t;
 
-static char *format_func( json_t *json, char *format, void *format_data_ptr )
+json_t *perl_variable_to_json( apr_pool_t *mp, SV *input )
 {
-  format_data_t *format_data = (format_data_t *) format_data_ptr;
-  char *value = json_get_string_value( format_data->mp, json );
-  int n;
-  SV *context = sv_newmortal();
-  SV *perl_ret;
-  char *ret_val = NULL;
+  json_writer_t *writer;
 
-  if ( !value )
-    value = "";
-
-  dSP;
-  ENTER;
-  SAVETMPS;
-  PUSHMARK( SP );
-
-  sv_setref_pv( context, "void *", (void *) json );
-
-  XPUSHs( sv_2mortal( newSVpv( value, 0 ) ) );
-  XPUSHs( sv_2mortal( newSVpv( format, 0 ) ) );
-  XPUSHs( context );
-  PUTBACK;
-
-  n = call_sv( format_data->perl_format_func, G_SCALAR );
-
-  SPAGAIN;
-  if ( n == 1 ) {
-    perl_ret = POPs;
-    ret_val = apr_pstrdup( format_data->mp, SvPV_nolen( perl_ret ) );
+  if ( perl_variable_can_be_json( input ) ) {
+    writer = json_writer_create( mp );
+    perl_variable_to_json_internal( input, writer );
+    return writer->json;
   }
-
-  PUTBACK;
-  FREETMPS;
-  LEAVE;
-
-  return ret_val;
+  else {
+    return NULL;
+  }
 }
 
-static int prep_for_expand( apr_pool_t **mp_ptr,
-                            const char *template_file,
-                            jxtl_template_t **template,
-                            json_t **json,
-                            SV *input,
-                            SV *perl_format_func )
-{
-  parser_t *jxtl_parser;
-  int ret = FALSE;
-  apr_pool_t *mp;
-  format_data_t *format_data;
-
-  apr_pool_create( &mp, NULL );
-  jxtl_parser = jxtl_parser_create( mp );
-
-  if ( perl_variable_can_be_json( input ) &&
-       jxtl_parser_parse_file( jxtl_parser, template_file,
-                               template ) == APR_SUCCESS ) {
-    *json = perl_variable_to_json( mp, input );
-    format_data = apr_palloc( mp, sizeof(format_data_t) );
-    format_data->perl_format_func = perl_format_func;
-    format_data->mp = mp;
-    jxtl_template_set_format_func( *template, format_func );
-    jxtl_template_set_format_data( *template, format_data );
-    ret = TRUE;
-  }
-
-  *mp_ptr = mp;
-  return ret;
-}
-
-int expand_to_file( const char *template_file, SV *input,
-                    const char *output_file, SV *perl_format_func )
-{
-  apr_pool_t *mp;
-  json_t *json;
-  jxtl_template_t *template;
-  int ret = FALSE;
-
-  if ( prep_for_expand( &mp, template_file, &template, &json, input,
-                        perl_format_func ) ) {
-    jxtl_expand_to_file( template, json, output_file );
-    ret = TRUE;
-  }
-
-  apr_pool_destroy( mp );
-
-  return ret;
-}
-
-SV *expand_to_buffer( const char *template_file, SV *input,
-                      SV *perl_format_func )
-{
-  apr_pool_t *mp;
-  json_t *json;
-  jxtl_template_t *template;
-  char *buffer;
-  SV *ret = &PL_sv_undef;
-
-  if ( prep_for_expand( &mp, template_file, &template, &json, input,
-                        perl_format_func ) ) {
-    buffer = jxtl_expand_to_buffer( mp, template, json );
-    ret = sv_newmortal();
-    sv_setpv( ret, buffer );
-  }
-
-  apr_pool_destroy( mp );
-
-  return ret;
-}
