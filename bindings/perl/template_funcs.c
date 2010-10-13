@@ -7,6 +7,7 @@
 
 #include "json.h"
 #include "jxtl.h"
+#include "xml2json.h"
 
 #include "template.h"
 #include "perl_util.h"
@@ -97,9 +98,18 @@ void Template_set_format_callback( Template *t, SV *perl_format_func )
   }
 }
 
-json_t *Template_xml_to_json( Template *t, char *xml_file )
+SV *Template_xml_to_hash( Template *t, char *xml_file )
 {
-  
+  apr_pool_t *tmp_mp;
+  json_t *json;
+  SV *hash;
+
+  apr_pool_create( &tmp_mp, NULL );
+  xml_file_to_json( t->mp, xml_file, 1, &json );
+  hash = json_to_perl_variable( json );
+  apr_pool_destroy( tmp_mp );
+
+  return hash;
 } 
 
 int Template_expand_to_file( Template *t, char *file, SV *input )

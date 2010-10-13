@@ -8,6 +8,7 @@
 #include <apr_tables.h>
 
 #include "perl_util.h"
+#include "apr_macros.h"
 #include "parser.h"
 #include "json_writer.h"
 #include "json.h"
@@ -114,10 +115,13 @@ static int perl_variable_can_be_json( SV *input )
 json_t *perl_variable_to_json( apr_pool_t *mp, SV *input )
 {
   json_writer_t *writer;
+  apr_pool_t *tmp_mp;
 
   if ( perl_variable_can_be_json( input ) ) {
-    writer = json_writer_create( mp );
+    apr_pool_create( &tmp_mp, NULL );
+    writer = json_writer_create( tmp_mp, mp );
     perl_variable_to_json_internal( input, writer );
+    apr_pool_destroy( tmp_mp );
     return writer->json;
   }
   else {
@@ -125,3 +129,61 @@ json_t *perl_variable_to_json( apr_pool_t *mp, SV *input )
   }
 }
 
+SV *json_to_perl_variable( json_t *json )
+{
+  json_t *tmp_json;
+  apr_array_header_t *arr;
+  apr_hash_index_t *idx;
+  AV *p_array;
+  HV *hash;
+  int i;
+
+  switch ( json->type ) {
+  case JSON_STRING:
+    return newSVpv( (char *) json->value.string, 0 );
+    break;
+
+  case JSON_INTEGER:
+    return newSViv( json->value.integer );
+    break;
+
+  case JSON_NUMBER:
+    return newSVnv( json->value.number );
+    break;
+
+  case JSON_OBJECT:
+    hash = newHV();
+    for ( idx = apr_hash_first( NULL, json->value.object ); idx;
+          idx = apr_hash_next( idx ) ) {
+      apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
+      hv_store( hash, (char *) JSON_NAME( tmp_json ),
+                strlen( (char * ) JSON_NAME( tmp_json ) ),
+                json_to_perl_variable( tmp_json ), 0 );
+    }
+    return newRV_noinc( (SV*) hash);
+    break;
+
+  case JSON_ARRAY:
+    arr = json->value.array;
+    p_array = newAV();
+    for ( i = 0; arr && i < arr->nelts; i++ ) {
+      tmp_json = APR_ARRAY_IDX( arr, i, json_t * );
+      av_push( p_array, json_to_perl_variable( tmp_json ) );
+    }
+    return newRV_noinc( (SV*) p_array);
+    break;
+
+  case JSON_BOOLEAN:
+    return ( json->value.boolean ) ? newSVpv( "true", 0 ) :
+                                     newSVpv( "false", 0 );
+    break;
+
+  case JSON_NULL:
+    return newSV( 0 );
+    break;
+    
+  default:
+    return NULL;
+    break;
+  }
+}
