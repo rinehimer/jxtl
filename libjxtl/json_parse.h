@@ -66,7 +66,7 @@ typedef union YYSTYPE
   unsigned char *string;
   double number;
 }
-/* Line 1489 of yacc.c.  */
+/* Line 1529 of yacc.c.  */
 #line 71 "json_parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

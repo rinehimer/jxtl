@@ -127,7 +127,7 @@ parser_t *json_parser_create( apr_pool_t *mp )
 				    json__scan_buffer,
 				    json__delete_buffer,
 				    json_parse );
-  json_writer_t *writer = json_writer_create( mp );
+  json_writer_t *writer = json_writer_create( mp, NULL );
 
   json_callback_t *json_callbacks = apr_palloc( mp, sizeof(json_callback_t) );
   json_callbacks->object_start_handler = json_writer_start_object;

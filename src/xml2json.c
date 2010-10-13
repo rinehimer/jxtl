@@ -15,20 +15,19 @@ void xml2json_usage( const char *prog_name )
 
 int main( int argc, char **argv )
 {
-  json_writer_t *writer;
+  json_t *json;
   int ret;
   apr_pool_t *mp;
 
   apr_app_initialize( NULL, NULL, NULL );
   apr_pool_create( &mp, NULL );
-  writer = json_writer_create( mp );
 
   if ( argc < 2 ) {
     xml2json_usage( argv[0] );
   }
   
-  if ( xml_file_to_json( argv[1], writer, 1 ) == 0 ) {
-    json_dump( writer->json, 1 );
+  if ( xml_file_to_json( mp, argv[1], 1, &json ) == 0 ) {
+    json_dump( json, 1 );
     ret = 0;
   }
   else {

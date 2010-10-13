@@ -150,31 +150,32 @@ static void xml_elem_to_json( apr_pool_t *mp, apr_xml_elem *root,
   }
 }
 
-int xml_file_to_json( const char *filename, json_writer_t *writer,
-		      int skip_root )
+int xml_file_to_json( apr_pool_t *mp, const char *filename, int skip_root,
+                      json_t **json )
 {
-  apr_pool_t *xml_mp;
+  apr_pool_t *tmp_mp;
   apr_xml_parser *parser;
   apr_xml_doc *doc;
   apr_xml_elem *elem;
+  json_writer_t *writer;
   apr_file_t *file;
   apr_status_t status;
   int is_stdin;
 
+  *json = NULL;
   is_stdin = ( filename && apr_strnatcasecmp( filename, "-" ) == 0 );
-
-  apr_pool_create( &xml_mp, NULL );
+  apr_pool_create( &tmp_mp, NULL );
 
   if ( is_stdin ) {
-    status = apr_file_open_stdin( &file, xml_mp );
+    status = apr_file_open_stdin( &file, tmp_mp );
   }
   else {
     status = apr_file_open( &file, filename, APR_READ | APR_BUFFERED, 0,
-			    xml_mp );
+			    tmp_mp );
   }
 
   if ( status == APR_SUCCESS ) {
-    status = apr_xml_parse_file( xml_mp, &parser, &doc, file, 4096 );
+    status = apr_xml_parse_file( tmp_mp, &parser, &doc, file, 4096 );
   }
 
   if ( status == APR_SUCCESS ) {
@@ -182,16 +183,18 @@ int xml_file_to_json( const char *filename, json_writer_t *writer,
     if ( skip_root ) {
       elem = elem->first_child;
     }
-    
+    writer = json_writer_create( tmp_mp, mp );
     json_writer_start_object( writer );
-    xml_elem_to_json( xml_mp, elem, writer );
+    xml_elem_to_json( tmp_mp, elem, writer );
     json_writer_end_object( writer );
+    *json = writer->json;
   }
 
   if ( !is_stdin ) {
     apr_file_close( file );
   }
-  apr_pool_destroy( xml_mp );
+
+  apr_pool_destroy( tmp_mp );
 
   return status;
 }

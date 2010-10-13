@@ -21,9 +21,31 @@ typedef struct json_writer_ctx_t {
 } json_writer_ctx_t;
 
 typedef struct json_writer_t {
+  /**
+   * Memory pool passed to the create function that is used to allocate the
+   * writer and do internal allocations.
+   */
   apr_pool_t *mp;
+
+  /**
+   * Memory pool for allocating the JSON objects.  Will be the same as the the
+   * above memory pool if it is not passed.
+   */
+  apr_pool_t *json_mp;
+  
+  /**
+   * Root node of the JSON created by the writer.
+   */
   json_t *json;
+
+  /**
+   * A writer context to validate actions.
+   */
   json_writer_ctx_t *context;
+
+  /**
+   * A stack of arrays and objects for building the JSON.
+   */
   apr_array_header_t *json_stack;
 } json_writer_t;
 
@@ -109,9 +131,11 @@ int json_writer_ctx_can_write_value( json_writer_ctx_t *context );
 /**
  * Create a new JSON writer.
  * @param mp Pool to allocate the writer out of.
+ * @param json_mp Pool to use for allocating the JSON object.  If NULL, the
+ *        same as mp.
  * @return The writer created.
  */
-json_writer_t *json_writer_create( apr_pool_t *mp );
+json_writer_t *json_writer_create( apr_pool_t *mp, apr_pool_t *json_mp );
 
 /**
  * Start an object.

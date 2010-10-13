@@ -47,6 +47,11 @@
   void set_format_callback( SV *perl_format_func );
 
   /**
+   * Convert an XML file to JSON.
+   */
+  json_t *xml_to_json( char *xml_file );
+
+  /**
    * Expand a template to a file using a Perl hash reference or the existing
    * context of the template.
    */

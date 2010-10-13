@@ -102,11 +102,12 @@ int json_writer_ctx_can_write_value( json_writer_ctx_t *context )
   return ( state == JSON_PROPERTY || state == JSON_IN_ARRAY );
 }
 
-json_writer_t *json_writer_create( apr_pool_t *mp )
+json_writer_t *json_writer_create( apr_pool_t *mp, apr_pool_t *json_mp )
 {
   json_writer_t *writer;
   writer = apr_palloc( mp, sizeof( json_writer_t ) );
   writer->mp = mp;
+  writer->json_mp = ( json_mp ) ? json_mp : mp;
   writer->context = json_writer_ctx_create( writer->mp );
   writer->json = NULL;
   writer->json_stack = apr_array_make( writer->mp, 1024, sizeof( json_t * ) );
@@ -128,6 +129,7 @@ static void json_add( json_writer_t *writer, json_t *json )
   json_t *obj = NULL;
   json_t *tmp_json;
   json_t *new_array;
+  unsigned char *name;
 
   if ( writer->json_stack->nelts > 0 ) {
     obj = APR_ARRAY_TAIL( writer->json_stack, json_t * );
@@ -140,12 +142,14 @@ static void json_add( json_writer_t *writer, json_t *json )
 
   switch ( obj->type ) {
   case JSON_OBJECT:
-    JSON_NAME( json ) = json_writer_ctx_get_prop( writer->context );
+    name = apr_pstrdup( writer->json_mp,
+                        json_writer_ctx_get_prop( writer->context ) );
+    JSON_NAME( json ) = name;
     tmp_json = apr_hash_get( obj->value.object, JSON_NAME( json ),
 			     APR_HASH_KEY_STRING );
     if ( tmp_json && tmp_json->type != JSON_ARRAY ) {
       /* Key already exists, make an array and put both objects in it. */
-      new_array = json_create_array( writer->mp );
+      new_array = json_create_array( writer->json_mp );
       JSON_NAME( new_array ) = JSON_NAME( json );
       JSON_NAME( json ) = NULL;
       JSON_NAME( tmp_json ) = NULL;
@@ -195,7 +199,7 @@ void json_writer_start_object( void *writer_ptr )
     return;
   }
 
-  json = json_create_object( writer->mp );
+  json = json_create_object( writer->json_mp );
   json_add( writer, json );
 
   APR_ARRAY_PUSH( writer->json_stack, json_t * ) = json;
@@ -221,7 +225,7 @@ void json_writer_start_array( void *writer_ptr )
     return;
   }
 
-  json = json_create_array( writer->mp );
+  json = json_create_array( writer->json_mp );
   json_add( writer, json );
 
   APR_ARRAY_PUSH( writer->json_stack, json_t * ) = json;
@@ -265,7 +269,7 @@ void json_writer_write_string( void *writer_ptr, unsigned char *value )
     return;
   }
 
-  json_add( writer, json_create_string( writer->mp, value ) );
+  json_add( writer, json_create_string( writer->json_mp, value ) );
 }
 
 void json_writer_write_integer( void *writer_ptr, int value )
@@ -276,7 +280,7 @@ void json_writer_write_integer( void *writer_ptr, int value )
     return;
   }
 
-  json_add( writer, json_create_integer( writer->mp, value ) );
+  json_add( writer, json_create_integer( writer->json_mp, value ) );
 }
 
 void json_writer_write_number( void *writer_ptr, double value )
@@ -287,7 +291,7 @@ void json_writer_write_number( void *writer_ptr, double value )
     return;
   }
 
-  json_add( writer, json_create_number( writer->mp, value ) );
+  json_add( writer, json_create_number( writer->json_mp, value ) );
 }
 
 void json_writer_write_boolean( void *writer_ptr, int value )
@@ -298,7 +302,7 @@ void json_writer_write_boolean( void *writer_ptr, int value )
     return;
   }
 
-  json_add( writer, json_create_boolean( writer->mp, value ) );
+  json_add( writer, json_create_boolean( writer->json_mp, value ) );
 }
 
 void json_writer_write_null( void *writer_ptr )
@@ -309,5 +313,5 @@ void json_writer_write_null( void *writer_ptr )
     return;
   }
 
-  json_add( writer, json_create_null( writer->mp ) );
+  json_add( writer, json_create_null( writer->json_mp ) );
 }

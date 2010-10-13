@@ -97,6 +97,11 @@ void Template_set_format_callback( Template *t, SV *perl_format_func )
   }
 }
 
+json_t *Template_xml_to_json( Template *t, char *xml_file )
+{
+  
+} 
+
 int Template_expand_to_file( Template *t, char *file, SV *input )
 {
   apr_pool_t *tmp_mp;

@@ -132,12 +132,10 @@ int jxtl_load_data( apr_pool_t *mp, const char *json_file,
                     const char *xml_file, int skip_root, json_t **obj )
 {
   int ret = 1;
-  json_writer_t *writer = json_writer_create( mp );
   parser_t *json_parser;
 
   if ( xml_file ) {
-    ret = xml_file_to_json( xml_file, writer, skip_root );
-    *obj = writer->json;
+    ret = xml_file_to_json( mp, xml_file, skip_root, obj );
   }
   else if ( json_file ) {
     json_parser = json_parser_create( mp );
