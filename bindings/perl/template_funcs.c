@@ -89,8 +89,6 @@ void Template_set_format_callback( Template *t, SV *perl_format_func )
   if ( SvROK( perl_format_func ) &&
        SvTYPE( SvRV( perl_format_func ) ) == SVt_PVCV ) {
     t->format_func = SvRV( perl_format_func );
-    jxtl_template_set_format_func( t->template, format_func );
-    jxtl_template_set_format_data( t->template, t );
   }
   else {
     fprintf( stderr,
@@ -102,11 +100,13 @@ SV *Template_xml_to_hash( Template *t, char *xml_file )
 {
   apr_pool_t *tmp_mp;
   json_t *json;
-  SV *hash;
+  SV *hash = &PL_sv_undef;
 
   apr_pool_create( &tmp_mp, NULL );
-  xml_file_to_json( t->mp, xml_file, 1, &json );
-  hash = json_to_perl_variable( json );
+  xml_file_to_json( tmp_mp, xml_file, 1, &json );
+  if ( json ) {
+    hash = json_to_perl_variable( json );
+  }
   apr_pool_destroy( tmp_mp );
 
   return hash;
@@ -117,7 +117,15 @@ int Template_expand_to_file( Template *t, char *file, SV *input )
   apr_pool_t *tmp_mp;
   int status;
 
+  if ( ! t->template ) {
+    fprintf( stderr, "Error: a template must be loaded before expanding.\n" );
+    return FALSE;
+  }
+
   apr_pool_create( &tmp_mp, NULL );
+
+  jxtl_template_set_format_func( t->template, format_func );
+  jxtl_template_set_format_data( t->template, t );
 
   if ( input ) {
     t->json = perl_variable_to_json( tmp_mp, input );
@@ -135,7 +143,15 @@ char *Template_expand_to_buffer( Template *t, SV *input )
   char *buffer;
   apr_pool_t *tmp_mp;
 
+  if ( ! t->template ) {
+    fprintf( stderr, "Error: a template must be loaded before expanding.\n" );
+    return "";
+  }
+
   apr_pool_create( &tmp_mp, NULL );
+
+  jxtl_template_set_format_func( t->template, format_func );
+  jxtl_template_set_format_data( t->template, t );
 
   if ( input ) {
     t->json = perl_variable_to_json( tmp_mp, input );

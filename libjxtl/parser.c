@@ -84,11 +84,12 @@ apr_status_t parser_parse_file( parser_t *parser, const char *file )
   if ( status != APR_SUCCESS ) {
     apr_strerror( status, error_buf, sizeof( error_buf ) );
     fprintf( stderr, "%s\n", error_buf );
-    return status;
+    parser->parse_result = status;
   }
-
-  parser->parse_result = parser->bison_parse( parser->scanner, parser,
-					      parser->user_data );
+  else {
+    parser->parse_result = parser->bison_parse( parser->scanner, parser,
+                                                parser->user_data );
+  }
 
   return parser->parse_result;
 }

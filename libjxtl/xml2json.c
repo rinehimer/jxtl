@@ -190,7 +190,7 @@ int xml_file_to_json( apr_pool_t *mp, const char *filename, int skip_root,
     *json = writer->json;
   }
 
-  if ( !is_stdin ) {
+  if ( status == APR_SUCCESS && !is_stdin ) {
     apr_file_close( file );
   }
 
