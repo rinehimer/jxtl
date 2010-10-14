@@ -28,11 +28,13 @@ static char *format_func( json_t *json, char *format_name,
   format_data_t *format_data = (format_data_t *) format_data_ptr;
   char *value;
   char *ret_value;
+  int len;
   char *c;
 
   APR_ARRAY_CLEAR( format_data->string_array );
   value = json_get_string_value( format_data->mp, json );
   ret_value = value;
+  len = strlen( value );
 
   if ( apr_strnatcasecmp( format_name, "upper" ) == 0 ) {
     for ( c = value; *c; c++ ) {
@@ -42,6 +44,27 @@ static char *format_func( json_t *json, char *format_name,
   else if ( apr_strnatcasecmp( format_name, "lower" ) == 0 ) {
     for ( c = value; *c; c++ ) {
       *c = apr_tolower( *c );
+    }
+  }
+  else if ( apr_strnatcasecmp( format_name, "trn_field" ) == 0 ) {
+    for ( c = value; *c; c++ ) {
+      if ( *c == '\'' ) {
+        APR_ARRAY_PUSH( format_data->string_array, char ) = '\'';
+      }
+      APR_ARRAY_PUSH( format_data->string_array, char ) = *c;
+    }
+    APR_ARRAY_PUSH( format_data->string_array, char ) = '\0';
+
+    if ( len > 80 ) {
+      ret_value = apr_pstrcat( format_data->mp,
+                               apr_psprintf( format_data->mp, "%d", len ),
+                               "'", format_data->string_array->elts,
+                               "'", NULL );
+    }
+    else {
+      ret_value = apr_pstrcat( format_data->mp, "'",
+                               format_data->string_array->elts,
+                               "'", NULL );
     }
   }
   else if ( apr_strnatcasecmp( format_name, "json" ) == 0 ) {
