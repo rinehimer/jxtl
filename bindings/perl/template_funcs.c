@@ -124,8 +124,10 @@ int Template_expand_to_file( Template *t, char *file, SV *input )
 
   apr_pool_create( &tmp_mp, NULL );
 
-  jxtl_template_set_format_func( t->template, format_func );
-  jxtl_template_set_format_data( t->template, t );
+  if ( t->format_func ) {
+    jxtl_template_set_format_func( t->template, format_func );
+    jxtl_template_set_format_data( t->template, t );
+  }
 
   if ( input ) {
     t->json = perl_variable_to_json( tmp_mp, input );
@@ -150,8 +152,10 @@ char *Template_expand_to_buffer( Template *t, SV *input )
 
   apr_pool_create( &tmp_mp, NULL );
 
-  jxtl_template_set_format_func( t->template, format_func );
-  jxtl_template_set_format_data( t->template, t );
+  if ( t->format_func ) {
+    jxtl_template_set_format_func( t->template, format_func );
+    jxtl_template_set_format_data( t->template, t );
+  }
 
   if ( input ) {
     t->json = perl_variable_to_json( tmp_mp, input );
