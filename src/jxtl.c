@@ -73,6 +73,7 @@ static char *format_func( json_t *json, char *format_name,
         }
       }
     }
+    APR_ARRAY_PUSH( format_data->string_array, char ) = '\0';
     ret_value = apr_pstrdup( format_data->mp,
                              (char *) format_data->string_array->elts );
   }
