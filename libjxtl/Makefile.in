@@ -63,7 +63,8 @@ am_libjxtl_la_OBJECTS = libjxtl_la-json.lo libjxtl_la-json_lex.lo \
 	libjxtl_la-jxtl_lex.lo libjxtl_la-jxtl_parse.lo \
 	libjxtl_la-jxtl_path.lo libjxtl_la-jxtl_path_lex.lo \
 	libjxtl_la-jxtl_path_parse.lo libjxtl_la-json_writer.lo \
-	libjxtl_la-parser.lo libjxtl_la-utf.lo libjxtl_la-xml2json.lo
+	libjxtl_la-json_writer_ctx.lo libjxtl_la-parser.lo \
+	libjxtl_la-utf.lo libjxtl_la-xml2json.lo
 libjxtl_la_OBJECTS = $(am_libjxtl_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -125,7 +126,6 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
-GREP = @GREP@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -157,10 +157,14 @@ STRIP = @STRIP@
 SWIG = @SWIG@
 VERSION = @VERSION@
 YACC = @YACC@
-YFLAGS = 
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
+ac_ct_DSYMUTIL = @ac_ct_DSYMUTIL@
 ac_ct_F77 = @ac_ct_F77@
+ac_ct_NMEDIT = @ac_ct_NMEDIT@
+ac_ct_RANLIB = @ac_ct_RANLIB@
+ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -177,30 +181,23 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
-datarootdir = @datarootdir@
-docdir = @docdir@
-dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
-htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
-pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
-psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -212,6 +209,7 @@ libjxtlinc_HEADERS = apr_macros.h \
                      jxtl.h \
                      jxtl_path.h \
                      json_writer.h \
+                     json_writer_ctx.h \
                      parser.h \
                      utf.h \
                      xml2json.h
@@ -226,6 +224,7 @@ libjxtl_la_SOURCES = json.c \
                      jxtl_path_lex.l \
                      jxtl_path_parse.y \
                      json_writer.c \
+                     json_writer_ctx.c \
                      parser.c \
                      parser_lex_macros.h \
                      utf.c \
@@ -233,6 +232,7 @@ libjxtl_la_SOURCES = json.c \
 
 libjxtl_la_CFLAGS = ${APR_CFLAGS} ${APU_CFLAGS}
 libjxtl_la_LDFLAGS = ${APR_LIBS} ${APU_LIBS}
+YFLAGS = 
 all: all-am
 
 .SUFFIXES:
@@ -306,6 +306,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-json_lex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-json_parse.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-json_writer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-json_writer_ctx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_lex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_parse.Plo@am__quote@
@@ -406,6 +407,13 @@ libjxtl_la-json_writer.lo: json_writer.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='json_writer.c' object='libjxtl_la-json_writer.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -c -o libjxtl_la-json_writer.lo `test -f 'json_writer.c' || echo '$(srcdir)/'`json_writer.c
+
+libjxtl_la-json_writer_ctx.lo: json_writer_ctx.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -MT libjxtl_la-json_writer_ctx.lo -MD -MP -MF "$(DEPDIR)/libjxtl_la-json_writer_ctx.Tpo" -c -o libjxtl_la-json_writer_ctx.lo `test -f 'json_writer_ctx.c' || echo '$(srcdir)/'`json_writer_ctx.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libjxtl_la-json_writer_ctx.Tpo" "$(DEPDIR)/libjxtl_la-json_writer_ctx.Plo"; else rm -f "$(DEPDIR)/libjxtl_la-json_writer_ctx.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='json_writer_ctx.c' object='libjxtl_la-json_writer_ctx.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -c -o libjxtl_la-json_writer_ctx.lo `test -f 'json_writer_ctx.c' || echo '$(srcdir)/'`json_writer_ctx.c
 
 libjxtl_la-parser.lo: parser.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -MT libjxtl_la-parser.lo -MD -MP -MF "$(DEPDIR)/libjxtl_la-parser.Tpo" -c -o libjxtl_la-parser.lo `test -f 'parser.c' || echo '$(srcdir)/'`parser.c; \
