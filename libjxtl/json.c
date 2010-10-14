@@ -1,3 +1,24 @@
+/*
+ * $Id$
+ *
+ * Description
+ *   Functions for creating and dumping JSON.
+ *
+ * Copyright 2010 Dan Rinehimer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <stdio.h>
 #include <apr_hash.h>
 #include <apr_pools.h>
@@ -12,9 +33,9 @@
 #include "json_lex.h"
 #include "json_writer.h"
 
-#define JSON_CREATE( mp, json )					   \
-  json = apr_palloc( mp, sizeof( json_t ) );                       \
-  json->name = NULL;						   \
+#define JSON_CREATE( mp, json )                                    \
+  json = apr_palloc( mp, sizeof(json_t) );                         \
+  json->name = NULL;                                               \
   json->parent = NULL
 
 json_t *json_create_string( apr_pool_t *mp, unsigned char *string )
@@ -58,7 +79,7 @@ json_t *json_create_array( apr_pool_t *mp )
 {
   json_t *json;
   JSON_CREATE( mp, json );
-  json->value.array = apr_array_make( mp, 8, sizeof( json_t * ) );
+  json->value.array = apr_array_make( mp, 8, sizeof(json_t *) );
   json->type = JSON_ARRAY;  
   return json;
 }
@@ -97,23 +118,23 @@ static void print_string( unsigned char *str )
       printf( "\\" );
       switch ( *c ) {
       case '\b':
-	printf( "b" );
-	break;
+        printf( "b" );
+        break;
       case '\t':
-	printf( "t" );
-	break;
+        printf( "t" );
+        break;
       case '\n':
-	printf( "n" );
-	break;
+        printf( "n" );
+        break;
       case '\f':
-	printf( "f" );
-	break;
+        printf( "f" );
+        break;
       case '\r':
-	printf( "r" );
-	break;
+        printf( "r" );
+        break;
       default:
-	printf( "u%.4x", *c );
-	break;
+        printf( "u%.4x", *c );
+        break;
       }
     }
     else if ( *c == '\\' ) {
@@ -167,7 +188,7 @@ static void dump_internal( json_t *json, int first, int depth, int indent )
   case JSON_OBJECT:
     printf( "{" );
     for ( i = 0, idx = apr_hash_first( NULL, json->value.object ); idx;
-	  i++, idx = apr_hash_next( idx ) ) {
+          i++, idx = apr_hash_next( idx ) ) {
       apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
       dump_internal( tmp_json, i == 0, depth + 1, indent );
     }
@@ -268,7 +289,7 @@ static void json_to_xml_internal( json_t *json, int indent )
 
   case JSON_OBJECT:
     for ( idx = apr_hash_first( NULL, json->value.object ); idx;
-	  idx = apr_hash_next( idx ) ) {
+          idx = apr_hash_next( idx ) ) {
       apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
       json_to_xml_internal( tmp_json, indent + 1 );
     }
