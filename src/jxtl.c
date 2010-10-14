@@ -44,7 +44,38 @@ static char *format_func( json_t *json, char *format_name,
       *c = apr_tolower( *c );
     }
   }
-
+  else if ( apr_strnatcasecmp( format_name, "json" ) == 0 ) {
+    for ( c = value; *c; c++ ) {
+      if ( *c > 0x1F ) {
+        if ( *c == '\\' || *c == '/' || *c == '"' ) {
+          APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
+        }
+        APR_ARRAY_PUSH( format_data->string_array, char ) = *c;
+      }
+      else {
+        APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
+        switch ( *c ) {
+        case '\b':
+          APR_ARRAY_PUSH( format_data->string_array, char ) = 'b';
+          break;
+        case '\f':
+          APR_ARRAY_PUSH( format_data->string_array, char ) = 'f';
+          break;
+        case '\n':
+          APR_ARRAY_PUSH( format_data->string_array, char ) = 'n';
+          break;
+        case '\r':
+          APR_ARRAY_PUSH( format_data->string_array, char ) = 'r';
+          break;
+        case '\t':
+          APR_ARRAY_PUSH( format_data->string_array, char ) = 't';
+          break;
+        }
+      }
+    }
+    ret_value = apr_pstrdup( format_data->mp,
+                             (char *) format_data->string_array->elts );
+  }
   return ret_value;
 }
 
