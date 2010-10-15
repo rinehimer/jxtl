@@ -33,15 +33,23 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([strcasecmp strdup])
 
 ## Apache portable runtime checking
-AC_CHECK_PROG(APR_CONFIG, apr-1-config, apr-1-config, [], [], [])
-AC_CHECK_PROG(APR_CONFIG, apr-config, apr-config, [], [], [exit1])
+AC_CHECK_PROGS(APR_CONFIG, apr-1-config apr-config, [/bin/false],
+               [$PATH$PATH_SEPARATOR/usr/local/apache2/bin$PATH_SEPARATOR]dnl
+               [/usr/apache2/bin])
+if test "x$APR_CONFIG" = "x/bin/false" ; then
+  AC_MSG_ERROR(Could not find an apr-config, [1])
+fi
 APR_CFLAGS=`$APR_CONFIG --cflags --cppflags --includes`
 APR_LIBS=`$APR_CONFIG --link-ld --libs`
 AC_SUBST(APR_CFLAGS)
 AC_SUBST(APR_LIBS)
 
-AC_CHECK_PROG(APU_CONFIG, apu-1-config, apu-1-config, [], [], [])
-AC_CHECK_PROG(APU_CONFIG, apu-config, apu-config, [], [], [exit1])
+AC_CHECK_PROGS(APU_CONFIG, apu-1-config apu-config, [/bin/false],
+               [$PATH$PATH_SEPARATOR/usr/local/apache2/bin$PATH_SEPARATOR]dnl
+               [/usr/apache2/bin])
+if test "x$APU_CONFIG" = "x/bin/false" ; then
+  AC_MSG_ERROR(Could not find an apu-config, [1])
+fi
 APU_CFLAGS=`$APU_CONFIG --includes`
 APU_LIBS=`$APU_CONFIG --link-ld --libs`
 AC_SUBST(APU_CFLAGS)
