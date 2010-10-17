@@ -59,6 +59,7 @@ AC_CHECK_PROG(SWIG, swig, swig, [], [], [])
 
 AC_CONFIG_FILES([Makefile
                  bindings/perl/Makefile.PL
+                 bindings/python/setup.py
                  libjxtl/Makefile
                  src/Makefile
                  test/Makefile])

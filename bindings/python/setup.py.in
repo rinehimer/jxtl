@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+#
+#  $Id$
+#
+#  Description
+#    A python script that uses distutils to build the SWIG bindings.
+#
+#  Copyright 2010 Dan Rinehimer
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+from distutils.core import setup, Extension
+
+top_srcdir = "@top_srcdir@";
+apr_cflags = "@APR_CFLAGS@";
+apr_libs = "@APR_LIBS@";
+apu_cflags = "@APU_CFLAGS@";
+apu_libs = "@APU_LIBS@";
+
+all_flags = apr_cflags + " " + apr_libs + " " + apu_cflags + " " + apu_libs;
+
+define_macros = [];
+include_dirs = [top_srcdir + "/libjxtl"];
+library_dirs = ["@prefix@/lib"];
+libraries = ["jxtl"];
+extra_compile_args = [];
+
+# Parse the flags
+for token in all_flags.split():
+    if token[:2] == "-D":
+        define_macros.append((token[2:], None));
+    elif token[:2] == "-I":
+        include_dirs.append(token[2:]);
+    elif token[:2] == "-L":
+        library_dirs.append(token[2:]);
+    elif token[:2] == "-l":
+        libraries.append(token[2:]);
+    else:
+        extra_compile_args.append(token);
+
+libjxtl_module = Extension('_libjxtl',
+                           sources = ['libjxtl_wrap.c', 'template_funcs.c'],
+                           define_macros = define_macros,
+                           include_dirs = include_dirs,
+                           library_dirs = library_dirs,
+                           libraries = libraries);
+
+setup(name = 'libjxtl',
+      version = '0.1',
+      author = "Dan Rinehimer",
+      description = """LibJXTL python language bindings.""",
+      ext_modules = [libjxtl_module],
+      py_modules = ["libjxtl"]);
