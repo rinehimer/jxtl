@@ -5,6 +5,7 @@
 #include "json.h"
 #include "template.h"
 #include "template_funcs.h"
+#include "perl_util.h"
 %}
 
 %init %{
@@ -22,7 +23,7 @@
 %extend Template {
   /**
    * Constructor - create a new template from a buffer or just allocate the
-   * object if no buffer is passed. Calls new_Template().
+   * object if no buffer is passed.
    */
   Template( char *buffer = NULL );
   
@@ -47,11 +48,6 @@
   void set_format_callback( SV *perl_format_func );
 
   /**
-   * Convert an XML file to a Perl hash.
-   */
-  SV *xml_to_hash( char *xml_file );
-
-  /**
    * Expand a template to a file using a Perl hash reference or the existing
    * context of the template.
    */
@@ -63,3 +59,8 @@
    */
   char *expand_to_buffer( SV *input = NULL );
 }
+
+/**
+ * Convert an XML file to a Perl hash.
+ */
+SV *xml_to_hash( char *xml_file );

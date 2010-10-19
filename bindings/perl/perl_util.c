@@ -13,6 +13,7 @@
 #include "json_writer.h"
 #include "json.h"
 #include "jxtl.h"
+#include "xml2json.c"
 
 static void perl_hash_to_json( SV *input, json_writer_t *writer );
 static void perl_array_to_json( SV *input, json_writer_t *writer );
@@ -187,3 +188,19 @@ SV *json_to_perl_variable( json_t *json )
     break;
   }
 }
+
+SV *xml_to_hash( char *xml_file )
+{
+  apr_pool_t *tmp_mp;
+  json_t *json;
+  SV *hash = &PL_sv_undef;
+
+  apr_pool_create( &tmp_mp, NULL );
+  xml_file_to_json( tmp_mp, xml_file, 1, &json );
+  if ( json ) {
+    hash = json_to_perl_variable( json );
+  }
+  apr_pool_destroy( tmp_mp );
+
+  return hash;
+} 

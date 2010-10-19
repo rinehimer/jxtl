@@ -10,7 +10,7 @@ typedef struct Template {
   parser_t *jxtl_parser;
   jxtl_template_t *template;
   json_t *json;
-  SV *format_func;
+  void *format_func;
 }Template;
 
 #endif
