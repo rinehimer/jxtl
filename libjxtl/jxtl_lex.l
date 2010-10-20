@@ -15,7 +15,7 @@
 #define YY_DECL int jxtl_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
 
 #define jxtl_error( ... ) \
-  jxtl_error( yylloc, yyscanner, NULL, NULL, __VA_ARGS__ )
+  jxtl_error( yylloc, yyscanner, PARSER, NULL, __VA_ARGS__ )
 
 #define STRING_COPY {                                           \
     int i;                                                      \
