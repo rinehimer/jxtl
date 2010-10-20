@@ -78,7 +78,7 @@
   /**
    * Set the format callback for the template.
    */
-  void set_format_callback( FORMAT_FUNC_T perl_format_func );
+  void set_format_callback( FORMAT_FUNC_T format_func );
 
   /**
    * Expand a template to a file using a Perl hash reference or the existing

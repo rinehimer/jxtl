@@ -30,7 +30,7 @@ apu_libs = "@APU_LIBS@";
 all_flags = apr_cflags + " " + apr_libs + " " + apu_cflags + " " + apu_libs;
 
 define_macros = [];
-include_dirs = [top_srcdir + "/libjxtl"];
+include_dirs = [top_srcdir + "/libjxtl", top_srcdir + "/bindings/include"];
 library_dirs = ["@prefix@/lib"];
 libraries = ["jxtl"];
 extra_compile_args = [];
