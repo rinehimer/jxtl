@@ -5,7 +5,7 @@
 
 #include "json.h"
 #include "jxtl.h"
-
+#include "py_util.h"
 #include "template.h"
 
 static char *format_func( json_t *json, char *format, void *template_ptr )
@@ -39,7 +39,7 @@ int Template_expand_to_file( Template *t, char *file, PyObject *input )
   }
 
   if ( input ) {
-    t->json = NULL;
+    t->json = py_variable_to_json( t->mp, input );
   }
 
   status = ( jxtl_expand_to_file( t->template, t->json, file ) == 0 );
