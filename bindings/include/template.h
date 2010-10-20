@@ -4,6 +4,7 @@
 #include <apr_pools.h>
 #include "jxtl.h"
 #include "json.h"
+#include "parser.h"
 
 typedef struct Template {
   apr_pool_t *mp;

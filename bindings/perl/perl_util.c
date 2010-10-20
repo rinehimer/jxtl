@@ -116,18 +116,23 @@ static int perl_variable_can_be_json( SV *input )
 json_t *perl_variable_to_json( apr_pool_t *mp, SV *input )
 {
   json_writer_t *writer;
+  json_t *json = NULL;
   apr_pool_t *tmp_mp;
 
   if ( perl_variable_can_be_json( input ) ) {
     apr_pool_create( &tmp_mp, NULL );
+    /*
+     * Create a writer, using tmp_mp but give it the passed in mp to allocate
+     * the JSON out of.  This allows us to check to destroy tmp_mp and destory
+     * the writer but keep the JSON around.
+     */
     writer = json_writer_create( tmp_mp, mp );
     perl_variable_to_json_internal( input, writer );
+    json = writer->json;
     apr_pool_destroy( tmp_mp );
-    return writer->json;
   }
-  else {
-    return NULL;
-  }
+
+  return json;
 }
 
 SV *json_to_perl_variable( json_t *json )
