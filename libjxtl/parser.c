@@ -6,8 +6,15 @@
 
 static const char *get_filename( parser_t *parser )
 {
-  const char *filename;
-  apr_file_name_get( &filename, parser->in_file );
+  const char *filename = NULL;
+  if ( parser->in_file ) {
+    apr_file_name_get( &filename, parser->in_file );
+  }
+
+  if ( filename ) {
+    filename = "(stdin)";
+  }
+
   return filename;
 }
 
@@ -32,6 +39,7 @@ parser_t *parser_create( apr_pool_t *mp,
 
   parser->error_str = NULL;
   parser->str_array = apr_array_make( mp, 8192, sizeof(char) );
+  parser->in_file = NULL;
   parser->flex_init( &parser->scanner );
   parser->flex_set_extra( parser, parser->scanner );
   apr_pool_cleanup_register( mp, parser->scanner, flex_destroy,
@@ -44,6 +52,7 @@ parser_t *parser_create( apr_pool_t *mp,
  */
 static void parser_reset( parser_t *parser )
 {
+  parser->in_file = NULL;
   parser->error_str = NULL;
   APR_ARRAY_CLEAR( parser->str_array );
 }
