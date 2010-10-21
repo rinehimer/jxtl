@@ -13,7 +13,7 @@
 #include "json_writer.h"
 #include "json.h"
 #include "jxtl.h"
-#include "xml2json.c"
+#include "xml2json.h"
 
 static void perl_hash_to_json( SV *input, json_writer_t *writer );
 static void perl_array_to_json( SV *input, json_writer_t *writer );
