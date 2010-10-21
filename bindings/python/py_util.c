@@ -3,7 +3,8 @@
 #include "json.h"
 #include "json_writer.h"
 
-#ifndef Py_ssize_t
+/* Not sure what the best way to go about this is... */
+#if !defined(HAVE_SSIZE_T) || SIZEOF_VOID_P != SIZEOF_SIZE_T
 #define Py_ssize_t int
 #endif
 
