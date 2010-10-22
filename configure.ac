@@ -50,8 +50,14 @@ AC_CHECK_PROGS(APU_CONFIG, apu-1-config apu-config, [/bin/false],
 if test "x$APU_CONFIG" = "x/bin/false" ; then
   AC_MSG_ERROR(Could not find an apu-config, [1])
 fi
+
+## Don't bother linking against dbm if our apu-config supports it.
+if $APU_CONFIG --avoid-dbm > /dev/null 2>&1 ; then
+  DBM_FLAGS="--avoid-dbm"
+fi
+
 APU_CFLAGS=`$APU_CONFIG --includes`
-APU_LIBS=`$APU_CONFIG --link-ld --libs`
+APU_LIBS=`$APU_CONFIG $DBM_FLAGS --link-ld --libs`
 AC_SUBST(APU_CFLAGS)
 AC_SUBST(APU_LIBS)
 

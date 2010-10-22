@@ -3,6 +3,7 @@ SUBDIRS = libjxtl \
           test
 
 bindings: swig-perl swig-python
+install-bindings: install-swig-perl install-swig-python
 
 PERL_BINDINGS_DIR=${top_srcdir}/bindings/perl
 PYTHON_BINDINGS_DIR=${top_srcdir}/bindings/python
