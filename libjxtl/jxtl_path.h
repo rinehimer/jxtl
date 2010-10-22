@@ -23,7 +23,6 @@ typedef struct jxtl_path_callback_t {
 } jxtl_path_callback_t;
 
 typedef enum jxtl_path_expr_type {
-  JXTL_PATH_BOOLEAN_EXPR,
   JXTL_PATH_ROOT_OBJ,
   JXTL_PATH_PARENT_OBJ,
   JXTL_PATH_CURRENT_OBJ,

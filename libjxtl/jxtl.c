@@ -191,7 +191,7 @@ void jxtl_template_set_format_func( jxtl_template_t *template,
 }
 
 void jxtl_template_set_format_data( jxtl_template_t *template,
-				    void *format_data )
+                                    void *format_data )
 {
   template->format_data = format_data;
 }

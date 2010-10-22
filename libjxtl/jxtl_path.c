@@ -15,10 +15,12 @@
 
 static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
                                      json_t *json,
-                                     apr_array_header_t *nodes );
+                                     apr_array_header_t *nodes,
+                                     int predicate_depth );
 static void jxtl_path_test_node( jxtl_path_expr_t *expr,
                                  json_t *json,
-                                 apr_array_header_t *nodes );
+                                 apr_array_header_t *nodes,
+                                 int predicate_depth );
 
 static jxtl_path_obj_t *jxtl_path_obj_create( apr_pool_t *mp )
 {
@@ -39,7 +41,8 @@ static jxtl_path_obj_t *jxtl_path_obj_create( apr_pool_t *mp )
 static void jxtl_finish_predicate( jxtl_path_expr_t *expr,
                                    json_t *json,
                                    apr_array_header_t *nodes,
-                                   int predicate_nodes )
+                                   int predicate_nodes,
+                                   int predicate_depth )
 {
   int result;
   result = ( expr->predicate->negate ) ? !predicate_nodes : predicate_nodes;
@@ -47,13 +50,14 @@ static void jxtl_finish_predicate( jxtl_path_expr_t *expr,
     APR_ARRAY_PUSH( nodes, json_t * ) = json;
   }
   else if ( result && expr->next ) {
-    jxtl_path_eval_internal( expr->next, json, nodes );
+    jxtl_path_eval_internal( expr->next, json, nodes, predicate_depth );
   }
 }
 
 static void jxtl_path_test_node( jxtl_path_expr_t *expr,
                                  json_t *json,
-                                 apr_array_header_t *nodes )
+                                 apr_array_header_t *nodes,
+                                 int predicate_depth )
 {
   if ( json && expr ) {
     if ( expr->predicate ) {
@@ -72,21 +76,23 @@ static void jxtl_path_test_node( jxtl_path_expr_t *expr,
         for ( i = 0; i < json->value.array->nelts; i++ ) {
           APR_ARRAY_CLEAR( predicate_nodes );
           tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
-          jxtl_path_eval_internal( expr->predicate, tmp_json,
-                                   predicate_nodes );
+          jxtl_path_eval_internal( expr->predicate, tmp_json, predicate_nodes,
+                                   predicate_depth + 1 );
           jxtl_finish_predicate( expr, tmp_json, nodes,
-                                 predicate_nodes->nelts );
+                                 predicate_nodes->nelts, predicate_depth );
         }
       }
       else {
-        jxtl_path_eval_internal( expr->predicate, json, predicate_nodes );
-        jxtl_finish_predicate( expr, json, nodes, predicate_nodes->nelts );
+        jxtl_path_eval_internal( expr->predicate, json, predicate_nodes,
+                                 predicate_depth + 1 );
+        jxtl_finish_predicate( expr, json, nodes, predicate_nodes->nelts,
+                               predicate_depth );
       }
       apr_pool_destroy( mp );
     }
     else if ( expr->next ) {
       /* No predicate, but expression keeps going. */
-      jxtl_path_eval_internal( expr->next, json, nodes );
+      jxtl_path_eval_internal( expr->next, json, nodes, predicate_depth );
     }
     else {
       /* This is the end of the expression, push on whatever nodes are left. */
@@ -95,11 +101,19 @@ static void jxtl_path_test_node( jxtl_path_expr_t *expr,
         json_t *tmp_json;
         for ( i = 0; i < json->value.array->nelts; i++ ) {
           tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
-          APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
+          if ( ( predicate_depth == 0 ) ||
+               ( !JSON_IS_BOOLEAN( tmp_json ) ) ||
+               ( JSON_IS_TRUE_BOOLEAN( tmp_json ) ) ) {
+              APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
+          }
         }
       }
       else {
-        APR_ARRAY_PUSH( nodes, json_t * ) = json;
+        if ( ( predicate_depth == 0 ) ||
+             ( !JSON_IS_BOOLEAN( json ) ) ||
+             ( JSON_IS_TRUE_BOOLEAN( json ) ) ) {
+          APR_ARRAY_PUSH( nodes, json_t * ) = json;
+        }
       }
     }
   }
@@ -107,7 +121,8 @@ static void jxtl_path_test_node( jxtl_path_expr_t *expr,
 
 static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
                                      json_t *json,
-                                     apr_array_header_t *nodes )
+                                     apr_array_header_t *nodes,
+                                     int predicate_depth )
 {
   int i;
   json_t *tmp_json = NULL;
@@ -122,16 +137,12 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
   if ( json->type == JSON_ARRAY ) {
     for ( i = 0; i < json->value.array->nelts; i++ ) {
       tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
-      jxtl_path_eval_internal( expr, tmp_json, nodes );
+      jxtl_path_eval_internal( expr, tmp_json, nodes, predicate_depth );
     }
     return;
   }
 
   switch ( expr->type ) {
-  case JXTL_PATH_BOOLEAN_EXPR:
-    tmp_json = json;
-    break;
-    
   case JXTL_PATH_ROOT_OBJ:
     for( tmp_json = json; tmp_json && tmp_json->parent;
          tmp_json = tmp_json->parent );
@@ -153,7 +164,7 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
       for ( idx = apr_hash_first( NULL, json->value.object ); idx;
             idx = apr_hash_next( idx ) ) {
         apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
-        jxtl_path_test_node( expr, tmp_json, nodes );
+        jxtl_path_test_node( expr, tmp_json, nodes, predicate_depth );
       }
     }
     return;
@@ -170,7 +181,7 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
     break;
   }
 
-  jxtl_path_test_node( expr, tmp_json, nodes );
+  jxtl_path_test_node( expr, tmp_json, nodes, predicate_depth );
 }
 
 /**
@@ -188,7 +199,7 @@ int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
   }
 
   obj = jxtl_path_obj_create( mp );
-  jxtl_path_eval_internal( expr, json, obj->nodes );
+  jxtl_path_eval_internal( expr, json, obj->nodes, 0 );
   *obj_ptr = obj;
 
   return expr->negate ? !obj->nodes->nelts : obj->nodes->nelts;
@@ -200,8 +211,9 @@ int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
  * the expression.
  */
 int jxtl_path_eval( apr_pool_t *mp, const unsigned char *path, json_t *json,
-		    jxtl_path_obj_t **obj_ptr )
+                    jxtl_path_obj_t **obj_ptr )
 {
+
   jxtl_path_expr_t *expr;
   parser_t *parser;
 
