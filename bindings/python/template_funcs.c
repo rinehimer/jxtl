@@ -75,8 +75,3 @@ char *Template_expand_to_buffer( Template *t, PyObject *input )
 
   return buffer;
 }
-
-PyObject *xml_to_hash( char *xml_file )
-{
-  return NULL;
-}

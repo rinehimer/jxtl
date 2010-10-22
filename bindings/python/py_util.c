@@ -124,3 +124,8 @@ json_t *py_variable_to_json( apr_pool_t *mp, PyObject *obj )
   return json;
 
 }
+
+PyObject *xml_to_hash( char *xml_file )
+{
+  return NULL;
+}
