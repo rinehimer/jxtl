@@ -67,7 +67,7 @@ char *Template_expand_to_buffer( Template *t, PyObject *input )
   }
 
   if ( input ) {
-    t->json = NULL;
+    t->json = py_variable_to_json( t->mp, input );
   }
 
   buffer = jxtl_expand_to_buffer( t->mp, t->template, t->json );
