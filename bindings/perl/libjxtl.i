@@ -9,3 +9,8 @@
 %}
 
 %include "template.i"
+
+/**
+ * Convert an XML file to a hash type.
+ */
+SV *xml_to_hash( char *xml_file );

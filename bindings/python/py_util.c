@@ -2,6 +2,7 @@
 #include <pyport.h>
 #include "json.h"
 #include "json_writer.h"
+#include "xml2json.h"
 
 /* Not sure what the best way to go about this is... */
 #if !defined(HAVE_SSIZE_T) || SIZEOF_VOID_P != SIZEOF_SIZE_T
@@ -115,7 +116,6 @@ json_t *py_variable_to_json( apr_pool_t *mp, PyObject *obj )
     py_variable_to_json_internal( obj, writer );
     json = writer->json;
     apr_pool_destroy( tmp_mp );
-    json_dump( json, 1);
   }
   else {
     fprintf( stderr, "Must be an object, list or tuple.\n" );
@@ -125,7 +125,85 @@ json_t *py_variable_to_json( apr_pool_t *mp, PyObject *obj )
 
 }
 
-PyObject *xml_to_hash( char *xml_file )
+PyObject *json_to_py_variable( json_t *json )
 {
-  return NULL;
+  json_t *tmp_json;
+  apr_array_header_t *arr;
+  apr_hash_index_t *idx;
+  PyObject *py_list;
+  PyObject *py_dict;
+  Py_ssize_t i;
+
+  switch ( json->type ) {
+  case JSON_STRING:
+    return PyString_FromString( (char *) json->value.string );
+    break;
+
+  case JSON_INTEGER:
+    return PyInt_FromLong( json->value.integer );
+    break;
+
+  case JSON_NUMBER:
+    return PyFloat_FromDouble( json->value.number );
+    break;
+
+  case JSON_OBJECT:
+    py_dict = PyDict_New();
+    for ( idx = apr_hash_first( NULL, json->value.object ); idx;
+          idx = apr_hash_next( idx ) ) {
+      apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
+      PyDict_SetItemString( py_dict, (char *) JSON_NAME( tmp_json ),
+                            json_to_py_variable( tmp_json ) );
+    }
+    return py_dict;
+    break;
+
+  case JSON_ARRAY:
+    arr = json->value.array;
+    py_list = PyList_New( arr->nelts );
+    for ( i = 0; arr && i < arr->nelts; i++ ) {
+      tmp_json = APR_ARRAY_IDX( arr, i, json_t * );
+      PyList_SET_ITEM( py_list, i, json_to_py_variable( tmp_json ) );
+    }
+    return py_list;
+    break;
+
+  case JSON_BOOLEAN:
+    if ( json->value.boolean ) {
+      Py_RETURN_TRUE;
+    }
+    else {
+      Py_RETURN_FALSE;
+    }
+    break;
+
+  case JSON_NULL:
+    Py_RETURN_NONE;
+    break;
+    
+  default:
+    return NULL;
+    break;
+  }
+}
+
+PyObject *xml_to_dict( char *xml_file )
+{
+  apr_pool_t *tmp_mp;
+  json_t *json;
+  PyObject *dict = NULL;
+
+  apr_pool_create( &tmp_mp, NULL );
+  xml_file_to_json( tmp_mp, xml_file, 1, &json );
+  if ( json ) {
+    dict = json_to_py_variable( json );
+  }
+  apr_pool_destroy( tmp_mp );
+  
+  if ( dict ) {
+    return dict;
+  }
+  else {
+    Py_RETURN_NONE;
+  }
 }

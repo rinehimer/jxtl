@@ -93,7 +93,3 @@
   char *expand_to_buffer( DICTIONARY_T input = NULL );
 }
 
-/**
- * Convert an XML file to a dictionary/hash type.
- */
-DICTIONARY_T xml_to_hash( char *xml_file );
