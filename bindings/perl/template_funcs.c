@@ -54,7 +54,11 @@ void Template_set_format_callback( Template *t, SV *format_func )
 {
   if ( SvROK( format_func ) &&
        SvTYPE( SvRV( format_func ) ) == SVt_PVCV ) {
+    if ( t->format_func ) {
+      SvREFCNT_dec( t->format_func );
+    }
     t->format_func = SvRV( format_func );
+    SvREFCNT_inc( t->format_func );
   }
   else {
     fprintf( stderr,

@@ -12,13 +12,34 @@ static char *format_func( json_t *json, char *format, void *template_ptr )
 {
   Template *t = (Template *) template_ptr;
   char *value = json_get_string_value( t->mp, json );
+  char *ret_val = NULL;
+  PyObject *arglist;
+  PyObject *py_ret;
+  PyObject *py_json;
 
-  return value;
+  py_json = PyCObject_FromVoidPtrAndDesc( json, "_p_json_t", NULL );
+  arglist = Py_BuildValue( "ssO", value, format, py_json );
+  py_ret = PyObject_CallObject( t->format_func, arglist );
+
+  if ( PyString_CheckExact( py_ret ) ) {
+    ret_val = apr_pstrdup( t->mp, PyString_AS_STRING( py_ret ) );
+  }
+
+  return ret_val;
 }
 
 void Template_set_format_callback( Template *t, PyObject *format_func )
 {
-  t->format_func = format_func;
+  if ( PyCallable_Check( format_func ) ) {
+    if ( t->format_func ) {
+      Py_XDECREF( t->format_func );
+    }
+    Py_XINCREF( format_func );
+    t->format_func = format_func;
+  }
+  else {
+    fprintf( stderr, "Error setting format function: not callable\n" );
+  }
 }
 
 int Template_expand_to_file( Template *t, char *file, PyObject *input )
