@@ -9,6 +9,7 @@
 
 json_t *perl_variable_to_json( apr_pool_t *mp, SV *input );
 SV *json_to_perl_variable( json_t *json );
-SV *xml_to_hash( char *xml_file );
+SV *xml_to_hash( const char *xml_file );
+SV *json_to_hash( const char *json_file );
 
 #endif

@@ -194,7 +194,7 @@ SV *json_to_perl_variable( json_t *json )
   }
 }
 
-SV *xml_to_hash( char *xml_file )
+SV *xml_to_hash( const char *xml_file )
 {
   apr_pool_t *tmp_mp;
   json_t *json;
@@ -209,3 +209,21 @@ SV *xml_to_hash( char *xml_file )
 
   return hash;
 } 
+
+SV *json_to_hash( const char *json_file )
+{
+  apr_pool_t *tmp_mp;
+  json_t *json;
+  SV *hash = &PL_sv_undef;
+  parser_t *json_parser;
+
+  apr_pool_create( &tmp_mp, NULL );
+  json_parser = json_parser_create( tmp_mp );
+  if ( json_parser_parse_file( json_parser, json_file,
+                               &json ) == APR_SUCCESS ) {
+    hash = json_to_perl_variable( json );
+  }
+  apr_pool_destroy( tmp_mp );
+
+  return hash;
+}

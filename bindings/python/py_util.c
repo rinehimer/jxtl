@@ -187,7 +187,7 @@ PyObject *json_to_py_variable( json_t *json )
   }
 }
 
-PyObject *xml_to_dict( char *xml_file )
+PyObject *xml_to_dict( const char *xml_file )
 {
   apr_pool_t *tmp_mp;
   json_t *json;
@@ -196,6 +196,29 @@ PyObject *xml_to_dict( char *xml_file )
   apr_pool_create( &tmp_mp, NULL );
   xml_file_to_json( tmp_mp, xml_file, 1, &json );
   if ( json ) {
+    dict = json_to_py_variable( json );
+  }
+  apr_pool_destroy( tmp_mp );
+  
+  if ( dict ) {
+    return dict;
+  }
+  else {
+    Py_RETURN_NONE;
+  }
+}
+
+PyObject *json_to_dict( char *json_file )
+{
+  apr_pool_t *tmp_mp;
+  json_t *json;
+  PyObject *dict = NULL;
+  parser_t *json_parser;
+
+  apr_pool_create( &tmp_mp, NULL );
+  json_parser = json_parser_create( tmp_mp );
+  if ( json_parser_parse_file( json_parser, json_file,
+                               &json ) == APR_SUCCESS ) {
     dict = json_to_py_variable( json );
   }
   apr_pool_destroy( tmp_mp );

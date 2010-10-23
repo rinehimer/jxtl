@@ -11,6 +11,11 @@
 %include "template.i"
 
 /**
- * Convert an XML file to a hash type.
+ * Convert an XML file to a hash.
  */
-SV *xml_to_hash( char *xml_file );
+SV *xml_to_hash( const char *xml_file );
+
+/**
+ * Convert a JSON file to a hash.
+ */
+SV *json_to_hash( const char *json_file );
