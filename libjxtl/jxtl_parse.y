@@ -86,13 +86,14 @@ text
 ;
 
 value_directive
-  : T_DIRECTIVE_START T_PATH_EXPR T_DIRECTIVE_END
+  : T_DIRECTIVE_START T_PATH_EXPR
     {
       if ( !callbacks->value_handler( callbacks->user_data, $<string>2 ) ) {
         jxtl_error( &@2, scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );
       }
     }
+    options T_DIRECTIVE_END
 ;
 
 section_directive
@@ -190,6 +191,8 @@ typedef struct jxtl_data_t {
   apr_array_header_t *current_array;
   /** Array of content arrays. */
   apr_array_header_t *content_array;
+  /** Pointer to the last section or value pushed on. */
+  jxtl_content_t *last_section_or_value;
   /** Reusable parser. */
   parser_t *jxtl_path_parser;
 } jxtl_data_t;
@@ -255,6 +258,10 @@ static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
   content->value = value;
   content->separator = NULL;
   content->format = NULL;
+
+  if ( ( type == JXTL_SECTION ) || ( type == JXTL_VALUE ) ) {
+    data->last_section_or_value = content;
+  }
 
   APR_ARRAY_PUSH( data->current_array, jxtl_content_t * ) = content;
 }
@@ -380,13 +387,13 @@ static void jxtl_if_end( void *user_data )
 static void jxtl_separator_start( void *user_data )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  apr_array_header_t *content_array;
-  jxtl_content_t *content;
+  jxtl_content_t *content = data->last_section_or_value;
 
-  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
-
-  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
   content->separator = apr_array_make( data->mp, 1, sizeof(jxtl_content_t *) );
+
+  /*
+   * Save off the current array and then make the current array the separator.
+   */
   APR_ARRAY_PUSH( data->content_array,
                   apr_array_header_t * ) = data->current_array;
   data->current_array = content->separator;
@@ -431,12 +438,7 @@ static char *jxtl_get_error( void *user_data )
 static void jxtl_format( void *user_data, char *format )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  apr_array_header_t *content_array;
-  jxtl_content_t *content;
-
-  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
-  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
-  content->format = apr_pstrdup( data->mp, format );
+  data->last_section_or_value->format = apr_pstrdup( data->mp, format );
 }
 
 static jxtl_template_t *jxtl_template_create( apr_pool_t *mp,

@@ -1,3 +1,3 @@
 {{#section brewery ; separator="\n"}}
-{{name}} Brewery:  {{#section beer ; separator=", "}}{{beer_name}}{{#end}}
+{{name}} Brewery:  {{beer/beer_name ; separator=", "}}
 {{#end}}

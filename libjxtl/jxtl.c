@@ -102,7 +102,6 @@ static void expand_section( apr_pool_t *mp,
 {
   int i;
   int num_items;
-  int num_printed;
   json_t *json_value;
   jxtl_path_obj_t *path_obj;
 
@@ -110,14 +109,12 @@ static void expand_section( apr_pool_t *mp,
     return;
 
   num_items = jxtl_path_compiled_eval( mp, section->expr, json, &path_obj );
-  num_printed = 0;
   for ( i = 0; i < path_obj->nodes->nelts; i++ ) {
     json_value = APR_ARRAY_IDX( path_obj->nodes, i, json_t * );
     expand_content( mp, template, section->content, json_value, format,
                     PRINT_SECTION, out );
-    num_printed++;
     /* Only print the separator if it's not the last one */
-    if ( separator && num_printed < num_items ) {
+    if ( separator && ( i + 1 < num_items ) ) {
       expand_content( mp, template, separator, json_value, format,
                       PRINT_SEPARATOR, out );
     }
@@ -182,8 +179,14 @@ static void expand_content( apr_pool_t *mp,
     case JXTL_VALUE:
       format = ( content->format ) ? content->format : prev_format;
       if ( jxtl_path_compiled_eval( mp, content->value, json, &path_obj ) ) {
-        json_value = APR_ARRAY_IDX( path_obj->nodes, 0, json_t * );
-        print_json_value( json_value, format, mp, template, out );
+        for ( j = 0; j < path_obj->nodes->nelts; j++ ) {
+          json_value = APR_ARRAY_IDX( path_obj->nodes, j, json_t * );
+          print_json_value( json_value, format, mp, template, out );
+          if ( content->separator && ( j + 1 < path_obj->nodes->nelts ) ) {
+            expand_content( mp, template, content->separator, json_value,
+                            format, PRINT_SEPARATOR, out );
+          }
+        }
       }
       break;
     }
