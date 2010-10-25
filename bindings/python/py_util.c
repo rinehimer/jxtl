@@ -1,5 +1,7 @@
 #include <Python.h>
 #include <pyport.h>
+
+#include "apr_macros.h"
 #include "json.h"
 #include "json_writer.h"
 #include "xml2json.h"
