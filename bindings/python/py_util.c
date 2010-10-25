@@ -11,6 +11,22 @@
 #define Py_ssize_t int
 #endif
 
+#ifndef Py_RETURN_TRUE
+#define Py_RETURN_TRUE return Py_INCREF(Py_True), Py_True
+#endif
+
+#ifndef Py_RETURN_FALSE
+#define Py_RETURN_FALSE return Py_INCREF(Py_False), Py_False
+#endif
+
+#ifndef Py_RETURN_NONE
+#define Py_RETURN_NONE return Py_INCREF(Py_None), Py_None
+#endif
+
+#ifndef PyDict_CheckExact
+#define PyDict_CheckExact(op) ((op)->ob_type == &PyDict_Type)
+#endif
+
 static void py_dict_to_json( PyObject *obj, json_writer_t *writer );
 static void py_list_to_json( PyObject *obj, json_writer_t *writer );
 static void py_tuple_to_json( PyObject *obj, json_writer_t *writer );
