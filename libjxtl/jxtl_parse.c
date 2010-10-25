@@ -106,7 +106,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "jxtl_parse.y"
+#line 22 "jxtl_parse.y"
 
 #include <stdarg.h>
 #include <apr_pools.h>
@@ -152,12 +152,12 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 38 "jxtl_parse.y"
+#line 59 "jxtl_parse.y"
 {
   int ival;
   unsigned char *string;
 }
-/* Line 193 of yacc.c.  */
+/* Line 187 of yacc.c.  */
 #line 162 "jxtl_parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -478,9 +478,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    53,    53,    56,    58,    62,    63,    64,    68,    79,
-      78,    95,    94,   108,   107,   116,   115,   120,   124,   129,
-     131,   135,   136,   137,   140,   142,   143,   147,   153
+       0,    74,    74,    77,    79,    83,    84,    85,    89,   100,
+      99,   114,   113,   127,   126,   135,   134,   139,   143,   148,
+     150,   154,   155,   156,   159,   161,   162,   166,   172
 };
 #endif
 
@@ -1455,14 +1455,14 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 59 "jxtl_parse.y"
+#line 80 "jxtl_parse.y"
     {
       callbacks->text_handler( callbacks->user_data, (yyvsp[(2) - (2)].string) );
     }
     break;
 
   case 8:
-#line 69 "jxtl_parse.y"
+#line 90 "jxtl_parse.y"
     {
       if ( !callbacks->value_handler( callbacks->user_data, (yyvsp[(2) - (3)].string) ) ) {
         jxtl_error( &(yylsp[(2) - (3)]), scanner, parser, callbacks_ptr,
@@ -1472,7 +1472,7 @@ yyreduce:
     break;
 
   case 9:
-#line 79 "jxtl_parse.y"
+#line 100 "jxtl_parse.y"
     {
       if ( !callbacks->section_start_handler( callbacks->user_data,
                                               (yyvsp[(3) - (3)].string) ) ) {
@@ -1483,12 +1483,12 @@ yyreduce:
     break;
 
   case 10:
-#line 90 "jxtl_parse.y"
+#line 109 "jxtl_parse.y"
     { callbacks->section_end_handler( callbacks->user_data ); }
     break;
 
   case 11:
-#line 95 "jxtl_parse.y"
+#line 114 "jxtl_parse.y"
     {
       if ( !callbacks->if_start_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) ) ) {
         jxtl_error( &(yylsp[(3) - (4)]), scanner, parser, callbacks_ptr,
@@ -1498,7 +1498,7 @@ yyreduce:
     break;
 
   case 13:
-#line 108 "jxtl_parse.y"
+#line 127 "jxtl_parse.y"
     {
       if ( !callbacks->elseif_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) ) ) {
         jxtl_error( &(yylsp[(3) - (4)]), scanner, parser, callbacks_ptr,
@@ -1508,28 +1508,28 @@ yyreduce:
     break;
 
   case 15:
-#line 116 "jxtl_parse.y"
+#line 135 "jxtl_parse.y"
     {
       callbacks->else_handler( callbacks->user_data );
     }
     break;
 
   case 18:
-#line 125 "jxtl_parse.y"
+#line 144 "jxtl_parse.y"
     {
       callbacks->if_end_handler( callbacks->user_data );
     }
     break;
 
   case 20:
-#line 132 "jxtl_parse.y"
+#line 151 "jxtl_parse.y"
     {
       callbacks->text_handler( callbacks->user_data, (yyvsp[(2) - (2)].string) );
     }
     break;
 
   case 27:
-#line 148 "jxtl_parse.y"
+#line 167 "jxtl_parse.y"
     {
       callbacks->separator_start_handler( callbacks->user_data );
       callbacks->text_handler( callbacks->user_data, (yyvsp[(3) - (3)].string) );
@@ -1538,7 +1538,7 @@ yyreduce:
     break;
 
   case 28:
-#line 154 "jxtl_parse.y"
+#line 173 "jxtl_parse.y"
     {
       callbacks->format_handler( callbacks->user_data, (yyvsp[(3) - (3)].string) );
     }
@@ -1766,7 +1766,7 @@ yyreturn:
 }
 
 
-#line 159 "jxtl_parse.y"
+#line 178 "jxtl_parse.y"
 
 
 /**
@@ -1845,6 +1845,7 @@ static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
   content = apr_palloc( data->mp, sizeof(jxtl_content_t) );
   content->type = type;
   content->value = value;
+  content->separator = NULL;
   content->format = NULL;
 
   APR_ARRAY_PUSH( data->current_array, jxtl_content_t * ) = content;
@@ -1874,8 +1875,6 @@ static int jxtl_section_start( void *user_data, unsigned char *expr )
   jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &section->expr );
   section->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
-  section->separator = apr_array_make( data->mp, 1024,
-                                       sizeof(jxtl_content_t *) );
   jxtl_content_push( data, JXTL_SECTION, section );
   APR_ARRAY_PUSH( data->content_array,
                   apr_array_header_t * ) = data->current_array;
@@ -1975,15 +1974,14 @@ static void jxtl_separator_start( void *user_data )
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   apr_array_header_t *content_array;
   jxtl_content_t *content;
-  jxtl_section_t *section;
 
   content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
 
   content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
-  section = content->value;
+  content->separator = apr_array_make( data->mp, 1, sizeof(jxtl_content_t *) );
   APR_ARRAY_PUSH( data->content_array,
                   apr_array_header_t * ) = data->current_array;
-  data->current_array = section->separator;
+  data->current_array = content->separator;
 }
 
 /**

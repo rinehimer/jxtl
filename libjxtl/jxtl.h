@@ -41,6 +41,8 @@ typedef struct jxtl_content_t {
   jxtl_content_type type;
   /** A string, pointer to a jxtl_section_t, jxtl_if_t or a jxtl_path_expr_t */
   void *value;
+  /** Array of content for the separator. */
+  apr_array_header_t *separator;
   /** A format to be applied. */
   char *format;
 } jxtl_content_t;
@@ -55,8 +57,6 @@ typedef struct jxtl_section_t {
   jxtl_path_expr_t *expr;
   /** Array of the content in the section. */
   apr_array_header_t *content;
-  /** Array of content for the separator. */
-  apr_array_header_t *separator;
 } jxtl_section_t;
 
 /**

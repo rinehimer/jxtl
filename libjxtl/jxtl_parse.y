@@ -1,3 +1,24 @@
+/*
+ * $Id$
+ *
+ * Description
+ *   Bison source file for generating the jxtl grammar.
+ *
+ * Copyright 2010 Dan Rinehimer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 %{
 #include <stdarg.h>
 #include <apr_pools.h>
@@ -83,9 +104,7 @@ section_directive
                     callbacks->get_error_func( callbacks->user_data ) );
       }
     }
-    options
-    T_DIRECTIVE_END
-    section_content
+    options T_DIRECTIVE_END section_content
     T_DIRECTIVE_START T_END T_DIRECTIVE_END
     { callbacks->section_end_handler( callbacks->user_data ); }
 ;
@@ -234,6 +253,7 @@ static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
   content = apr_palloc( data->mp, sizeof(jxtl_content_t) );
   content->type = type;
   content->value = value;
+  content->separator = NULL;
   content->format = NULL;
 
   APR_ARRAY_PUSH( data->current_array, jxtl_content_t * ) = content;
@@ -263,8 +283,6 @@ static int jxtl_section_start( void *user_data, unsigned char *expr )
   jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &section->expr );
   section->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
-  section->separator = apr_array_make( data->mp, 1024,
-                                       sizeof(jxtl_content_t *) );
   jxtl_content_push( data, JXTL_SECTION, section );
   APR_ARRAY_PUSH( data->content_array,
                   apr_array_header_t * ) = data->current_array;
@@ -364,15 +382,14 @@ static void jxtl_separator_start( void *user_data )
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   apr_array_header_t *content_array;
   jxtl_content_t *content;
-  jxtl_section_t *section;
 
   content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
 
   content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
-  section = content->value;
+  content->separator = apr_array_make( data->mp, 1, sizeof(jxtl_content_t *) );
   APR_ARRAY_PUSH( data->content_array,
                   apr_array_header_t * ) = data->current_array;
-  data->current_array = section->separator;
+  data->current_array = content->separator;
 }
 
 /**

@@ -94,6 +94,7 @@ static void expand_content( apr_pool_t *mp,
 static void expand_section( apr_pool_t *mp,
                             jxtl_template_t *template,
                             jxtl_section_t *section,
+                            apr_array_header_t *separator,
                             json_t *json,
                             char *format,
                             section_print_type print_type,
@@ -116,9 +117,10 @@ static void expand_section( apr_pool_t *mp,
                     PRINT_SECTION, out );
     num_printed++;
     /* Only print the separator if it's not the last one */
-    if ( num_printed < num_items )
-      expand_content( mp, template, section->separator, json_value, format,
+    if ( separator && num_printed < num_items ) {
+      expand_content( mp, template, separator, json_value, format,
                       PRINT_SEPARATOR, out );
+    }
   }
 }
 
@@ -139,9 +141,6 @@ static void expand_content( apr_pool_t *mp,
   jxtl_path_obj_t *path_obj;
   char *format;
 
-  if ( !json )
-    return;
-
   prev_content = NULL;
   next_content = NULL;
 
@@ -159,8 +158,8 @@ static void expand_content( apr_pool_t *mp,
     case JXTL_SECTION:
       tmp_section = (jxtl_section_t *) content->value;
       format = ( content->format ) ? content->format : prev_format;
-      expand_section( mp, template, tmp_section, json, format, PRINT_SECTION,
-                      out );
+      expand_section( mp, template, tmp_section, content->separator, json,
+                      format, PRINT_SECTION, out );
       break;
 
     case JXTL_IF:
