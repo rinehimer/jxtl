@@ -35,7 +35,7 @@ def format( value, format, context ):
 
 def compare( file1, file2 ):
     if ( filecmp.cmp( file1, file2 ) == False ):
-            print "Failed test in " + os.path.dirname( file1 );
+        print "Failed test in " + os.path.dirname( file1 );
     else:
         os.remove( file2 );
 
