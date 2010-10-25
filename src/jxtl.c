@@ -28,78 +28,81 @@ static char *format_func( json_t *json, char *format_name,
   format_data_t *format_data = (format_data_t *) format_data_ptr;
   char *value;
   char *ret_value;
-  int len;
+  int len = 0;
   char *c;
 
   APR_ARRAY_CLEAR( format_data->string_array );
   value = json_get_string_value( format_data->mp, json );
   ret_value = value;
-  len = strlen( value );
 
-  if ( apr_strnatcasecmp( format_name, "upper" ) == 0 ) {
-    for ( c = value; *c; c++ ) {
-      *c = apr_toupper( *c );
-    }
-  }
-  else if ( apr_strnatcasecmp( format_name, "lower" ) == 0 ) {
-    for ( c = value; *c; c++ ) {
-      *c = apr_tolower( *c );
-    }
-  }
-  else if ( apr_strnatcasecmp( format_name, "trn_field" ) == 0 ) {
-    for ( c = value; *c; c++ ) {
-      if ( *c == '\'' ) {
-        APR_ARRAY_PUSH( format_data->string_array, char ) = '\'';
+  if ( value ) {
+    len = strlen( value );
+    if ( apr_strnatcasecmp( format_name, "upper" ) == 0 ) {
+      for ( c = value; *c; c++ ) {
+        *c = apr_toupper( *c );
       }
-      APR_ARRAY_PUSH( format_data->string_array, char ) = *c;
     }
-    APR_ARRAY_PUSH( format_data->string_array, char ) = '\0';
-
-    if ( len > 80 ) {
-      ret_value = apr_pstrcat( format_data->mp,
-                               apr_psprintf( format_data->mp, "%d", len ),
-                               "'", format_data->string_array->elts,
-                               "'", NULL );
+    else if ( apr_strnatcasecmp( format_name, "lower" ) == 0 ) {
+      for ( c = value; *c; c++ ) {
+        *c = apr_tolower( *c );
+      }
     }
-    else {
-      ret_value = apr_pstrcat( format_data->mp, "'",
-                               format_data->string_array->elts,
-                               "'", NULL );
-    }
-  }
-  else if ( apr_strnatcasecmp( format_name, "json" ) == 0 ) {
-    for ( c = value; *c; c++ ) {
-      if ( *c > 0x1F ) {
-        if ( *c == '\\' || *c == '/' || *c == '"' ) {
-          APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
+    else if ( apr_strnatcasecmp( format_name, "trn_field" ) == 0 ) {
+      for ( c = value; *c; c++ ) {
+        if ( *c == '\'' ) {
+          APR_ARRAY_PUSH( format_data->string_array, char ) = '\'';
         }
         APR_ARRAY_PUSH( format_data->string_array, char ) = *c;
       }
+      APR_ARRAY_PUSH( format_data->string_array, char ) = '\0';
+      
+      if ( len > 80 ) {
+        ret_value = apr_pstrcat( format_data->mp,
+                                 apr_psprintf( format_data->mp, "%d", len ),
+                                 "'", format_data->string_array->elts,
+                                 "'", NULL );
+      }
       else {
-        APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
-        switch ( *c ) {
-        case '\b':
-          APR_ARRAY_PUSH( format_data->string_array, char ) = 'b';
-          break;
-        case '\f':
-          APR_ARRAY_PUSH( format_data->string_array, char ) = 'f';
-          break;
-        case '\n':
-          APR_ARRAY_PUSH( format_data->string_array, char ) = 'n';
-          break;
-        case '\r':
-          APR_ARRAY_PUSH( format_data->string_array, char ) = 'r';
-          break;
-        case '\t':
-          APR_ARRAY_PUSH( format_data->string_array, char ) = 't';
-          break;
-        }
+        ret_value = apr_pstrcat( format_data->mp, "'",
+                                 format_data->string_array->elts,
+                                 "'", NULL );
       }
     }
-    APR_ARRAY_PUSH( format_data->string_array, char ) = '\0';
-    ret_value = apr_pstrdup( format_data->mp,
-                             (char *) format_data->string_array->elts );
+    else if ( apr_strnatcasecmp( format_name, "json" ) == 0 ) {
+      for ( c = value; *c; c++ ) {
+        if ( *c > 0x1F ) {
+          if ( *c == '\\' || *c == '/' || *c == '"' ) {
+            APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
+          }
+          APR_ARRAY_PUSH( format_data->string_array, char ) = *c;
+        }
+        else {
+          APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
+          switch ( *c ) {
+          case '\b':
+            APR_ARRAY_PUSH( format_data->string_array, char ) = 'b';
+            break;
+          case '\f':
+            APR_ARRAY_PUSH( format_data->string_array, char ) = 'f';
+            break;
+          case '\n':
+            APR_ARRAY_PUSH( format_data->string_array, char ) = 'n';
+            break;
+          case '\r':
+            APR_ARRAY_PUSH( format_data->string_array, char ) = 'r';
+            break;
+          case '\t':
+            APR_ARRAY_PUSH( format_data->string_array, char ) = 't';
+            break;
+          }
+        }
+      }
+      APR_ARRAY_PUSH( format_data->string_array, char ) = '\0';
+      ret_value = apr_pstrdup( format_data->mp,
+                               (char *) format_data->string_array->elts );
+    }
   }
+
   return ret_value;
 }
 
