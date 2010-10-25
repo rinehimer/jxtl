@@ -30,9 +30,11 @@ static char *format_func( json_t *json, char *format, void *template_ptr )
 
 void Template_set_format_callback( Template *t, PyObject *format_func )
 {
+  PyObject *prev_format_func = t->format_func;
+
   if ( PyCallable_Check( format_func ) ) {
-    if ( t->format_func ) {
-      Py_XDECREF( t->format_func );
+    if ( prev_format_func ) {
+      Py_XDECREF( prev_format_func );
     }
     Py_XINCREF( format_func );
     t->format_func = format_func;

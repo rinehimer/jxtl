@@ -44,8 +44,7 @@ static void py_variable_to_json_internal( PyObject *obj,
     py_list_to_json( obj, writer );
   }
   else if ( PyTuple_CheckExact( obj ) ) {
-    py_tuple_to_json( obj, writer );
-    
+    py_tuple_to_json( obj, writer ); 
   }
 }
 
