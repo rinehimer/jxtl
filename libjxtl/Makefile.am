@@ -9,6 +9,7 @@ libjxtlinc_HEADERS = apr_macros.h \
                      json_writer.h \
                      json_writer_ctx.h \
                      parser.h \
+                     str_buf.h \
                      utf.h \
                      xml2json.h
 
@@ -25,6 +26,7 @@ libjxtl_la_SOURCES = json.c \
                      json_writer_ctx.c \
                      parser.c \
                      parser_lex_macros.h \
+                     str_buf.c \
                      utf.c \
                      xml2json.c
 
