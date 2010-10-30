@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 33
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -31,7 +31,7 @@
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
 
-#if __STDC_VERSION__ >= 199901L
+#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
  * if you want the limit (max/min) macros for int types. 
@@ -94,11 +94,12 @@ typedef unsigned int flex_uint32_t;
 
 #else	/* ! __cplusplus */
 
-#if __STDC__
+/* C99 requires __STDC__ to be defined as 1. */
+#if defined (__STDC__)
 
 #define YY_USE_CONST
 
-#endif	/* __STDC__ */
+#endif	/* defined (__STDC__) */
 #endif	/* ! __cplusplus */
 
 #ifdef YY_USE_CONST
@@ -133,8 +134,6 @@ typedef void* yyscan_t;
 #define yylineno (YY_CURRENT_BUFFER_LVALUE->yy_bs_lineno)
 #define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
 #define yy_flex_debug yyg->yy_flex_debug_r
-
-int jxtl_path_lex_init (yyscan_t* scanner);
 
 /* Enter a start condition.  This macro really ought to take a parameter,
  * but we do it the disgusting crufty way forced on us by the ()-less
@@ -206,14 +205,9 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 #define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
 
-/* The following is because we cannot portably get our hands on size_t
- * (without autoconf's help, which isn't available because we want
- * flex-generated scanners to compile on their own).
- */
-
 #ifndef YY_TYPEDEF_YY_SIZE_T
 #define YY_TYPEDEF_YY_SIZE_T
-typedef unsigned int yy_size_t;
+typedef size_t yy_size_t;
 #endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -380,7 +374,7 @@ struct yy_trans_info
 static yyconst flex_int16_t yy_accept[18] =
     {   0,
         0,    0,   13,   11,    9,   10,    7,    4,    2,    1,
-        5,    6,    8,    9,    3,    8,    0
+        8,    5,    6,    9,    3,    8,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -391,14 +385,14 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    2,    4,    1,    1,    1,    1,    1,    1,    1,
         1,    5,    1,    1,    1,    6,    7,    8,    8,    8,
         8,    8,    8,    8,    8,    8,    8,    1,    1,    1,
-        1,    1,    1,    1,   11,   11,   11,   11,   11,   11,
-       11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
-       11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
-        9,    1,   10,    1,    8,    1,   11,   11,   11,   11,
+        1,    1,    1,    1,    9,    9,    9,    9,    9,    9,
+        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
+        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
+       10,    1,   11,    1,    8,    1,    9,    9,    9,    9,
 
-       11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
-       11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
-       11,   11,    1,    1,    1,    1,    1,    1,    1,    1,
+        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
+        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
+        9,    9,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -417,20 +411,20 @@ static yyconst flex_int32_t yy_ec[256] =
 
 static yyconst flex_int32_t yy_meta[12] =
     {   0,
-        1,    1,    1,    1,    1,    1,    1,    2,    1,    1,
-        2
+        1,    1,    1,    1,    1,    1,    1,    2,    2,    1,
+        1
     } ;
 
 static yyconst flex_int16_t yy_base[19] =
     {   0,
         0,    0,   16,   17,   13,   17,   17,   17,    8,   17,
-       17,   17,    0,   11,   17,    0,   17,   10
+        0,   17,   17,   11,   17,    0,   17,   10
     } ;
 
 static yyconst flex_int16_t yy_def[19] =
     {   0,
        17,    1,   17,   17,   17,   17,   17,   17,   17,   17,
-       17,   17,   18,   17,   17,   18,    0,   17
+       18,   17,   17,   17,   17,   18,    0,   17
     } ;
 
 static yyconst flex_int16_t yy_nxt[29] =
@@ -460,7 +454,27 @@ static yyconst flex_int32_t yy_rule_can_match_eol[13] =
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "jxtl_path_lex.l"
-#line 2 "jxtl_path_lex.l"
+/*
+ * $Id$
+ *
+ * Description
+ *   The lexer for path language used the templates.
+ *
+ * Copyright 2010 Dan Rinehimer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#line 23 "jxtl_path_lex.l"
 #include <apr_hash.h>
 #include <apr_pools.h>
 #include <apr_strings.h>
@@ -480,7 +494,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[13] =
 
 void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
                       void *callbacks_ptr, const char *error_string, ... );
-#line 484 "jxtl_path_lex.c"
+#line 498 "jxtl_path_lex.c"
 
 #define INITIAL 0
 
@@ -542,6 +556,10 @@ static int yy_init_globals (yyscan_t yyscanner );
     
     #    define yylloc yyg->yylloc_r
     
+int jxtl_path_lex_init (yyscan_t* scanner);
+
+int jxtl_path_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
@@ -621,7 +639,7 @@ static int input (yyscan_t yyscanner );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO (void) fwrite( yytext, yyleng, 1, yyout )
+#define ECHO fwrite( yytext, yyleng, 1, yyout )
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -632,7 +650,7 @@ static int input (yyscan_t yyscanner );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		int n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -686,9 +704,11 @@ static int input (yyscan_t yyscanner );
 #ifndef YY_DECL
 #define YY_DECL_IS_OURS 1
 
-extern int jxtl_path_lex (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
+extern int jxtl_path_lex \
+               (YYSTYPE * yylval_param,YYLTYPE * yylloc_param ,yyscan_t yyscanner);
 
-#define YY_DECL int jxtl_path_lex (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner)
+#define YY_DECL int jxtl_path_lex \
+               (YYSTYPE * yylval_param, YYLTYPE * yylloc_param , yyscan_t yyscanner)
 #endif /* !YY_DECL */
 
 /* Code executed at the beginning of each rule, after yytext and yyleng
@@ -715,10 +735,10 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 35 "jxtl_path_lex.l"
+#line 56 "jxtl_path_lex.l"
 
 
-#line 722 "jxtl_path_lex.c"
+#line 742 "jxtl_path_lex.c"
 
     yylval = yylval_param;
 
@@ -819,42 +839,42 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 37 "jxtl_path_lex.l"
+#line 58 "jxtl_path_lex.l"
 { return '/'; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 38 "jxtl_path_lex.l"
+#line 59 "jxtl_path_lex.l"
 { return '.'; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 39 "jxtl_path_lex.l"
+#line 60 "jxtl_path_lex.l"
 { return T_PARENT; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 40 "jxtl_path_lex.l"
+#line 61 "jxtl_path_lex.l"
 { return '*'; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 41 "jxtl_path_lex.l"
+#line 62 "jxtl_path_lex.l"
 { return '['; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 42 "jxtl_path_lex.l"
+#line 63 "jxtl_path_lex.l"
 { return ']'; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 43 "jxtl_path_lex.l"
+#line 64 "jxtl_path_lex.l"
 { return '!'; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 44 "jxtl_path_lex.l"
+#line 65 "jxtl_path_lex.l"
 {
   yylval->string = apr_pstrdup( PARSER_MP, yytext );
   return T_IDENTIFIER;
@@ -862,18 +882,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 48 "jxtl_path_lex.l"
+#line 69 "jxtl_path_lex.l"
 
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 49 "jxtl_path_lex.l"
+#line 70 "jxtl_path_lex.l"
 
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 50 "jxtl_path_lex.l"
+#line 71 "jxtl_path_lex.l"
 {
   jxtl_lex_error( "illegal character '%c' found in path expression",
                   yytext[0] );
@@ -881,10 +901,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 55 "jxtl_path_lex.l"
+#line 76 "jxtl_path_lex.l"
 ECHO;
 	YY_BREAK
-#line 888 "jxtl_path_lex.c"
+#line 908 "jxtl_path_lex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1116,7 +1136,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			yyg->yy_n_chars, num_to_read );
+			yyg->yy_n_chars, (size_t) num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
 		}
@@ -1139,6 +1159,14 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
+
+	if ((yy_size_t) (yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+		/* Extend the array by 50%, plus the number we really need. */
+		yy_size_t new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) jxtl_path_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
+		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
+			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+	}
 
 	yyg->yy_n_chars += number_to_move;
 	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] = YY_END_OF_BUFFER_CHAR;
@@ -1299,7 +1327,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 				case EOB_ACT_END_OF_FILE:
 					{
 					if ( jxtl_path_wrap(yyscanner ) )
-						return 0;
+						return EOF;
 
 					if ( ! yyg->yy_did_buffer_switch_on_eof )
 						YY_NEW_FILE;
@@ -1579,7 +1607,9 @@ static void jxtl_path_ensure_buffer_stack (yyscan_t yyscanner)
 		yyg->yy_buffer_stack = (struct yy_buffer_state**)jxtl_path_alloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
-		
+		if ( ! yyg->yy_buffer_stack )
+			YY_FATAL_ERROR( "out of dynamic memory in jxtl_path_ensure_buffer_stack()" );
+								  
 		memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
 				
 		yyg->yy_buffer_stack_max = num_to_alloc;
@@ -1597,6 +1627,8 @@ static void jxtl_path_ensure_buffer_stack (yyscan_t yyscanner)
 								(yyg->yy_buffer_stack,
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								, yyscanner);
+		if ( ! yyg->yy_buffer_stack )
+			YY_FATAL_ERROR( "out of dynamic memory in jxtl_path_ensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -1641,7 +1673,7 @@ YY_BUFFER_STATE jxtl_path__scan_buffer  (char * base, yy_size_t  size , yyscan_t
 
 /** Setup the input buffer state to scan a string. The next call to jxtl_path_lex() will
  * scan from a @e copy of @a str.
- * @param str a NUL-terminated string to scan
+ * @param yystr a NUL-terminated string to scan
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  * @note If you want to scan bytes that may contain NUL values, then use
@@ -1915,6 +1947,42 @@ int jxtl_path_lex_init(yyscan_t* ptr_yy_globals)
     return yy_init_globals ( *ptr_yy_globals );
 }
 
+/* jxtl_path_lex_init_extra has the same functionality as jxtl_path_lex_init, but follows the
+ * convention of taking the scanner as the last argument. Note however, that
+ * this is a *pointer* to a scanner, as it will be allocated by this call (and
+ * is the reason, too, why this function also must handle its own declaration).
+ * The user defined value in the first argument will be available to jxtl_path_alloc in
+ * the yyextra field.
+ */
+
+int jxtl_path_lex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
+
+{
+    struct yyguts_t dummy_yyguts;
+
+    jxtl_path_set_extra (yy_user_defined, &dummy_yyguts);
+
+    if (ptr_yy_globals == NULL){
+        errno = EINVAL;
+        return 1;
+    }
+	
+    *ptr_yy_globals = (yyscan_t) jxtl_path_alloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
+	
+    if (*ptr_yy_globals == NULL){
+        errno = ENOMEM;
+        return 1;
+    }
+    
+    /* By setting to 0xAA, we expose bugs in
+    yy_init_globals. Leave at 0x00 for releases. */
+    memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
+    
+    jxtl_path_set_extra (yy_user_defined, *ptr_yy_globals);
+    
+    return yy_init_globals ( *ptr_yy_globals );
+}
+
 static int yy_init_globals (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
@@ -2026,7 +2094,7 @@ void jxtl_path_free (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 55 "jxtl_path_lex.l"
+#line 76 "jxtl_path_lex.l"
 
 
 

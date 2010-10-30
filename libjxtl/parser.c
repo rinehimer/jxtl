@@ -2,6 +2,7 @@
 #include <apr_strings.h>
 
 #include "apr_macros.h"
+#include "str_buf.h"
 #include "parser.h"
 
 static const char *get_filename( parser_t *parser )
@@ -11,7 +12,7 @@ static const char *get_filename( parser_t *parser )
     apr_file_name_get( &filename, parser->in_file );
   }
 
-  if ( filename ) {
+  if ( !filename ) {
     filename = "(stdin)";
   }
 
@@ -38,7 +39,7 @@ parser_t *parser_create( apr_pool_t *mp,
   parser->bison_parse = bison_parse;
 
   parser->error_str = NULL;
-  parser->str_array = apr_array_make( mp, 8192, sizeof(char) );
+  parser->str_buf = str_buf_create( mp, 8192 );
   parser->in_file = NULL;
   parser->flex_init( &parser->scanner );
   parser->flex_set_extra( parser, parser->scanner );
@@ -54,7 +55,7 @@ static void parser_reset( parser_t *parser )
 {
   parser->in_file = NULL;
   parser->error_str = NULL;
-  APR_ARRAY_CLEAR( parser->str_array );
+  STR_BUF_CLEAR( parser->str_buf );
 }
 
 void parser_set_user_data( parser_t *parser, void *user_data )

@@ -1,7 +1,26 @@
 /*
- * Define some utility macros for accessing pieces of the parser for using in
- * a flex source file.  Should only be included in a flex source file as these
- * macros depend on the macro yyextra being defined.
+ * $Id$
+ *
+ * Description
+ *   Defines some utility macros for accessing pieces of the parser for using
+ *   in a flex source file.  Should only be included in a flex source file as
+ *   these macros depend on the macro yyextra being defined.  We could access
+ *   the flex variables through function calls, but we really want this code
+ *   as efficient as possible.
+ *
+ * Copyright 2010 Dan Rinehimer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #ifndef PARSER_LEX_MACROS_H
@@ -11,7 +30,7 @@
 
 #define PARSER ((parser_t *) yyextra)
 #define PARSER_MP PARSER->mp
-#define PARSER_STR_ARRAY PARSER->str_array
+#define PARSER_STR_BUF ((str_buf_t *)PARSER->str_buf)
 #define PARSER_STATUS PARSER->status
 #define PARSER_IN_FILE PARSER->in_file
 #define PARSER_BYTES PARSER->bytes

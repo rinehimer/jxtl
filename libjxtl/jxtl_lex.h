@@ -343,7 +343,7 @@ extern int jxtl_lex \
 #undef YY_DECL
 #endif
 
-#line 155 "jxtl_lex.l"
+#line 169 "jxtl_lex.l"
 
 
 #line 350 "jxtl_lex.h"

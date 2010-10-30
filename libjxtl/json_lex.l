@@ -1,3 +1,24 @@
+/*
+ * $Id$
+ *
+ * Description
+ *   The lexer for JSON.
+ *
+ * Copyright 2010 Dan Rinehimer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 %{
 #include <apr_hash.h>
 #include <apr_pools.h>
@@ -41,8 +62,8 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 %%
 
 <INITIAL>{
-  "'" { APR_ARRAY_CLEAR( PARSER_STR_ARRAY ); BEGIN( squote_str ); }
-  "\"" { APR_ARRAY_CLEAR( PARSER_STR_ARRAY ); BEGIN( dquote_str ); }
+  "'" { STR_BUF_CLEAR( PARSER_STR_BUF ); BEGIN( squote_str ); }
+  "\"" { STR_BUF_CLEAR( PARSER_STR_BUF ); BEGIN( dquote_str ); }
   "{" { return '{'; }
   "}" { return '}'; }
   "[" { return '['; }
@@ -87,36 +108,34 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 <dquote_str>{
   "\"" {
     BEGIN( INITIAL );
-    yylval->string = apr_palloc( PARSER_MP,
-				 PARSER_STR_ARRAY->nelts + 1 );
-    utf8_strcpyn( yylval->string, (unsigned char *) PARSER_STR_ARRAY->elts,
-                  PARSER_STR_ARRAY->nelts );
+    yylval->string = apr_palloc( PARSER_MP, PARSER_STR_BUF->data_len + 1 );
+    utf8_strcpyn( yylval->string, PARSER_STR_BUF->data,
+                  PARSER_STR_BUF->data_len );
     return T_STRING;
   }
-  "'" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\''; }
-  "\\\"" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '"'; }
+  "'" { str_buf_putc( PARSER_STR_BUF, '\'' ); }
+  "\\\"" { str_buf_putc( PARSER_STR_BUF, '"' ); }
 }
 <squote_str>{
   "'" {
     BEGIN( INITIAL );
-    yylval->string = apr_palloc( PARSER_MP,
-				 PARSER_STR_ARRAY->nelts + 1 );
-    utf8_strcpyn( yylval->string, (unsigned char *) PARSER_STR_ARRAY->elts,
-                  PARSER_STR_ARRAY->nelts );
+    yylval->string = apr_palloc( PARSER_MP, PARSER_STR_BUF->data_len + 1 );
+    utf8_strcpyn( yylval->string, PARSER_STR_BUF->data,
+                  PARSER_STR_BUF->data_len );
     return T_STRING;
   }
-  "\"" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '"'; }
-  "\\\'" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\''; }
+  "\"" { str_buf_putc( PARSER_STR_BUF, '"' ); }
+  "\\\'" { str_buf_putc( PARSER_STR_BUF, '\'' ); }
 }
 
 <squote_str,dquote_str>{
-  "\\\\" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\\'; }
-  "\\/" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '/'; }
-  "\\b" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\b'; }
-  "\\f" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\f'; }
-  "\\n" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\n'; }
-  "\\r" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\r'; }
-  "\\t" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\t'; }
+  "\\\\" { str_buf_putc( PARSER_STR_BUF, '\\' ); }
+  "\\/" { str_buf_putc( PARSER_STR_BUF, '/' ); }
+  "\\b" { str_buf_putc( PARSER_STR_BUF, '\b' ); }
+  "\\f" { str_buf_putc( PARSER_STR_BUF, '\f' ); }
+  "\\n" { str_buf_putc( PARSER_STR_BUF, '\n' ); }
+  "\\r" { str_buf_putc( PARSER_STR_BUF, '\r' ); }
+  "\\t" { str_buf_putc( PARSER_STR_BUF, '\t' ); }
   {unicode_escape} {
     int value;
     int value2;
@@ -136,9 +155,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 	  /* Valid second surrogate */
 	  value = ( ( value - 0xD800 ) << 10 ) + ( value2 - 0xDC00 ) + 0x10000;
 	  utf8_encode( value, utf8_str );
-	  for ( i = 0; utf8_str[i]; i++ ) {
-	    APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = utf8_str[i];
-	  }
+          str_buf_append( PARSER_STR_BUF, utf8_str );
 	}
 	else {
 	  json_lex_error( "invalid unicode \\u%.4x\\u%.4x", value, value2 );
@@ -150,9 +167,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 	yycolumn = yycolumn - 6;
 	
 	utf8_encode( value, utf8_str );
-	for ( i = 0; utf8_str[i]; i++ ) {
-	  APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = utf8_str[i];
-	}
+        str_buf_append( PARSER_STR_BUF, utf8_str );
       }
       else {
 	json_lex_error( "invalid unicode \\u%.4x\\u%.4x", value, value2 );
@@ -165,9 +180,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
     }
     else {
       utf8_encode( value, utf8_str );
-      for ( i = 0; utf8_str[i]; i++ ) {
-	APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = utf8_str[i];
-      }
+      str_buf_append( PARSER_STR_BUF, utf8_str );
     }
   }
   [\x00-\x09\x0b-\x1f] {
@@ -175,14 +188,11 @@ exp ("e"|"E")("+"|"-")?[0-9]+
      * Not legal as per the JSON specification, save it off and issue an
      * error.
      */
-    APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = yytext[0];
+    str_buf_putc( PARSER_STR_BUF, yytext[0] );
     json_lex_error( "illegal control character 0x%x", yytext[0] );
   }
   [^\"\'\\\x00-\x1f]+ {
-    int i;
-    for ( i = 0; i < yyleng; i++ ) {
-      APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = yytext[i];
-    }
+    str_buf_write( PARSER_STR_BUF, yytext, yyleng );
   }
   . {
     json_lex_error( "start of illegal backslash" );
@@ -192,9 +202,9 @@ exp ("e"|"E")("+"|"-")?[0-9]+
     BEGIN( INITIAL );
     json_lex_error( "unterminated string constant" );
     yylval->string = apr_palloc( PARSER_MP,
-				 PARSER_STR_ARRAY->nelts + 1 );
-    utf8_strcpyn( yylval->string, (unsigned char *) PARSER_STR_ARRAY->elts,
-                  PARSER_STR_ARRAY->nelts );
+				 PARSER_STR_BUF->data_len + 1 );
+    utf8_strcpyn( yylval->string, PARSER_STR_BUF->data,
+                  PARSER_STR_BUF->data_len );
     return T_STRING;
   }
 }

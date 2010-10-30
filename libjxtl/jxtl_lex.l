@@ -1,3 +1,24 @@
+/*
+ * $Id$
+ *
+ * Description
+ *   The lexer for template language.
+ *
+ * Copyright 2010 Dan Rinehimer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 %{
 #include <apr_hash.h>
 #include <apr_pools.h>
@@ -17,12 +38,6 @@
 #define jxtl_error( ... ) \
   jxtl_error( yylloc, yyscanner, PARSER, NULL, __VA_ARGS__ )
 
-#define STRING_COPY {                                           \
-    int i;                                                      \
-    for ( i = 0; i < yyleng; i++ ) {                            \
-      APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = yytext[i];     \
-    }                                                           \
-  }
 %}
 
 %option prefix="jxtl_"
@@ -47,10 +62,10 @@
      * return that now and put the the directive start text back so that it
      * can be returned next time after the array is cleared.
      */
-    if ( PARSER_STR_ARRAY->nelts > 0 )  {
-      yylval->string = apr_pstrndup( PARSER_MP, PARSER_STR_ARRAY->elts,
-				     PARSER_STR_ARRAY->nelts );
-      APR_ARRAY_CLEAR( PARSER_STR_ARRAY );
+    if ( PARSER_STR_BUF->data_len > 0 )  {
+      yylval->string = apr_pstrndup( PARSER_MP, PARSER_STR_BUF->data,
+				     PARSER_STR_BUF->data_len );
+      STR_BUF_CLEAR( PARSER_STR_BUF );
       yyless( 0 );
       return T_TEXT;
     }
@@ -62,8 +77,8 @@
   "{{!" {
     BEGIN( comment );
   }
-  "{"|"\n" { STRING_COPY; }
-  [^{\n]+ { STRING_COPY; }
+  "{"|"\n" { str_buf_putc( PARSER_STR_BUF, yytext[0] ); }
+  [^{\n]+ { str_buf_write( PARSER_STR_BUF, yytext, yyleng ); }
 }
 
 <directive>{
@@ -91,7 +106,7 @@
   "," { return ','; }
   "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
   "\"" {
-    APR_ARRAY_CLEAR( PARSER_STR_ARRAY );
+    STR_BUF_CLEAR( PARSER_STR_BUF );
     BEGIN( str );
   }
   [ \t\r]+
@@ -104,21 +119,20 @@
 
 <str>{
   "\"" {
-    yylval->string = apr_pstrndup( PARSER_MP,
-                                   PARSER_STR_ARRAY->elts,
-                                   PARSER_STR_ARRAY->nelts );
-    APR_ARRAY_CLEAR( PARSER_STR_ARRAY );
+    yylval->string = apr_pstrndup( PARSER_MP, PARSER_STR_BUF->data,
+                                   PARSER_STR_BUF->data_len );
+    STR_BUF_CLEAR( PARSER_STR_BUF );
     BEGIN( options );
     return T_STRING;
   }
-  "\\b" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\b'; }
-  "\\f" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\f'; }
-  "\\n" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\n'; }
-  "\\r" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\r'; }
-  "\\t" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '\t'; }
-  "\\\"" { APR_ARRAY_PUSH( PARSER_STR_ARRAY, char ) = '"'; }
+  "\\b" { str_buf_putc( PARSER_STR_BUF, '\b' ); }
+  "\\f" { str_buf_putc( PARSER_STR_BUF, '\f' ); }
+  "\\n" { str_buf_putc( PARSER_STR_BUF, '\n' ); }
+  "\\r" { str_buf_putc( PARSER_STR_BUF, '\r' ); }
+  "\\t" { str_buf_putc( PARSER_STR_BUF, '\t' ); }
+  "\\\"" { str_buf_putc( PARSER_STR_BUF, '"' ); }
   [^\"\\\n]+ {
-    STRING_COPY;
+    str_buf_write( PARSER_STR_BUF, yytext, yyleng );
   }
   "\n" {
     jxtl_error( "unterminated string constant" );
@@ -134,11 +148,11 @@
 }
 
 <INITIAL><<EOF>> {
-  if ( PARSER_STR_ARRAY->nelts > 0 )  {
+  if ( PARSER_STR_BUF->data_len > 0 )  {
     yylval->string = apr_pstrndup( PARSER_MP,
-				   PARSER_STR_ARRAY->elts,
-				   PARSER_STR_ARRAY->nelts );
-    APR_ARRAY_CLEAR( PARSER_STR_ARRAY );
+				   PARSER_STR_BUF->data,
+				   PARSER_STR_BUF->data_len );
+    STR_BUF_CLEAR( PARSER_STR_BUF );
     return T_TEXT;
   }
   yyterminate();

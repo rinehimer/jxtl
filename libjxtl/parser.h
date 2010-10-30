@@ -2,6 +2,7 @@
 #define PARSER_H
 
 #include <apr_file_io.h>
+#include "str_buf.h"
 
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
@@ -34,7 +35,7 @@ struct parser_t {
   /* Status variable used when reading from in_file. */
   apr_status_t status;
   /* Array for storing strings in the lexer. */
-  apr_array_header_t *str_array;
+  str_buf_t *str_buf;
   /* An APR file pointer. */
   apr_file_t *in_file;
   /* Number of bytes read from the file. */
