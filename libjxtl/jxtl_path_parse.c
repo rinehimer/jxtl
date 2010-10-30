@@ -1,24 +1,22 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+/* A Bison parser, made by GNU Bison 2.4.3.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
+   
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+   2009, 2010 Free Software Foundation, Inc.
+   
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -29,7 +27,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -47,7 +45,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.3"
+#define YYBISON_VERSION "2.4.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -55,38 +53,29 @@
 /* Pure parsers.  */
 #define YYPURE 1
 
+/* Push parsers.  */
+#define YYPUSH 0
+
+/* Pull parsers.  */
+#define YYPULL 1
+
 /* Using locations.  */
 #define YYLSP_NEEDED 1
 
 /* Substitute the variable and function names.  */
-#define yyparse jxtl_path_parse
-#define yylex   jxtl_path_lex
-#define yyerror jxtl_path_error
-#define yylval  jxtl_path_lval
-#define yychar  jxtl_path_char
-#define yydebug jxtl_path_debug
-#define yynerrs jxtl_path_nerrs
-#define yylloc jxtl_path_lloc
-
-/* Tokens.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     T_IDENTIFIER = 258,
-     T_PARENT = 259
-   };
-#endif
-/* Tokens.  */
-#define T_IDENTIFIER 258
-#define T_PARENT 259
-
-
-
+#define yyparse         jxtl_path_parse
+#define yylex           jxtl_path_lex
+#define yyerror         jxtl_path_error
+#define yylval          jxtl_path_lval
+#define yychar          jxtl_path_char
+#define yydebug         jxtl_path_debug
+#define yynerrs         jxtl_path_nerrs
+#define yylloc          jxtl_path_lloc
 
 /* Copy the first part of user declarations.  */
-#line 1 "jxtl_path_parse.y"
+
+/* Line 189 of yacc.c  */
+#line 22 "jxtl_path_parse.y"
 
 #include <apr_strings.h>
 #include <stdarg.h>
@@ -109,6 +98,9 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
                       void *callbacks_ptr, const char *error_string, ... );
 
 
+/* Line 189 of yacc.c  */
+#line 103 "jxtl_path_parse.c"
+
 /* Enabling traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -127,19 +119,42 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 # define YYTOKEN_TABLE 0
 #endif
 
+
+/* Tokens.  */
+#ifndef YYTOKENTYPE
+# define YYTOKENTYPE
+   /* Put the tokens into the symbol table, so that GDB and other debuggers
+      know about them.  */
+   enum yytokentype {
+     T_IDENTIFIER = 258,
+     T_PARENT = 259
+   };
+#endif
+/* Tokens.  */
+#define T_IDENTIFIER 258
+#define T_PARENT 259
+
+
+
+
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 36 "jxtl_path_parse.y"
 {
+
+/* Line 214 of yacc.c  */
+#line 57 "jxtl_path_parse.y"
+
   int ival;
   unsigned char *string;
-}
-/* Line 187 of yacc.c.  */
-#line 139 "jxtl_path_parse.c"
-	YYSTYPE;
+
+
+
+/* Line 214 of yacc.c  */
+#line 154 "jxtl_path_parse.c"
+} YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 #if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
@@ -159,8 +174,8 @@ typedef struct YYLTYPE
 /* Copy the second part of user declarations.  */
 
 
-/* Line 216 of yacc.c.  */
-#line 164 "jxtl_path_parse.c"
+/* Line 264 of yacc.c  */
+#line 179 "jxtl_path_parse.c"
 
 #ifdef short
 # undef short
@@ -210,7 +225,7 @@ typedef short int yytype_int16;
 #define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
 
 #ifndef YY_
-# if YYENABLE_NLS
+# if defined YYENABLE_NLS && YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
@@ -235,14 +250,14 @@ typedef short int yytype_int16;
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static int
-YYID (int i)
+YYID (int yyi)
 #else
 static int
-YYID (i)
-    int i;
+YYID (yyi)
+    int yyi;
 #endif
 {
-  return i;
+  return yyi;
 }
 #endif
 
@@ -324,9 +339,9 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  yytype_int16 yyss;
-  YYSTYPE yyvs;
-    YYLTYPE yyls;
+  yytype_int16 yyss_alloc;
+  YYSTYPE yyvs_alloc;
+  YYLTYPE yyls_alloc;
 };
 
 /* The size of the maximum gap between one aligned stack and the next.  */
@@ -361,12 +376,12 @@ union yyalloc
    elements in the stack, and YYPTR gives the new location of the
    stack.  Advance YYPTR to a properly aligned location for the next
    stack.  */
-# define YYSTACK_RELOCATE(Stack)					\
+# define YYSTACK_RELOCATE(Stack_alloc, Stack)				\
     do									\
       {									\
 	YYSIZE_T yynewbytes;						\
-	YYCOPY (&yyptr->Stack, Stack, yysize);				\
-	Stack = &yyptr->Stack;						\
+	YYCOPY (&yyptr->Stack_alloc, Stack, yysize);			\
+	Stack = &yyptr->Stack_alloc;					\
 	yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
 	yyptr += yynewbytes / sizeof (*yyptr);				\
       }									\
@@ -447,8 +462,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    49,    49,    50,    54,    54,    55,    59,    59,    61,
-      62,    63,    63,    64,    67,    69,    69
+       0,    70,    70,    71,    75,    75,    76,    80,    80,    82,
+      83,    84,    84,    85,    88,    90,    90
 };
 #endif
 
@@ -458,8 +473,8 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "\"identifier\"", "\"..\"", "'/'", "'!'",
-  "'.'", "'*'", "'['", "']'", "$accept", "path_expr", "pattern", "@1",
-  "path_pattern", "@2", "@3", "predicate", "@4", 0
+  "'.'", "'*'", "'['", "']'", "$accept", "path_expr", "pattern", "$@1",
+  "path_pattern", "$@2", "$@3", "predicate", "$@4", 0
 };
 #endif
 
@@ -559,9 +574,18 @@ static const yytype_uint8 yystos[] =
 
 /* Like YYERROR except do call yyerror.  This remains here temporarily
    to ease the transition to the new meaning of YYERROR, for GCC.
-   Once GCC version 2 has supplanted version 1, this can go.  */
+   Once GCC version 2 has supplanted version 1, this can go.  However,
+   YYFAIL appears to be in use.  Nevertheless, it is formally deprecated
+   in Bison 2.4.2's NEWS entry, where a plan to phase it out is
+   discussed.  */
 
 #define YYFAIL		goto yyerrlab
+#if defined YYFAIL
+  /* This is here to suppress warnings from the GCC cpp's
+     -Wunused-macros.  Normally we don't worry about that warning, but
+     some users do, and we want to make it easy for users to remove
+     YYFAIL uses, which will produce warnings from Bison 2.5.  */
+#endif
 
 #define YYRECOVERING()  (!!yyerrstatus)
 
@@ -618,7 +642,7 @@ while (YYID (0))
    we won't break user code: when these are the locations we know.  */
 
 #ifndef YY_LOCATION_PRINT
-# if YYLTYPE_IS_TRIVIAL
+# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
 #  define YY_LOCATION_PRINT(File, Loc)			\
      fprintf (File, "%d.%d-%d.%d",			\
 	      (Loc).first_line, (Loc).first_column,	\
@@ -743,17 +767,20 @@ yy_symbol_print (yyoutput, yytype, yyvaluep, yylocationp, scanner, parser, callb
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_stack_print (yytype_int16 *bottom, yytype_int16 *top)
+yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
 #else
 static void
-yy_stack_print (bottom, top)
-    yytype_int16 *bottom;
-    yytype_int16 *top;
+yy_stack_print (yybottom, yytop)
+    yytype_int16 *yybottom;
+    yytype_int16 *yytop;
 #endif
 {
   YYFPRINTF (stderr, "Stack now");
-  for (; bottom <= top; ++bottom)
-    YYFPRINTF (stderr, " %d", *bottom);
+  for (; yybottom <= yytop; yybottom++)
+    {
+      int yybot = *yybottom;
+      YYFPRINTF (stderr, " %d", yybot);
+    }
   YYFPRINTF (stderr, "\n");
 }
 
@@ -791,11 +818,11 @@ yy_reduce_print (yyvsp, yylsp, yyrule, scanner, parser, callbacks_ptr)
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
-      fprintf (stderr, "   $%d = ", yyi + 1);
+      YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
 		       , &(yylsp[(yyi + 1) - (yynrhs)])		       , scanner, parser, callbacks_ptr);
-      fprintf (stderr, "\n");
+      YYFPRINTF (stderr, "\n");
     }
 }
 
@@ -1083,10 +1110,8 @@ yydestruct (yymsg, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr
 	break;
     }
 }
-
 
 /* Prevent warnings from -Wmissing-prototypes.  */
-
 #ifdef YYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
 int yyparse (void *YYPARSE_PARAM);
@@ -1105,10 +1130,9 @@ int yyparse ();
 
 
 
-
-/*----------.
-| yyparse.  |
-`----------*/
+/*-------------------------.
+| yyparse or yypush_parse.  |
+`-------------------------*/
 
 #ifdef YYPARSE_PARAM
 #if (defined __STDC__ || defined __C99__FUNC__ \
@@ -1134,24 +1158,59 @@ yyparse (scanner, parser, callbacks_ptr)
 #endif
 #endif
 {
-  /* The look-ahead symbol.  */
+/* The lookahead symbol.  */
 int yychar;
 
-/* The semantic value of the look-ahead symbol.  */
+/* The semantic value of the lookahead symbol.  */
 YYSTYPE yylval;
 
-/* Number of syntax errors so far.  */
-int yynerrs;
-/* Location data for the look-ahead symbol.  */
+/* Location data for the lookahead symbol.  */
 YYLTYPE yylloc;
 
-  int yystate;
+    /* Number of syntax errors so far.  */
+    int yynerrs;
+
+    int yystate;
+    /* Number of tokens to shift before error messages enabled.  */
+    int yyerrstatus;
+
+    /* The stacks and their tools:
+       `yyss': related to states.
+       `yyvs': related to semantic values.
+       `yyls': related to locations.
+
+       Refer to the stacks thru separate pointers, to allow yyoverflow
+       to reallocate them elsewhere.  */
+
+    /* The state stack.  */
+    yytype_int16 yyssa[YYINITDEPTH];
+    yytype_int16 *yyss;
+    yytype_int16 *yyssp;
+
+    /* The semantic value stack.  */
+    YYSTYPE yyvsa[YYINITDEPTH];
+    YYSTYPE *yyvs;
+    YYSTYPE *yyvsp;
+
+    /* The location stack.  */
+    YYLTYPE yylsa[YYINITDEPTH];
+    YYLTYPE *yyls;
+    YYLTYPE *yylsp;
+
+    /* The locations where the error started and ended.  */
+    YYLTYPE yyerror_range[3];
+
+    YYSIZE_T yystacksize;
+
   int yyn;
   int yyresult;
-  /* Number of tokens to shift before error messages enabled.  */
-  int yyerrstatus;
-  /* Look-ahead token as an internal (translated) token number.  */
-  int yytoken = 0;
+  /* Lookahead token as an internal (translated) token number.  */
+  int yytoken;
+  /* The variables used to return semantic value and location from the
+     action routines.  */
+  YYSTYPE yyval;
+  YYLTYPE yyloc;
+
 #if YYERROR_VERBOSE
   /* Buffer for error messages, and its allocated size.  */
   char yymsgbuf[128];
@@ -1159,63 +1218,37 @@ YYLTYPE yylloc;
   YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
 #endif
 
-  /* Three stacks and their tools:
-     `yyss': related to states,
-     `yyvs': related to semantic values,
-     `yyls': related to locations.
-
-     Refer to the stacks thru separate pointers, to allow yyoverflow
-     to reallocate them elsewhere.  */
-
-  /* The state stack.  */
-  yytype_int16 yyssa[YYINITDEPTH];
-  yytype_int16 *yyss = yyssa;
-  yytype_int16 *yyssp;
-
-  /* The semantic value stack.  */
-  YYSTYPE yyvsa[YYINITDEPTH];
-  YYSTYPE *yyvs = yyvsa;
-  YYSTYPE *yyvsp;
-
-  /* The location stack.  */
-  YYLTYPE yylsa[YYINITDEPTH];
-  YYLTYPE *yyls = yylsa;
-  YYLTYPE *yylsp;
-  /* The locations where the error started and ended.  */
-  YYLTYPE yyerror_range[2];
-
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N), yylsp -= (N))
-
-  YYSIZE_T yystacksize = YYINITDEPTH;
-
-  /* The variables used to return semantic value and location from the
-     action routines.  */
-  YYSTYPE yyval;
-  YYLTYPE yyloc;
 
   /* The number of symbols on the RHS of the reduced rule.
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
+
+  yytoken = 0;
+  yyss = yyssa;
+  yyvs = yyvsa;
+  yyls = yylsa;
+  yystacksize = YYINITDEPTH;
 
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yystate = 0;
   yyerrstatus = 0;
   yynerrs = 0;
-  yychar = YYEMPTY;		/* Cause a token to be read.  */
+  yychar = YYEMPTY; /* Cause a token to be read.  */
 
   /* Initialize stack pointers.
      Waste one element of value and location stack
      so that they stay on the same level as the state stack.
      The wasted elements are never initialized.  */
-
   yyssp = yyss;
   yyvsp = yyvs;
   yylsp = yyls;
-#if YYLTYPE_IS_TRIVIAL
+
+#if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
   /* Initialize the default location before parsing starts.  */
   yylloc.first_line   = yylloc.last_line   = 1;
-  yylloc.first_column = yylloc.last_column = 0;
+  yylloc.first_column = yylloc.last_column = 1;
 #endif
 
   goto yysetstate;
@@ -1254,6 +1287,7 @@ YYLTYPE yylloc;
 		    &yyvs1, yysize * sizeof (*yyvsp),
 		    &yyls1, yysize * sizeof (*yylsp),
 		    &yystacksize);
+
 	yyls = yyls1;
 	yyss = yyss1;
 	yyvs = yyvs1;
@@ -1275,9 +1309,9 @@ YYLTYPE yylloc;
 	  (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
 	if (! yyptr)
 	  goto yyexhaustedlab;
-	YYSTACK_RELOCATE (yyss);
-	YYSTACK_RELOCATE (yyvs);
-	YYSTACK_RELOCATE (yyls);
+	YYSTACK_RELOCATE (yyss_alloc, yyss);
+	YYSTACK_RELOCATE (yyvs_alloc, yyvs);
+	YYSTACK_RELOCATE (yyls_alloc, yyls);
 #  undef YYSTACK_RELOCATE
 	if (yyss1 != yyssa)
 	  YYSTACK_FREE (yyss1);
@@ -1298,6 +1332,9 @@ YYLTYPE yylloc;
 
   YYDPRINTF ((stderr, "Entering state %d\n", yystate));
 
+  if (yystate == YYFINAL)
+    YYACCEPT;
+
   goto yybackup;
 
 /*-----------.
@@ -1306,16 +1343,16 @@ YYLTYPE yylloc;
 yybackup:
 
   /* Do appropriate processing given the current state.  Read a
-     look-ahead token if we need one and don't already have one.  */
+     lookahead token if we need one and don't already have one.  */
 
-  /* First try to decide what to do without reference to look-ahead token.  */
+  /* First try to decide what to do without reference to lookahead token.  */
   yyn = yypact[yystate];
   if (yyn == YYPACT_NINF)
     goto yydefault;
 
-  /* Not known => get a look-ahead token if don't already have one.  */
+  /* Not known => get a lookahead token if don't already have one.  */
 
-  /* YYCHAR is either YYEMPTY or YYEOF or a valid look-ahead symbol.  */
+  /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
   if (yychar == YYEMPTY)
     {
       YYDPRINTF ((stderr, "Reading a token: "));
@@ -1347,20 +1384,16 @@ yybackup:
       goto yyreduce;
     }
 
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
   /* Count tokens shifted since error; after three, turn off error
      status.  */
   if (yyerrstatus)
     yyerrstatus--;
 
-  /* Shift the look-ahead token.  */
+  /* Shift the lookahead token.  */
   YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
 
-  /* Discard the shifted token unless it is eof.  */
-  if (yychar != YYEOF)
-    yychar = YYEMPTY;
+  /* Discard the shifted token.  */
+  yychar = YYEMPTY;
 
   yystate = yyn;
   *++yyvsp = yylval;
@@ -1401,49 +1434,66 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 49 "jxtl_path_parse.y"
+
+/* Line 1464 of yacc.c  */
+#line 70 "jxtl_path_parse.y"
     { callbacks->negate_handler( callbacks->user_data ); }
     break;
 
   case 4:
-#line 54 "jxtl_path_parse.y"
+
+/* Line 1464 of yacc.c  */
+#line 75 "jxtl_path_parse.y"
     { callbacks->root_object_handler( callbacks->user_data ); }
     break;
 
   case 7:
-#line 59 "jxtl_path_parse.y"
+
+/* Line 1464 of yacc.c  */
+#line 80 "jxtl_path_parse.y"
     { callbacks->identifier_handler( callbacks->user_data,
                                                   (yyvsp[(1) - (1)].string) ); }
     break;
 
   case 9:
-#line 61 "jxtl_path_parse.y"
+
+/* Line 1464 of yacc.c  */
+#line 82 "jxtl_path_parse.y"
     { callbacks->current_object_handler( callbacks->user_data ); }
     break;
 
   case 10:
-#line 62 "jxtl_path_parse.y"
+
+/* Line 1464 of yacc.c  */
+#line 83 "jxtl_path_parse.y"
     { callbacks->parent_object_handler( callbacks->user_data ); }
     break;
 
   case 11:
-#line 63 "jxtl_path_parse.y"
+
+/* Line 1464 of yacc.c  */
+#line 84 "jxtl_path_parse.y"
     { callbacks->any_object_handler( callbacks->user_data ); }
     break;
 
   case 15:
-#line 69 "jxtl_path_parse.y"
+
+/* Line 1464 of yacc.c  */
+#line 90 "jxtl_path_parse.y"
     { callbacks->predicate_start_handler( callbacks->user_data ); }
     break;
 
   case 16:
-#line 71 "jxtl_path_parse.y"
+
+/* Line 1464 of yacc.c  */
+#line 92 "jxtl_path_parse.y"
     { callbacks->predicate_end_handler( callbacks->user_data ); }
     break;
 
 
-/* Line 1267 of yacc.c.  */
-#line 1447 "jxtl_path_parse.c"
+
+/* Line 1464 of yacc.c  */
+#line 1497 "jxtl_path_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1515,11 +1565,11 @@ yyerrlab:
 #endif
     }
 
-  yyerror_range[0] = yylloc;
+  yyerror_range[1] = yylloc;
 
   if (yyerrstatus == 3)
     {
-      /* If just tried and failed to reuse look-ahead token after an
+      /* If just tried and failed to reuse lookahead token after an
 	 error, discard it.  */
 
       if (yychar <= YYEOF)
@@ -1536,7 +1586,7 @@ yyerrlab:
 	}
     }
 
-  /* Else will try to reuse look-ahead token after shifting the error
+  /* Else will try to reuse lookahead token after shifting the error
      token.  */
   goto yyerrlab1;
 
@@ -1552,7 +1602,7 @@ yyerrorlab:
   if (/*CONSTCOND*/ 0)
      goto yyerrorlab;
 
-  yyerror_range[0] = yylsp[1-yylen];
+  yyerror_range[1] = yylsp[1-yylen];
   /* Do not reclaim the symbols of the rule which action triggered
      this YYERROR.  */
   YYPOPSTACK (yylen);
@@ -1586,7 +1636,7 @@ yyerrlab1:
       if (yyssp == yyss)
 	YYABORT;
 
-      yyerror_range[0] = *yylsp;
+      yyerror_range[1] = *yylsp;
       yydestruct ("Error: popping",
 		  yystos[yystate], yyvsp, yylsp, scanner, parser, callbacks_ptr);
       YYPOPSTACK (1);
@@ -1594,15 +1644,12 @@ yyerrlab1:
       YY_STACK_PRINT (yyss, yyssp);
     }
 
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
   *++yyvsp = yylval;
 
-  yyerror_range[1] = yylloc;
+  yyerror_range[2] = yylloc;
   /* Using YYLLOC is tempting, but would change the location of
-     the look-ahead.  YYLOC is available though.  */
-  YYLLOC_DEFAULT (yyloc, (yyerror_range - 1), 2);
+     the lookahead.  YYLOC is available though.  */
+  YYLLOC_DEFAULT (yyloc, yyerror_range, 2);
   *++yylsp = yyloc;
 
   /* Shift the error token.  */
@@ -1626,7 +1673,7 @@ yyabortlab:
   yyresult = 1;
   goto yyreturn;
 
-#ifndef yyoverflow
+#if !defined(yyoverflow) || YYERROR_VERBOSE
 /*-------------------------------------------------.
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
@@ -1637,7 +1684,7 @@ yyexhaustedlab:
 #endif
 
 yyreturn:
-  if (yychar != YYEOF && yychar != YYEMPTY)
+  if (yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
 		 yytoken, &yylval, &yylloc, scanner, parser, callbacks_ptr);
   /* Do not reclaim the symbols of the rule which action triggered
@@ -1663,22 +1710,40 @@ yyreturn:
 }
 
 
-#line 74 "jxtl_path_parse.y"
+
+/* Line 1684 of yacc.c  */
+#line 95 "jxtl_path_parse.y"
 
 
-typedef struct jxtl_path_data_t {
+/**
+ * Parser error callback.  Just store the error so that the caller can retrieve
+ * it later and show it in a context that makes sense.
+ */
+void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
+		      void *callbacks_ptr, const char *error_string, ... )
+{
+  va_list args;
+  va_start( args, error_string );
+  parser->error_str = apr_pvsprintf( parser->mp, error_string, args );
+  va_end( args );
+}
+
+typedef struct path_data_t {
   apr_pool_t *mp;
-  /** Array to store the current expression.  */
+  /** Array to store the current expression. */
   apr_array_header_t *expr_array;
   /** Root of the path expression. */
   jxtl_path_expr_t *root;
-  /** The current expression. */ 
+  /** The current expression. */
   jxtl_path_expr_t *curr;
-}jxtl_path_data_t;
+}path_data_t;
 
-static void jxtl_path_expr_create( jxtl_path_data_t *data,
-				   jxtl_path_expr_type type,
-				   unsigned char *identifier )
+/**
+ * Convenience function called by the parser callbacks.
+ */
+static void create_expr( path_data_t *data,
+                         jxtl_path_expr_type type,
+                         unsigned char *identifier )
 {
   jxtl_path_expr_t *expr;
 
@@ -1703,58 +1768,59 @@ static void jxtl_path_expr_create( jxtl_path_data_t *data,
   }
 }
 
-/*****************************************************************************
- Begin parser callback functions.
- *****************************************************************************/
+/*
+ * Begin parser callback functions.
+ */
 
 /**
  * Request to lookup an identifier.
  */
-static void jxtl_path_identifier( void *user_data, unsigned char *ident )
+static void lookup_identifier( void *user_data, unsigned char *ident )
 {
-  jxtl_path_data_t *data = (jxtl_path_data_t *) user_data;
-  jxtl_path_expr_create( data, JXTL_PATH_LOOKUP,
-                         (unsigned char *) apr_pstrdup( data->mp,
-                                                        (char *) ident ) );
+  path_data_t *data = (path_data_t *) user_data;
+  create_expr( data, JXTL_PATH_LOOKUP,
+               (unsigned char *) apr_pstrdup( data->mp, (char *) ident ) );
 }
 
 /**
  * Request for the root object.
  */
-static void jxtl_path_root_object( void *user_data )
+static void get_root_object( void *user_data )
 {
-  jxtl_path_expr_create( user_data, JXTL_PATH_ROOT_OBJ, NULL );
+  create_expr( user_data, JXTL_PATH_ROOT_OBJ, NULL );
 }
 
-static void jxtl_path_parent_object( void *user_data )
+/**
+ * Request for the parent object.
+ */
+static void get_parent_object( void *user_data )
 {
-  jxtl_path_expr_create( user_data, JXTL_PATH_PARENT_OBJ, NULL );
+  create_expr( user_data, JXTL_PATH_PARENT_OBJ, NULL );
 }
 
 /**
  * Request for the current object.
  */
-static void jxtl_path_current_object( void *user_data )
+static void get_current_object( void *user_data )
 {
-  jxtl_path_expr_create( user_data, JXTL_PATH_CURRENT_OBJ, NULL );
-
+  create_expr( user_data, JXTL_PATH_CURRENT_OBJ, NULL );
 }
 
 /**
- * Request for all children.
+ * Request for any object.
  */
-static void jxtl_path_any_object( void *user_data )
+static void get_any_object( void *user_data )
 {
-  jxtl_path_expr_create( user_data, JXTL_PATH_ANY_OBJ, NULL );
+  create_expr( user_data, JXTL_PATH_ANY_OBJ, NULL );
 }
 
 /**
  * Start a predicate.  Push the current expression node on our stack and set
  * root and curr to NULL.
  */
-static void jxtl_path_predicate_start( void *user_data )
+static void start_predicate( void *user_data )
 {
-  jxtl_path_data_t *data = (jxtl_path_data_t *) user_data;
+  path_data_t *data = (path_data_t *) user_data;
 
   APR_ARRAY_PUSH( data->expr_array, jxtl_path_expr_t * ) = data->curr;
 
@@ -1763,13 +1829,13 @@ static void jxtl_path_predicate_start( void *user_data )
 }
 
 /**
- * End a predicate.  Pop off the previous expression node, set it's predicate
+ * End a predicate.  Pop off the previous expression node, set its predicate
  * to be this expression and reset the curr and root pointers from what we
  * popped.
  */
-static void jxtl_path_predicate_end( void *user_data )
+static void end_predicate( void *user_data )
 {
-  jxtl_path_data_t *data = (jxtl_path_data_t *) user_data;
+  path_data_t *data = (path_data_t *) user_data;
   jxtl_path_expr_t *expr;
   expr = APR_ARRAY_POP( data->expr_array, jxtl_path_expr_t * );
 
@@ -1781,25 +1847,19 @@ static void jxtl_path_predicate_end( void *user_data )
 /**
  * Negate the current expression.
  */
-static void jxtl_path_negate( void *user_data )
+static void negate_expression( void *user_data )
 {
-  jxtl_path_data_t *data = (jxtl_path_data_t *) user_data;
+  path_data_t *data = (path_data_t *) user_data;
   data->root->negate = 1;
 }
 
-/*****************************************************************************
- End parser callback functions.
- *****************************************************************************/
+/*
+ * End of parser callback functions.
+ */
 
-void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
-		      void *callbacks_ptr, const char *error_string, ... )
-{
-  va_list args;
-  va_start( args, error_string );
-  parser->error_str = apr_pvsprintf( parser->mp, error_string, args );
-  va_end( args );
-}
-
+/**
+ * Create a path parser.
+ */
 parser_t *jxtl_path_parser_create( apr_pool_t *mp )
 {
   parser_t *parser = parser_create( mp,
@@ -1810,20 +1870,20 @@ parser_t *jxtl_path_parser_create( apr_pool_t *mp )
 				    jxtl_path__delete_buffer,
 				    jxtl_path_parse );
   jxtl_path_callback_t *jxtl_callbacks;
-  jxtl_path_data_t *jxtl_data;
+  path_data_t *jxtl_data;
 
   jxtl_callbacks = apr_palloc( mp, sizeof(jxtl_path_callback_t) );
   
-  jxtl_callbacks->identifier_handler = jxtl_path_identifier;
-  jxtl_callbacks->root_object_handler = jxtl_path_root_object;
-  jxtl_callbacks->parent_object_handler = jxtl_path_parent_object;
-  jxtl_callbacks->current_object_handler = jxtl_path_current_object;
-  jxtl_callbacks->any_object_handler = jxtl_path_any_object;
-  jxtl_callbacks->predicate_start_handler = jxtl_path_predicate_start;
-  jxtl_callbacks->predicate_end_handler = jxtl_path_predicate_end;
-  jxtl_callbacks->negate_handler = jxtl_path_negate;
+  jxtl_callbacks->identifier_handler = lookup_identifier;
+  jxtl_callbacks->root_object_handler = get_root_object;
+  jxtl_callbacks->parent_object_handler = get_parent_object;
+  jxtl_callbacks->current_object_handler = get_current_object;
+  jxtl_callbacks->any_object_handler = get_any_object;
+  jxtl_callbacks->predicate_start_handler = start_predicate;
+  jxtl_callbacks->predicate_end_handler = end_predicate;
+  jxtl_callbacks->negate_handler = negate_expression;
 
-  jxtl_data = apr_palloc( mp, sizeof(jxtl_path_data_t) );
+  jxtl_data = apr_palloc( mp, sizeof(path_data_t) );
   jxtl_data->expr_array = apr_array_make( mp, 32, sizeof(jxtl_path_expr_t *) );
   jxtl_data->mp = mp;
   jxtl_data->root = NULL;
@@ -1841,7 +1901,7 @@ int jxtl_path_parser_parse_buffer( parser_t *parser,
                                    jxtl_path_expr_t **expr )
 {
   jxtl_path_callback_t *jxtl_callbacks = parser_get_user_data( parser );
-  jxtl_path_data_t *jxtl_data = jxtl_callbacks->user_data;
+  path_data_t *jxtl_data = jxtl_callbacks->user_data;
 
   APR_ARRAY_CLEAR( jxtl_data->expr_array );
   jxtl_data->root = NULL;

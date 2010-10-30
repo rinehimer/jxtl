@@ -455,7 +455,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[13] =
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "jxtl_path_lex.l"
 /*
- * $Id$
+ * $Id: jxtl_path_lex.l 156 2010-10-30 06:13:59Z rinehimer $
  *
  * Description
  *   The lexer for path language used the templates.
