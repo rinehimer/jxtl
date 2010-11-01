@@ -47,7 +47,6 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %option header-file="json_lex.h"
 %option outfile="json_lex.c"
 %option noyywrap
-%option yylineno
 %option reentrant
 %option bison-bridge
 %option bison-locations

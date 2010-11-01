@@ -44,7 +44,6 @@
 %option header-file="jxtl_lex.h"
 %option outfile="jxtl_lex.c"
 %option noyywrap
-%option yylineno
 %option reentrant
 %option bison-bridge
 %option bison-locations

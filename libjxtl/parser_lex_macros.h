@@ -34,6 +34,7 @@
 #define PARSER_STATUS PARSER->status
 #define PARSER_IN_FILE PARSER->in_file
 #define PARSER_BYTES PARSER->bytes
+#define PARSER_LINE_NUM PARSER->line_num
 
 #define YY_INPUT( buf, result, max_size ) {                             \
     PARSER_BYTES = max_size;                                            \
@@ -42,16 +43,18 @@
  }
 
 #define YY_USER_ACTION {						\
-    yylloc->first_line = yylineno;					\
-    yylloc->last_line = yylineno;					\
+    yylloc->first_line = PARSER_LINE_NUM;                               \
+    yylloc->last_line = PARSER_LINE_NUM;                                \
     yylloc->first_column = yycolumn + 1;				\
     yylloc->last_column = yycolumn + yyleng;				\
     if ( yyleng == 1 && yytext[0] == '\n' ) {				\
+      PARSER_LINE_NUM++;                                                \
       yylloc->first_column = 0;						\
       yylloc->last_column = 0;						\
+      yycolumn = 0;                                                     \
     }									\
     else {								\
-      yycolumn += yyleng;						\
+      yycolumn += yyleng;                                               \
     }									\
   }
 

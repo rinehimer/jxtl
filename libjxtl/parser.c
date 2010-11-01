@@ -1,3 +1,24 @@
+/*
+ * $Id$
+ *
+ * Description
+ *   The parser implementation.
+ *
+ * Copyright 2010 Dan Rinehimer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <apr_pools.h>
 #include <apr_strings.h>
 
@@ -38,9 +59,7 @@ parser_t *parser_create( apr_pool_t *mp,
   parser->flex_delete = flex_delete;
   parser->bison_parse = bison_parse;
 
-  parser->error_str = NULL;
   parser->str_buf = str_buf_create( mp, 8192 );
-  parser->in_file = NULL;
   parser->flex_init( &parser->scanner );
   parser->flex_set_extra( parser, parser->scanner );
   apr_pool_cleanup_register( mp, parser->scanner, flex_destroy,
@@ -49,11 +68,12 @@ parser_t *parser_create( apr_pool_t *mp,
 }
 
 /**
- * Make sure internal variables are reset before parsing a buffer.
+ * Function to reset internal variables.
  */
-static void parser_reset( parser_t *parser )
+static void reset_parser( parser_t *parser )
 {
   parser->in_file = NULL;
+  parser->line_num = 1;
   parser->error_str = NULL;
   STR_BUF_CLEAR( parser->str_buf );
 }
@@ -79,7 +99,7 @@ apr_status_t parser_parse_file( parser_t *parser, const char *file )
   int is_stdin;
   char error_buf[1024];
 
-  parser_reset( parser );
+  reset_parser( parser );
 
   is_stdin = ( file && apr_strnatcasecmp( file, "-" ) == 0 );
 
@@ -110,7 +130,7 @@ apr_status_t parser_parse_buffer( parser_t *parser, const char *buffer )
   int flex_buffer_len = strlen( buffer ) + 2;
   void *buffer_state;
 
-  parser_reset( parser );
+  reset_parser( parser );
 
   flex_buffer = apr_palloc( parser->mp, flex_buffer_len );
   apr_cpystrn( flex_buffer, buffer, flex_buffer_len - 1 );

@@ -1,3 +1,25 @@
+/*
+ * $Id$
+ *
+ * Description
+ *   A generic parser API that is abstracts some of the details of using flex
+ *   and bison.
+ *
+ * Copyright 2010 Dan Rinehimer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef PARSER_H
 #define PARSER_H
 
@@ -14,6 +36,11 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
+
 typedef struct parser_t parser_t;
 
 typedef int ( *flex_init_func )( yyscan_t *yyscanner );
@@ -21,7 +48,7 @@ typedef void ( *flex_set_extra_func )( void *user_defined,
                                        yyscan_t yyscanner );
 typedef int ( *flex_destroy_func )( void *yyscanner );
 typedef YY_BUFFER_STATE ( *flex_scan_buffer_func )( char *base,
-                                                    unsigned int size,
+                                                    yy_size_t size,
                                                     yyscan_t yyscanner );
 typedef void ( *flex_delete_buffer_func )( YY_BUFFER_STATE b,
                                            yyscan_t yyscanner );
@@ -42,6 +69,8 @@ struct parser_t {
   apr_size_t bytes;
   /* A scanner object. */
   yyscan_t scanner;
+  /* Current line number.  Only works if newlines are matched separately. */
+  int line_num;
   /* Result of parsing. */
   int parse_result;
   /* If an error occurs during parsing and we want to save it. */
@@ -112,6 +141,5 @@ void *parser_get_user_data( parser_t *parser );
  * @param parser A parser.
  */
 char *parser_get_error( parser_t *parser );
-
 
 #endif

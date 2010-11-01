@@ -174,20 +174,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
 
-    /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
-     *       access to the local variable yy_act. Since yyless() is a macro, it would break
-     *       existing scanners that call yyless() from OUTSIDE jxtl_path_lex. 
-     *       One obvious solution it to make yy_act a global. I tried that, and saw
-     *       a 5% performance hit in a non-yylineno scanner, because yy_act is
-     *       normally declared as a register variable-- so it is not worth it.
-     */
-    #define  YY_LESS_LINENO(n) \
-            do { \
-                int yyl;\
-                for ( yyl = n; yyl < yyleng; ++yyl )\
-                    if ( yytext[yyl] == '\n' )\
-                        --yylineno;\
-            }while(0)
+    #define YY_LESS_LINENO(n)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -441,11 +428,6 @@ static yyconst flex_int16_t yy_chk[29] =
        17,   17,   17,   17,   17,   17,   17,   17
     } ;
 
-/* Table of booleans, true if rule could match eol. */
-static yyconst flex_int32_t yy_rule_can_match_eol[13] =
-    {   0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,     };
-
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
  */
@@ -458,7 +440,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[13] =
  * $Id: jxtl_path_lex.l 156 2010-10-30 06:13:59Z rinehimer $
  *
  * Description
- *   The lexer for path language used the templates.
+ *   The lexer for path language used in the templates.
  *
  * Copyright 2010 Dan Rinehimer
  *
@@ -490,11 +472,11 @@ static yyconst flex_int32_t yy_rule_can_match_eol[13] =
 #define YY_DECL int jxtl_path_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
 
 #define jxtl_lex_error( ... ) \
-  jxtl_path_error( yylloc, yyscanner, NULL, NULL, __VA_ARGS__ )
+  jxtl_path_error( yylloc, yyscanner, PARSER, NULL, __VA_ARGS__ )
 
 void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
                       void *callbacks_ptr, const char *error_string, ... );
-#line 498 "jxtl_path_lex.c"
+#line 480 "jxtl_path_lex.c"
 
 #define INITIAL 0
 
@@ -735,10 +717,10 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 56 "jxtl_path_lex.l"
+#line 55 "jxtl_path_lex.l"
 
 
-#line 742 "jxtl_path_lex.c"
+#line 724 "jxtl_path_lex.c"
 
     yylval = yylval_param;
 
@@ -814,18 +796,6 @@ yy_find_action:
 
 		YY_DO_BEFORE_ACTION;
 
-		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
-			{
-			int yyl;
-			for ( yyl = 0; yyl < yyleng; ++yyl )
-				if ( yytext[yyl] == '\n' )
-					   
-    do{ yylineno++;
-        yycolumn=0;
-    }while(0)
-;
-			}
-
 do_action:	/* This label is used only to access EOF actions. */
 
 		switch ( yy_act )
@@ -839,42 +809,42 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 58 "jxtl_path_lex.l"
+#line 57 "jxtl_path_lex.l"
 { return '/'; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 59 "jxtl_path_lex.l"
+#line 58 "jxtl_path_lex.l"
 { return '.'; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 60 "jxtl_path_lex.l"
+#line 59 "jxtl_path_lex.l"
 { return T_PARENT; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 61 "jxtl_path_lex.l"
+#line 60 "jxtl_path_lex.l"
 { return '*'; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 62 "jxtl_path_lex.l"
+#line 61 "jxtl_path_lex.l"
 { return '['; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 63 "jxtl_path_lex.l"
+#line 62 "jxtl_path_lex.l"
 { return ']'; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 64 "jxtl_path_lex.l"
+#line 63 "jxtl_path_lex.l"
 { return '!'; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 65 "jxtl_path_lex.l"
+#line 64 "jxtl_path_lex.l"
 {
   yylval->string = apr_pstrdup( PARSER_MP, yytext );
   return T_IDENTIFIER;
@@ -882,18 +852,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 69 "jxtl_path_lex.l"
+#line 68 "jxtl_path_lex.l"
 
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 70 "jxtl_path_lex.l"
+#line 69 "jxtl_path_lex.l"
 
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 71 "jxtl_path_lex.l"
+#line 70 "jxtl_path_lex.l"
 {
   jxtl_lex_error( "illegal character '%c' found in path expression",
                   yytext[0] );
@@ -901,10 +871,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 76 "jxtl_path_lex.l"
+#line 75 "jxtl_path_lex.l"
 ECHO;
 	YY_BREAK
-#line 908 "jxtl_path_lex.c"
+#line 878 "jxtl_path_lex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1269,10 +1239,6 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 	*--yy_cp = (char) c;
 
-    if ( c == '\n' ){
-        --yylineno;
-    }
-
 	yyg->yytext_ptr = yy_bp;
 	yyg->yy_hold_char = *yy_cp;
 	yyg->yy_c_buf_p = yy_cp;
@@ -1348,13 +1314,6 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	c = *(unsigned char *) yyg->yy_c_buf_p;	/* cast for 8-bit char's */
 	*yyg->yy_c_buf_p = '\0';	/* preserve yytext */
 	yyg->yy_hold_char = *++yyg->yy_c_buf_p;
-
-	if ( c == '\n' )
-		   
-    do{ yylineno++;
-        yycolumn=0;
-    }while(0)
-;
 
 	return c;
 }
@@ -2094,7 +2053,7 @@ void jxtl_path_free (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 76 "jxtl_path_lex.l"
+#line 75 "jxtl_path_lex.l"
 
 
 

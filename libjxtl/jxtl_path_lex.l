@@ -2,7 +2,7 @@
  * $Id$
  *
  * Description
- *   The lexer for path language used the templates.
+ *   The lexer for path language used in the templates.
  *
  * Copyright 2010 Dan Rinehimer
  *
@@ -35,7 +35,7 @@
 #define YY_DECL int jxtl_path_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
 
 #define jxtl_lex_error( ... ) \
-  jxtl_path_error( yylloc, yyscanner, NULL, NULL, __VA_ARGS__ )
+  jxtl_path_error( yylloc, yyscanner, PARSER, NULL, __VA_ARGS__ )
 
 void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
                       void *callbacks_ptr, const char *error_string, ... );
@@ -45,7 +45,6 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %option header-file="jxtl_path_lex.h"
 %option outfile="jxtl_path_lex.c"
 %option noyywrap
-%option yylineno
 %option reentrant
 %option bison-bridge
 %option bison-locations
