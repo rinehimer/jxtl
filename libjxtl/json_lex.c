@@ -512,7 +512,7 @@ static yyconst flex_int16_t yy_chk[243] =
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "json_lex.l"
 /*
- * $Id: $
+ * $Id: json_lex.l 158 2010-11-01 02:36:00Z rinehimer $
  *
  * Description
  *   The lexer for JSON.
@@ -1012,6 +1012,7 @@ YY_RULE_SETUP
 #line 108 "json_lex.l"
 {
     BEGIN( INITIAL );
+    yylloc->first_column = yylloc->last_column - PARSER_STR_BUF->data_len - 1;
     yylval->string = apr_palloc( PARSER_MP, PARSER_STR_BUF->data_len + 1 );
     utf8_strcpyn( yylval->string, PARSER_STR_BUF->data,
                   PARSER_STR_BUF->data_len );
@@ -1020,21 +1021,22 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 115 "json_lex.l"
+#line 116 "json_lex.l"
 { str_buf_putc( PARSER_STR_BUF, '\'' ); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 116 "json_lex.l"
+#line 117 "json_lex.l"
 { str_buf_putc( PARSER_STR_BUF, '"' ); }
 	YY_BREAK
 
 
 case 23:
 YY_RULE_SETUP
-#line 119 "json_lex.l"
+#line 120 "json_lex.l"
 {
     BEGIN( INITIAL );
+    yylloc->first_column = yylloc->last_column - PARSER_STR_BUF->data_len - 1;
     yylval->string = apr_palloc( PARSER_MP, PARSER_STR_BUF->data_len + 1 );
     utf8_strcpyn( yylval->string, PARSER_STR_BUF->data,
                   PARSER_STR_BUF->data_len );
@@ -1043,54 +1045,54 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 126 "json_lex.l"
+#line 128 "json_lex.l"
 { str_buf_putc( PARSER_STR_BUF, '"' ); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 127 "json_lex.l"
+#line 129 "json_lex.l"
 { str_buf_putc( PARSER_STR_BUF, '\'' ); }
 	YY_BREAK
 
 
 case 26:
 YY_RULE_SETUP
-#line 131 "json_lex.l"
+#line 133 "json_lex.l"
 { str_buf_putc( PARSER_STR_BUF, '\\' ); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 132 "json_lex.l"
+#line 134 "json_lex.l"
 { str_buf_putc( PARSER_STR_BUF, '/' ); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 133 "json_lex.l"
+#line 135 "json_lex.l"
 { str_buf_putc( PARSER_STR_BUF, '\b' ); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 134 "json_lex.l"
+#line 136 "json_lex.l"
 { str_buf_putc( PARSER_STR_BUF, '\f' ); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 135 "json_lex.l"
+#line 137 "json_lex.l"
 { str_buf_putc( PARSER_STR_BUF, '\n' ); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 136 "json_lex.l"
+#line 138 "json_lex.l"
 { str_buf_putc( PARSER_STR_BUF, '\r' ); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 137 "json_lex.l"
+#line 139 "json_lex.l"
 { str_buf_putc( PARSER_STR_BUF, '\t' ); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 138 "json_lex.l"
+#line 140 "json_lex.l"
 {
     int value;
     int value2;
@@ -1141,7 +1143,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 185 "json_lex.l"
+#line 187 "json_lex.l"
 {
     /*
      * Not legal as per the JSON specification, save it off and issue an
@@ -1153,14 +1155,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 193 "json_lex.l"
+#line 195 "json_lex.l"
 {
     str_buf_write( PARSER_STR_BUF, yytext, yyleng );
   }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 196 "json_lex.l"
+#line 198 "json_lex.l"
 {
     json_lex_error( "start of illegal backslash" );
   }
@@ -1168,7 +1170,7 @@ YY_RULE_SETUP
 case 37:
 /* rule 37 can match eol */
 YY_RULE_SETUP
-#line 199 "json_lex.l"
+#line 201 "json_lex.l"
 {
     /* Unterminated string constant, still return the string for the parser. */
     BEGIN( INITIAL );
@@ -1183,10 +1185,10 @@ YY_RULE_SETUP
 
 case 38:
 YY_RULE_SETUP
-#line 211 "json_lex.l"
+#line 213 "json_lex.l"
 ECHO;
 	YY_BREAK
-#line 1190 "json_lex.c"
+#line 1192 "json_lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(unmatched):
 case YY_STATE_EOF(squote_str):
@@ -2368,7 +2370,7 @@ void json_free (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 211 "json_lex.l"
+#line 213 "json_lex.l"
 
 
 

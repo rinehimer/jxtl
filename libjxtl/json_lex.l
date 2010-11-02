@@ -107,6 +107,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 <dquote_str>{
   "\"" {
     BEGIN( INITIAL );
+    yylloc->first_column = yylloc->last_column - PARSER_STR_BUF->data_len - 1;
     yylval->string = apr_palloc( PARSER_MP, PARSER_STR_BUF->data_len + 1 );
     utf8_strcpyn( yylval->string, PARSER_STR_BUF->data,
                   PARSER_STR_BUF->data_len );
@@ -118,6 +119,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 <squote_str>{
   "'" {
     BEGIN( INITIAL );
+    yylloc->first_column = yylloc->last_column - PARSER_STR_BUF->data_len - 1;
     yylval->string = apr_palloc( PARSER_MP, PARSER_STR_BUF->data_len + 1 );
     utf8_strcpyn( yylval->string, PARSER_STR_BUF->data,
                   PARSER_STR_BUF->data_len );
