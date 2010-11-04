@@ -1098,7 +1098,6 @@ YY_RULE_SETUP
     int value2;
     char tmp_str[4];
     unsigned char utf8_str[5];
-    int i;
 
     memcpy( tmp_str, yytext + 2, 4 );
     value = strtol( tmp_str, NULL, 16 );
@@ -1143,7 +1142,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 187 "json_lex.l"
+#line 186 "json_lex.l"
 {
     /*
      * Not legal as per the JSON specification, save it off and issue an
@@ -1155,14 +1154,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 195 "json_lex.l"
+#line 194 "json_lex.l"
 {
     str_buf_write( PARSER_STR_BUF, yytext, yyleng );
   }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 198 "json_lex.l"
+#line 197 "json_lex.l"
 {
     json_lex_error( "start of illegal backslash" );
   }
@@ -1170,7 +1169,7 @@ YY_RULE_SETUP
 case 37:
 /* rule 37 can match eol */
 YY_RULE_SETUP
-#line 201 "json_lex.l"
+#line 200 "json_lex.l"
 {
     /* Unterminated string constant, still return the string for the parser. */
     BEGIN( INITIAL );
@@ -1185,10 +1184,10 @@ YY_RULE_SETUP
 
 case 38:
 YY_RULE_SETUP
-#line 213 "json_lex.l"
+#line 212 "json_lex.l"
 ECHO;
 	YY_BREAK
-#line 1192 "json_lex.c"
+#line 1191 "json_lex.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(unmatched):
 case YY_STATE_EOF(squote_str):
@@ -2370,7 +2369,7 @@ void json_free (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 213 "json_lex.l"
+#line 212 "json_lex.l"
 
 
 

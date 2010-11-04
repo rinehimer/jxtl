@@ -142,7 +142,6 @@ exp ("e"|"E")("+"|"-")?[0-9]+
     int value2;
     char tmp_str[4];
     unsigned char utf8_str[5];
-    int i;
 
     memcpy( tmp_str, yytext + 2, 4 );
     value = strtol( tmp_str, NULL, 16 );
