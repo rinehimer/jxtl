@@ -109,11 +109,20 @@ static void write_xml_string( json_writer_t *writer, const char *str  )
   }
 }
 
+static void write_attrs( apr_xml_attr *attr, json_writer_t *writer )
+{
+  while ( attr ) {
+    json_writer_start_property( writer, (unsigned char *) attr->name );
+    write_xml_string( writer, attr->value );
+    json_writer_end_property( writer );
+    attr = attr->next;
+  }
+}
+
 static void xml_elem_to_json( apr_pool_t *mp, apr_xml_elem *root,
 			      json_writer_t *writer )
 {
   apr_xml_elem *elem;
-  apr_xml_attr *attr;
   json_type type;
   const char *elem_buf;
   apr_size_t buf_size;
@@ -135,15 +144,8 @@ static void xml_elem_to_json( apr_pool_t *mp, apr_xml_elem *root,
     }
     else if ( type == JSON_OBJECT ) {
       json_writer_start_object( writer );
-        
-      for ( attr = elem->attr; attr; attr = attr->next ) {
-	json_writer_start_property( writer, (unsigned char *) attr->name );
-	write_xml_string( writer, attr->value );
-	json_writer_end_property( writer );
-      }
-
+      write_attrs( elem->attr, writer );
       xml_elem_to_json( mp, elem->first_child, writer );
-      
       json_writer_end_object( writer );
     }
     json_writer_end_property( writer );
@@ -180,11 +182,15 @@ int xml_file_to_json( apr_pool_t *mp, const char *filename, int skip_root,
 
   if ( status == APR_SUCCESS ) {
     elem = doc->root;
-    if ( skip_root ) {
-      elem = elem->first_child;
-    }
     writer = json_writer_create( tmp_mp, mp );
     json_writer_start_object( writer );
+
+    if ( skip_root ) {
+      /* Even if skipping root, we want attributes of the root elem. */
+      write_attrs( elem->attr, writer );
+      elem = elem->first_child;
+    }
+
     xml_elem_to_json( tmp_mp, elem, writer );
     json_writer_end_object( writer );
     *json = writer->json;
