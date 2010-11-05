@@ -202,7 +202,7 @@ int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
   jxtl_path_eval_internal( expr, json, obj->nodes, 0 );
   *obj_ptr = obj;
 
-  return expr->negate ? !obj->nodes->nelts : obj->nodes->nelts;
+  return obj->nodes->nelts;
 }
 
 /**

@@ -128,17 +128,20 @@ static void expand_section( apr_pool_t *mp,
  * 3) If there was exactly one node and it is a boolean and it's value is true.
  * 4) Anything else is false.
  */
-static int is_true_if( jxtl_path_obj_t *path_obj )
+static int is_true_if( jxtl_path_obj_t *path_obj, int negate )
 {
   json_t *json;
+  int result = FALSE;
 
   if ( path_obj->nodes->nelts > 1 ) {
-    return TRUE;
+    result = TRUE;
   }
   else if ( path_obj->nodes->nelts == 1 ) {
     json = APR_ARRAY_HEAD( path_obj->nodes, json_t * );
-    return ( !JSON_IS_BOOLEAN( json ) || JSON_IS_TRUE_BOOLEAN( json ) );
+    result = ( !JSON_IS_BOOLEAN( json ) || JSON_IS_TRUE_BOOLEAN( json ) );
   }
+  
+  return negate ? !result : result;
 }
 
 static void expand_content( apr_pool_t *mp,
@@ -189,7 +192,7 @@ static void expand_content( apr_pool_t *mp,
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
         if ( !jxtl_if->expr ||
              ( jxtl_path_compiled_eval( mp, jxtl_if->expr, json, &path_obj ) &&
-               is_true_if( path_obj ) ) ) {
+               is_true_if( path_obj, jxtl_if->expr->negate ) ) ) {
           expand_content( mp, template, jxtl_if->content, json, prev_format,
                           PRINT_SECTION, out );
           break;
