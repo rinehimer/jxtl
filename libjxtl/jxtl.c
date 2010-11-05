@@ -121,6 +121,26 @@ static void expand_section( apr_pool_t *mp,
   }
 }
 
+/**
+ * Determine if the result of an if statement is true.  The criteria is:
+ * 1) More than 1 node returned is automatically true.
+ * 2) If there was exactly one node and it's not a boolean then it's true.
+ * 3) If there was exactly one node and it is a boolean and it's value is true.
+ * 4) Anything else is false.
+ */
+static int is_true_if( jxtl_path_obj_t *path_obj )
+{
+  json_t *json;
+
+  if ( path_obj->nodes->nelts > 1 ) {
+    return TRUE;
+  }
+  else if ( path_obj->nodes->nelts == 1 ) {
+    json = APR_ARRAY_HEAD( path_obj->nodes, json_t * );
+    return ( !JSON_IS_BOOLEAN( json ) || JSON_IS_TRUE_BOOLEAN( json ) );
+  }
+}
+
 static void expand_content( apr_pool_t *mp,
                             jxtl_template_t *template,
                             apr_array_header_t *content_array,
@@ -168,7 +188,8 @@ static void expand_content( apr_pool_t *mp,
       for ( j = 0; j < if_block->nelts; j++ ) {
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
         if ( !jxtl_if->expr ||
-             jxtl_path_compiled_eval( mp, jxtl_if->expr, json, &path_obj ) ) {
+             ( jxtl_path_compiled_eval( mp, jxtl_if->expr, json, &path_obj ) &&
+               is_true_if( path_obj ) ) ) {
           expand_content( mp, template, jxtl_if->content, json, prev_format,
                           PRINT_SECTION, out );
           break;
