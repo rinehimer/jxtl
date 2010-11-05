@@ -128,20 +128,24 @@ static void expand_section( apr_pool_t *mp,
  * 3) If there was exactly one node and it is a boolean and it's value is true.
  * 4) Anything else is false.
  */
-static int is_true_if( jxtl_path_obj_t *path_obj, int negate )
+static int is_true_if( apr_pool_t *mp, jxtl_if_t *jxtl_if, json_t *json )
 {
-  json_t *json;
+  json_t *tmp_json;
   int result = FALSE;
+  jxtl_path_obj_t *path_obj;
+
+  jxtl_path_compiled_eval( mp, jxtl_if->expr, json, &path_obj );
 
   if ( path_obj->nodes->nelts > 1 ) {
     result = TRUE;
   }
   else if ( path_obj->nodes->nelts == 1 ) {
-    json = APR_ARRAY_HEAD( path_obj->nodes, json_t * );
-    result = ( !JSON_IS_BOOLEAN( json ) || JSON_IS_TRUE_BOOLEAN( json ) );
+    tmp_json = APR_ARRAY_HEAD( path_obj->nodes, json_t * );
+    result = ( !JSON_IS_BOOLEAN( tmp_json ) ||
+               JSON_IS_TRUE_BOOLEAN( tmp_json ) );
   }
   
-  return negate ? !result : result;
+  return jxtl_if->expr->negate ? !result : result;
 }
 
 static void expand_content( apr_pool_t *mp,
@@ -190,9 +194,7 @@ static void expand_content( apr_pool_t *mp,
       if_block = (apr_array_header_t *) content->value;
       for ( j = 0; j < if_block->nelts; j++ ) {
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
-        if ( !jxtl_if->expr ||
-             ( jxtl_path_compiled_eval( mp, jxtl_if->expr, json, &path_obj ) &&
-               is_true_if( path_obj, jxtl_if->expr->negate ) ) ) {
+        if ( !jxtl_if->expr ||( is_true_if( mp, jxtl_if, json ) ) ) {
           expand_content( mp, template, jxtl_if->content, json, prev_format,
                           PRINT_SECTION, out );
           break;
