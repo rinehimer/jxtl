@@ -5,3 +5,9 @@ Show {{name}}
 Don't Show {{name}}
 {{ #end}}
 {{#end}}
+{{#section brewery[show] ; separator="\n"}}
+Show {{name}}
+{{#end}}
+{{#section brewery[!show] ; separator="\n"}}
+Don't Show {{name}}
+{{#end}}
