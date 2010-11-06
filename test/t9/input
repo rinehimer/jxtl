@@ -1,3 +1,6 @@
+{{! Extensive if testing to make sure it works correctly.  This interesting
+    test in here is that Magic Hat has two false nodes for show, but that
+    should actually evaluate to true.  -}}
 {{#section brewery ; separator="\n"}}
 {{ #if show}}
 Show {{name}}

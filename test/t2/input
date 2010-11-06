@@ -1,3 +1,4 @@
+{{! Print the breweries with a newline between them. -}}
 {{#section brewery ; separator="\n"}}
 {{name}} Brewery
 {{#end}}

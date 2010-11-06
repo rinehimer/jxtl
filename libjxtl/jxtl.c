@@ -194,7 +194,7 @@ static void expand_content( apr_pool_t *mp,
       if_block = (apr_array_header_t *) content->value;
       for ( j = 0; j < if_block->nelts; j++ ) {
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
-        if ( !jxtl_if->expr ||( is_true_if( mp, jxtl_if, json ) ) ) {
+        if ( !jxtl_if->expr || ( is_true_if( mp, jxtl_if, json ) ) ) {
           expand_content( mp, template, jxtl_if->content, json, prev_format,
                           PRINT_SECTION, out );
           break;

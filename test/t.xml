@@ -37,4 +37,15 @@
       <season>Winter</season>
     </beer>
   </brewery>
+  <brewery>
+    <show>false</show>
+    <show>false</show>
+    <name>Magic Hat</name>
+    <beer>
+      <beer_name>#9</beer_name>
+    </beer>
+    <beer>
+      <beer_name>Circus Boy</beer_name>
+    </beer>
+  </brewery>
 </beers>

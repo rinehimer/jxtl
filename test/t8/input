@@ -1,7 +1,10 @@
+{{! Basically the same as test 4, but tests format functions in jxtl. -}}
 {{#section brewery ; separator="\n\n", format="upper"}}
 {{name}} Brewery:
   Year Round Beers:  {{beer[!season]/beer_name ;
                        separator=", ", format="lower"}}
+{{ #if beer[season]}}
   Seasonal Beers:  {{#section beer[season] ;
                      separator=", "}}{{beer_name}} ({{season}}){{#end}}
+{{ #end}}
 {{#end}}

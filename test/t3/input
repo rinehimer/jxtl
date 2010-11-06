@@ -1,3 +1,4 @@
+{{! Print each brewery and then the beers it has. -}}
 {{#section brewery ; separator="\n"}}
 {{name}} Brewery:  {{beer/beer_name ; separator=", "}}
 {{#end}}

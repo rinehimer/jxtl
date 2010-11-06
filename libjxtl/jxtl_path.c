@@ -101,11 +101,7 @@ static void jxtl_path_test_node( jxtl_path_expr_t *expr,
         json_t *tmp_json;
         for ( i = 0; i < json->value.array->nelts; i++ ) {
           tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
-          if ( ( predicate_depth == 0 ) ||
-               ( !JSON_IS_BOOLEAN( tmp_json ) ) ||
-               ( JSON_IS_TRUE_BOOLEAN( tmp_json ) ) ) {
-              APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
-          }
+          APR_ARRAY_PUSH( nodes, json_t * ) = tmp_json;
         }
       }
       else {
