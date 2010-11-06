@@ -24,6 +24,8 @@ libjxtl_la_SOURCES = json.c \
                      jxtl_path_parse.y \
                      json_writer.c \
                      json_writer_ctx.c \
+                     misc.c \
+                     misc.h \
                      parser.c \
                      parser_lex_macros.h \
                      str_buf.c \

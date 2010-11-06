@@ -23,7 +23,6 @@
 #define STR_BUF_H
 
 #include <apr_pools.h>
-#include <apr_rmm.h>
 
 typedef struct str_buf_t {
   /** Pool used to to allocate this object. */

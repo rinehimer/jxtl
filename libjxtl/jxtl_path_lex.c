@@ -437,7 +437,7 @@ static yyconst flex_int16_t yy_chk[29] =
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "jxtl_path_lex.l"
 /*
- * $Id: jxtl_path_lex.l 156 2010-10-30 06:13:59Z rinehimer $
+ * $Id: jxtl_path_lex.l 158 2010-11-01 02:36:00Z rinehimer $
  *
  * Description
  *   The lexer for path language used in the templates.

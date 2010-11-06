@@ -25,21 +25,21 @@
 
 #include <stdlib.h>
 #include <apr_pools.h>
-#include <apr_rmm.h>
 
 #include "str_buf.h"
+#include "misc.h"
 
 #define DEFAULT_BUF_SIZE 256
 
 /* Make sure we can append len bytes. */
 #define CHECK_SIZE( buf, len )                                          \
   if ( ( buf->data_len + len ) > buf->data_size ) {                     \
-    apr_pool_cleanup_kill( buf->mp, buf->data, free );                  \
+    apr_pool_cleanup_kill( buf->mp, buf->data, mem_free );              \
     while ( buf->data_size < len ) {                                    \
       buf->data_size = buf->data_size * 2;                              \
     }                                                                   \
     buf->data = realloc( buf->data, buf->data_size );                   \
-    apr_pool_cleanup_register( buf->mp, buf->data, free,                \
+    apr_pool_cleanup_register( buf->mp, buf->data, mem_free,            \
                                apr_pool_cleanup_null );                 \
   }
 
@@ -58,7 +58,7 @@ str_buf_t *str_buf_create( apr_pool_t *mp, apr_size_t initial_size )
    * Register a cleanup so that this can properly be freed when the pool is
    * destroyed.
    */
-  apr_pool_cleanup_register( mp, buf->data, free, apr_pool_cleanup_null );
+  apr_pool_cleanup_register( mp, buf->data, mem_free, apr_pool_cleanup_null );
 
   return buf;
 }
