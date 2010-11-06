@@ -1,5 +1,5 @@
 #
-# $Id: jxtl.c 146 2010-10-25 00:45:22Z rinehimer $
+# $Id$
 #
 # Description
 #   Runs the same tests, but does it by using the Python language bindings.

@@ -1,0 +1,7 @@
+{{#section brewery ; separator="\n"}}
+{{ #if show}}
+Show {{name}}
+{{ #elseif !show}}
+Don't Show {{name}}
+{{ #end}}
+{{#end}}

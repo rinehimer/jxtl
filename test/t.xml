@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <beers>
-  <brewery>
+  <brewery show="true">
     <name>Dogfish Head</name>
     <beer>
       <beer_name>60 Minute IPA</beer_name>
@@ -13,7 +13,7 @@
       <season>Fall</season>
     </beer>
   </brewery>
-  <brewery>
+  <brewery show="false">
     <name>Troegs</name>
     <beer>
       <beer_name>HopBack Amber Ale</beer_name>
@@ -24,6 +24,16 @@
     </beer>
     <beer>
       <beer_name>Mad Elf</beer_name>
+      <season>Winter</season>
+    </beer>
+  </brewery>
+  <brewery>
+    <name>Stone</name>
+    <beer>
+      <beer_name>Pale Ale</beer_name>
+    </beer>
+    <beer>
+      <beer_name>Vertical Epic Ale</beer_name>
       <season>Winter</season>
     </beer>
   </brewery>
