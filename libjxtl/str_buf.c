@@ -36,7 +36,7 @@
 #define CHECK_SIZE( buf, len )                                          \
   if ( ( buf->data_len + len ) > buf->data_size ) {                     \
     apr_pool_cleanup_kill( buf->mp, buf->data, mem_free );              \
-    while ( buf->data_size < len ) {                                    \
+    while ( buf->data_size < buf->data_len + len ) {                    \
       buf->data_size = buf->data_size * 2;                              \
     }                                                                   \
     buf->data = realloc( buf->data, buf->data_size );                   \
