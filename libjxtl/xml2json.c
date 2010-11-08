@@ -202,5 +202,5 @@ int xml_file_to_json( apr_pool_t *mp, const char *filename, int skip_root,
 
   apr_pool_destroy( tmp_mp );
 
-  return status;
+  return status == APR_SUCCESS;
 }

@@ -26,7 +26,7 @@ int main( int argc, char **argv )
     xml2json_usage( argv[0] );
   }
   
-  if ( xml_file_to_json( mp, argv[1], 1, &json ) == 0 ) {
+  if ( xml_file_to_json( mp, argv[1], 1, &json ) ) {
     json_dump( json, 1 );
     ret = 0;
   }

@@ -224,10 +224,9 @@ int main( int argc, char const * const *argv )
 
   jxtl_parser = jxtl_parser_create( mp );
 
-  if ( ( jxtl_load_data( mp, json_file, xml_file, skip_root,
-                         &json ) == APR_SUCCESS ) &&
-       ( jxtl_parser_parse_file( jxtl_parser, template_file,
-                                 &template ) == APR_SUCCESS ) ) {
+  if ( jxtl_load_data( mp, json_file, xml_file, skip_root, &json ) &&
+       jxtl_parser_parse_file( jxtl_parser, template_file,
+                               &template ) ) {
     format_data = apr_palloc( mp, sizeof(format_data_t) );
     format_data->mp = mp;
     format_data->string_array = apr_array_make( mp, 8192, sizeof(char) );

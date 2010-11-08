@@ -63,8 +63,7 @@
    */
   int load( char *file )
   {
-    return ( jxtl_parser_parse_file( self->jxtl_parser, file,
-                                     &self->template ) == 0 );
+    return jxtl_parser_parse_file( self->jxtl_parser, file, &self->template );
   }
   
   /**
@@ -92,4 +91,3 @@
    */
   char *expand_to_buffer( DICTIONARY_T input = NULL );
 }
-

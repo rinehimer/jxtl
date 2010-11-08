@@ -285,9 +285,11 @@ static int jxtl_section_start( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_section_t *section;
+  int result;
 
   section = apr_palloc( data->mp, sizeof(jxtl_section_t) );
-  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &section->expr );
+  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
+                                          &section->expr );
   section->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
   jxtl_content_push( data, JXTL_SECTION, section );
@@ -295,7 +297,7 @@ static int jxtl_section_start( void *user_data, unsigned char *expr )
                   apr_array_header_t * ) = data->current_array;
   data->current_array = section->content;
 
-  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
+  return result;
 }
 
 /**
@@ -316,10 +318,12 @@ static int jxtl_if_start( void *user_data, unsigned char *expr )
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_if_t *jxtl_if;
   apr_array_header_t *if_block;
+  int result;
 
   if_block = apr_array_make( data->mp, 8, sizeof(jxtl_if_t *) );
   jxtl_if = apr_palloc( data->mp, sizeof(jxtl_if_t) );
-  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &jxtl_if->expr );
+  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
+                                          &jxtl_if->expr );
   jxtl_if->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
   APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
@@ -329,7 +333,7 @@ static int jxtl_if_start( void *user_data, unsigned char *expr )
                   apr_array_header_t * ) = data->current_array;
   data->current_array = jxtl_if->content;
 
-  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
+  return result;
 }
 
 static int jxtl_elseif( void *user_data, unsigned char *expr )
@@ -338,18 +342,20 @@ static int jxtl_elseif( void *user_data, unsigned char *expr )
   apr_array_header_t *content_array, *if_block;
   jxtl_if_t *jxtl_if;
   jxtl_content_t *content;
+  int result;
 
   content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
   content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
   if_block = (apr_array_header_t *) content->value;
   jxtl_if = apr_palloc( data->mp, sizeof(jxtl_if_t) );
-  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &jxtl_if->expr );
+  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
+                                          &jxtl_if->expr );
   jxtl_if->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
   APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
   data->current_array = jxtl_if->content;
 
-  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
+  return result;
 }
 
 static void jxtl_else( void *user_data )
@@ -422,11 +428,13 @@ static int jxtl_value_func( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_path_expr_t *path_expr;
+  int result;
 
-  jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr, &path_expr );
+  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
+                                          &path_expr );
   jxtl_content_push( data, JXTL_VALUE, path_expr );
 
-  return ( data->jxtl_path_parser->parse_result == APR_SUCCESS ) ? TRUE : FALSE;
+  return result;
 }
 
 static char *jxtl_get_error( void *user_data )
@@ -487,16 +495,18 @@ int jxtl_parser_parse_file( parser_t *parser, const char *file,
 {
   jxtl_callback_t *jxtl_callbacks = parser_get_user_data( parser );
   jxtl_data_t *jxtl_data = (jxtl_data_t *) jxtl_callbacks->user_data;
+  int result = FALSE;
 
   *template_ptr = NULL;
   jxtl_data_reset( jxtl_data );
 
-  if ( parser_parse_file( parser, file ) == 0 ) {
+  if ( parser_parse_file( parser, file ) ) {
     *template_ptr = jxtl_template_create( parser->mp,
                                           jxtl_data->current_array );
+    result = TRUE;
   }
 
-  return parser->parse_result;
+  return result;
 }
 
 int jxtl_parser_parse_buffer( parser_t *parser, const char *buffer,
@@ -504,14 +514,16 @@ int jxtl_parser_parse_buffer( parser_t *parser, const char *buffer,
 {
   jxtl_callback_t *jxtl_callbacks = parser_get_user_data( parser );
   jxtl_data_t *jxtl_data = (jxtl_data_t *) jxtl_callbacks->user_data;
+  int result = FALSE;
 
   *template_ptr = NULL;
   jxtl_data_reset( jxtl_data );
 
-  if ( parser_parse_buffer( parser, buffer ) == 0 ) {
+  if ( parser_parse_buffer( parser, buffer ) ) {
     *template_ptr = jxtl_template_create( parser->mp,
                                           jxtl_data->current_array );
+    result = TRUE;
   }
 
-  return parser->parse_result;
+  return result;
 }

@@ -60,6 +60,7 @@ parser_t *parser_create( apr_pool_t *mp,
   parser->bison_parse = bison_parse;
 
   parser->str_buf = str_buf_create( mp, 8192 );
+  parser->err_buf = str_buf_create( mp, 1024 );
   parser->flex_init( &parser->scanner );
   parser->flex_set_extra( parser, parser->scanner );
   apr_pool_cleanup_register( mp, parser->scanner, flex_destroy,
@@ -74,7 +75,7 @@ static void reset_parser( parser_t *parser )
 {
   parser->in_file = NULL;
   parser->line_num = 1;
-  parser->error_str = NULL;
+  STR_BUF_CLEAR( parser->err_buf );
   STR_BUF_CLEAR( parser->str_buf );
 }
 
@@ -90,14 +91,17 @@ void *parser_get_user_data( parser_t *parser )
 
 char *parser_get_error( parser_t *parser )
 {
-  return parser->error_str;
+  /* Make sure we NULL terminate it before returning. */
+  str_buf_putc( parser->err_buf, '\0' );
+  return parser->err_buf->data;
 }
 
-apr_status_t parser_parse_file( parser_t *parser, const char *file )
+int parser_parse_file( parser_t *parser, const char *file )
 {
   apr_status_t status;
   int is_stdin;
-  char error_buf[1024];
+  char error_str[1024];
+  int result = FALSE;
 
   reset_parser( parser );
 
@@ -112,23 +116,23 @@ apr_status_t parser_parse_file( parser_t *parser, const char *file )
   }
 
   if ( status != APR_SUCCESS ) {
-    apr_strerror( status, error_buf, sizeof( error_buf ) );
-    fprintf( stderr, "%s\n", error_buf );
-    parser->parse_result = status;
+    apr_strerror( status, error_str, sizeof(error_str) );
+    str_buf_append( parser->err_buf, error_str );
   }
   else {
-    parser->parse_result = parser->bison_parse( parser->scanner, parser,
-                                                parser->user_data );
+    result = parser->bison_parse( parser->scanner, parser,
+                                  parser->user_data ) == 0;
   }
 
-  return parser->parse_result;
+  return result;
 }
 
-apr_status_t parser_parse_buffer( parser_t *parser, const char *buffer )
+int parser_parse_buffer( parser_t *parser, const char *buffer )
 {
   char *flex_buffer;
   int flex_buffer_len = strlen( buffer ) + 2;
-  void *buffer_state;
+  YY_BUFFER_STATE buffer_state;
+  int result = FALSE;
 
   reset_parser( parser );
 
@@ -139,10 +143,10 @@ apr_status_t parser_parse_buffer( parser_t *parser, const char *buffer )
   buffer_state = parser->flex_scan( flex_buffer, flex_buffer_len,
 				    parser->scanner );
 
-  parser->parse_result = parser->bison_parse( parser->scanner, parser,
-					      parser->user_data );
+  result = parser->bison_parse( parser->scanner, parser,
+                                parser->user_data ) == 0;
 
   parser->flex_delete( buffer_state, parser->scanner );
 
-  return parser->parse_result;
+  return result;
 }

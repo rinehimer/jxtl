@@ -152,10 +152,12 @@ int json_parser_parse_file( parser_t *parser, const char *file, json_t **obj )
   *obj = NULL;
   json_callback_t *json_callbacks = parser_get_user_data( parser );
   json_writer_t *writer = json_callbacks->user_data;
+  int result = FALSE;
 
-  if ( parser_parse_file( parser, file ) == 0 ) {
+  if ( parser_parse_file( parser, file ) ) {
     *obj = writer->json;
+    result = TRUE;
   }
 
-  return parser->parse_result;
+  return result;
 }

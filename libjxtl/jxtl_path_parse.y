@@ -103,7 +103,7 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 {
   va_list args;
   va_start( args, error_string );
-  parser->error_str = apr_pvsprintf( parser->mp, error_string, args );
+  str_buf_vprintf( parser->err_buf, error_string, args );
   va_end( args );
 }
 
@@ -281,15 +281,17 @@ int jxtl_path_parser_parse_buffer( parser_t *parser,
 {
   jxtl_path_callback_t *jxtl_callbacks = parser_get_user_data( parser );
   path_data_t *jxtl_data = jxtl_callbacks->user_data;
+  int result = FALSE;
 
   APR_ARRAY_CLEAR( jxtl_data->expr_array );
   jxtl_data->root = NULL;
   jxtl_data->curr = NULL;
   *expr = NULL;
 
-  if ( parser_parse_buffer( parser, path ) == 0 ) {
+  if ( parser_parse_buffer( parser, path ) ) {
     *expr = jxtl_data->root;
+    result = TRUE;
   }
 
-  return parser->parse_result;
+  return result;
 }

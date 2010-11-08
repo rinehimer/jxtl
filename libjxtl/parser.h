@@ -71,10 +71,8 @@ struct parser_t {
   yyscan_t scanner;
   /* Current line number.  Only works if newlines are matched separately. */
   int line_num;
-  /* Result of parsing. */
-  int parse_result;
   /* If an error occurs during parsing and we want to save it. */
-  char *error_str;
+  str_buf_t *err_buf;
   /* User data. */
   void *user_data;
   const char * ( *get_filename )( struct parser_t * );
@@ -110,16 +108,17 @@ parser_t *parser_create( apr_pool_t *mp,
  * Parse a file.
  * @param parser A parser.
  * @param file The filename to parse.
- * @return A status code.
+ * @return TRUE or FALSE.
  */
-apr_status_t parser_parse_file( parser_t *parser, const char *file );
+int parser_parse_file( parser_t *parser, const char *file );
 
 /**
  * Parse a buffer.
  * @param parser A parser
  * @param A null terminated buffer to parse.
+ * @return TRUE or FALSE.
  */
-apr_status_t parser_parse_buffer( parser_t *parser, const char *buffer );
+int parser_parse_buffer( parser_t *parser, const char *buffer );
 
 /**
  * Set the user data for a parser.  This will be passed to the bison_parse_func

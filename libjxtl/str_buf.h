@@ -39,6 +39,8 @@ str_buf_t *str_buf_create( apr_pool_t *mp, apr_size_t initial_size );
 void str_buf_putc( str_buf_t *buf, char c );
 void str_buf_append( str_buf_t *buf, const char *str );
 void str_buf_write( str_buf_t *buf, const char *data, apr_size_t len );
+void str_buf_vprintf( str_buf_t *buf, char *format, va_list args );
+void str_buf_printf( str_buf_t *buf, char *format, ... );
 
 #define STR_BUF_CLEAR( buf ) buf->data_len = 0
 

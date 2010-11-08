@@ -25,6 +25,7 @@
 
 #include <stdlib.h>
 #include <apr_pools.h>
+#include <apr_lib.h>
 
 #include "str_buf.h"
 #include "misc.h"
@@ -82,4 +83,46 @@ void str_buf_write( str_buf_t *buf, const char *data, apr_size_t len )
   CHECK_SIZE( buf, len );
   memcpy( &buf->data[buf->data_len], data, len );
   buf->data_len += len;
+}
+
+typedef struct str_buf_printf_data {
+  apr_vformatter_buff_t vbuf;
+  char *buf;
+  str_buf_t *str_buf;
+}str_buf_printf_data;
+
+static int str_buf_flush( apr_vformatter_buff_t *buf )
+{
+  str_buf_printf_data *data = (str_buf_printf_data *) buf;
+  str_buf_write( data->str_buf, data->buf, data->vbuf.curpos - data->buf );
+  data->vbuf.curpos = data->buf;
+
+  return 0;
+}
+
+void str_buf_vprintf( str_buf_t *buf, char *format, va_list args )
+{
+  str_buf_printf_data data;
+  char tmp_buf[4096];
+  int count;
+
+  data.buf = tmp_buf;
+  data.vbuf.curpos = data.buf;
+  data.vbuf.endpos = data.buf + 4096;
+  data.str_buf = buf;
+
+  count = apr_vformatter( str_buf_flush, 
+                          (apr_vformatter_buff_t *) &data, format, args );
+  if ( count >= 0 ) {
+    str_buf_flush( (apr_vformatter_buff_t *) &data );
+  }
+}
+
+void str_buf_printf( str_buf_t *buf, char *format, ... )
+{
+  va_list args;
+
+  va_start( args, format );
+  str_buf_vprintf( buf, format, args );
+  va_end( args );
 }
