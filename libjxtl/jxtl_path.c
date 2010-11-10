@@ -215,7 +215,7 @@ int jxtl_path_eval( apr_pool_t *mp, const unsigned char *path, json_t *json,
 
   parser = jxtl_path_parser_create( mp );
 
-  if ( jxtl_path_parser_parse_buffer( parser, path, &expr ) == APR_SUCCESS ) {
+  if ( jxtl_path_parser_parse_buffer( parser, path, &expr ) ) {
     return jxtl_path_compiled_eval( mp, expr, json, obj_ptr );
   }
   else {
