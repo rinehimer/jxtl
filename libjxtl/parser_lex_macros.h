@@ -47,7 +47,7 @@
     yylloc->last_line = PARSER_LINE_NUM;                                \
     yylloc->first_column = yycolumn + 1;				\
     yylloc->last_column = yycolumn + yyleng;				\
-    if ( yyleng == 1 && yytext[0] == '\n' ) {				\
+    if ( yytext[yyleng - 1] == '\n' ) {                                 \
       PARSER_LINE_NUM++;                                                \
       yylloc->first_column = 0;						\
       yylloc->last_column = 0;						\
