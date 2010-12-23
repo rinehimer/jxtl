@@ -37,6 +37,25 @@ typedef enum section_print_type {
   PRINT_SEPARATOR
 } section_print_type;
 
+static apr_status_t flush_to_file( apr_bucket_brigade *bb, void *ctx )
+{
+  apr_bucket *e;
+  const char *str;
+  apr_size_t str_len;
+  apr_file_t *out = (apr_file_t *) ctx;
+
+  for ( e = APR_BRIGADE_FIRST( bb );
+        e != APR_BRIGADE_SENTINEL( bb );
+        e = APR_BUCKET_NEXT( e ) ) {
+    apr_bucket_read( e, &str, &str_len, APR_BLOCK_READ );
+    apr_file_write( out, str, &str_len );
+  }
+
+  apr_brigade_cleanup( bb );
+
+  return APR_SUCCESS;
+}
+
 static void print_json_value( json_t *json,
                               char *format,
                               apr_pool_t *mp,
@@ -56,13 +75,16 @@ static void print_json_value( json_t *json,
   }
 
   if ( value ) {
-    apr_brigade_printf( out, NULL, NULL, "%s", value );
+    apr_brigade_printf( out, template->flush_func, template->flush_data, "%s",
+                        value );
   }
 }
 
-static void print_text( char *text, jxtl_content_t *prev_content,
+static void print_text( char *text,
+                        jxtl_content_t *prev_content,
                         jxtl_content_t *next_content,
                         section_print_type print_type,
+                        jxtl_template_t *template,
                         apr_bucket_brigade *out )
 {
   char *text_ptr = text;
@@ -77,7 +99,8 @@ static void print_text( char *text, jxtl_content_t *prev_content,
        ( text_ptr[len - 1] == '\n' ) ) {
     len--;
   }
-  apr_brigade_printf( out, NULL, NULL, "%.*s", len, text_ptr );
+  apr_brigade_printf( out, template->flush_func, template->flush_data, "%.*s",
+                      len, text_ptr );
 }
 
 static void expand_content( apr_pool_t *mp,
@@ -176,7 +199,7 @@ static void expand_content( apr_pool_t *mp,
     switch ( content->type ) {
     case JXTL_TEXT:
       print_text( content->value, prev_content, next_content, print_type,
-                  out );
+                  template, out );
       break;
 
     case JXTL_SECTION:
@@ -220,19 +243,6 @@ static void expand_content( apr_pool_t *mp,
   }
 }
 
-static int number_of_buckets( apr_bucket_brigade *b )
-{
-  apr_bucket *e;
-  int n = 0;
-  for ( e = APR_BRIGADE_FIRST( b );
-        e != APR_BRIGADE_SENTINEL( b );
-        e = APR_BUCKET_NEXT( e ) ) {
-    n++;
-  }
-
-  return n;
-}
-
 void jxtl_template_set_format_func( jxtl_template_t *template,
                                     jxtl_format_func format_func )
 {
@@ -253,9 +263,7 @@ int jxtl_expand_to_file( jxtl_template_t *template, json_t *json,
   apr_status_t status;
   apr_bucket_alloc_t *bucket_alloc;
   apr_bucket_brigade *bucket_brigade;
-  struct iovec *vec;
-  int nvec = 0;
-  apr_size_t nbytes;
+
   int is_stdout;
 
   apr_pool_create( &mp, NULL );
@@ -272,16 +280,16 @@ int jxtl_expand_to_file( jxtl_template_t *template, json_t *json,
   }
   
   if ( status == APR_SUCCESS ) {
+    template->flush_func = flush_to_file;
+    template->flush_data = out;
+
     bucket_alloc = apr_bucket_alloc_create( mp );
     bucket_brigade = apr_brigade_create( mp, bucket_alloc );
 
     expand_content( mp, template, template->content, json, NULL, PRINT_NORMAL,
                     bucket_brigade );
 
-    nvec = number_of_buckets( bucket_brigade );
-    vec = apr_palloc( mp, sizeof(struct iovec) * nvec );
-    apr_brigade_to_iovec( bucket_brigade, vec, &nvec );
-    status = apr_file_writev( out, vec, nvec, &nbytes );
+    flush_to_file( bucket_brigade, out );
 
     apr_brigade_destroy( bucket_brigade );
     apr_bucket_alloc_destroy( bucket_alloc );
@@ -306,6 +314,9 @@ char *jxtl_expand_to_buffer( apr_pool_t *mp, jxtl_template_t *template,
   apr_pool_t *tmp_pool;
 
   apr_pool_create( &tmp_pool, NULL );
+
+  template->flush_func = NULL;
+  template->flush_data = NULL;
 
   bucket_alloc = apr_bucket_alloc_create( tmp_pool );
   bucket_brigade = apr_brigade_create( tmp_pool, bucket_alloc );

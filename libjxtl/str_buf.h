@@ -35,11 +35,52 @@ typedef struct str_buf_t {
   unsigned char *data;
 }str_buf_t;
 
+/**
+ * Create a new string buffer.  This buffer will be properly cleaned up when
+ * the memory pool it is allocated from is cleared or destroyed.
+ * @param mp The memory pool to allocate the buffer out of.
+ * @param initial_size The initial size to make the buffer.  If this value is
+ *        <= 0 then a default size is used.
+ * @return The newly allocated string buffer.
+ */
 str_buf_t *str_buf_create( apr_pool_t *mp, apr_size_t initial_size );
+
+/**
+ * Write a character to the str_buf.
+ * @param buf The string buffer.
+ * @param c The character to write.
+ */
 void str_buf_putc( str_buf_t *buf, char c );
+
+/**
+ * Append a string to the str_buf.
+ * @param buf The string buffer.
+ * @param str The string to append.
+ */
 void str_buf_append( str_buf_t *buf, const char *str );
+
+/**
+ * Write data to the end of the str_buf.
+ * @param buf The string buffer.
+ * @param data The data to write.
+ * @param len The length of the data.
+ */
 void str_buf_write( str_buf_t *buf, const char *data, apr_size_t len );
+
+/**
+ * Write to a string buf using a va_list.
+ * @param buf The string buffer.
+ * @param format The string format.
+ * @param args An arg list.
+ */
 void str_buf_vprintf( str_buf_t *buf, char *format, va_list args );
+
+/**
+ * Write to a buffer using a printf style of arguments.
+ * @param buf The string buffer.
+ * @param format The string format.
+ * @param ... Arguments to use in the format.
+ */
 void str_buf_printf( str_buf_t *buf, char *format, ... );
 
 #define STR_BUF_CLEAR( buf ) buf->data_len = 0

@@ -1848,8 +1848,8 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 {
   va_list args;
   fprintf( stderr, "%s: %d.%d-%d.%d ", parser->get_filename( parser ),
-	   yylloc->first_line, yylloc->first_column, yylloc->last_line,
-	   yylloc->last_column );
+           yylloc->first_line, yylloc->first_column, yylloc->last_line,
+           yylloc->last_column );
   va_start( args, error_string );
   vfprintf( stderr, error_string, args );
   fprintf( stderr, "\n" );
@@ -2101,7 +2101,10 @@ static jxtl_template_t *jxtl_template_create( apr_pool_t *mp,
   jxtl_template_t *template;
   template = apr_palloc( mp, sizeof(jxtl_template_t) );
   template->content = content;
+  template->flush_func = NULL;
+  template->flush_data = NULL;
   template->format = NULL;
+  template->format_data = NULL;
 
   return template;
 }
@@ -2109,12 +2112,12 @@ static jxtl_template_t *jxtl_template_create( apr_pool_t *mp,
 parser_t *jxtl_parser_create( apr_pool_t *mp )
 {
   parser_t *parser = parser_create( mp,
-				    jxtl_lex_init,
-				    jxtl_set_extra,
-				    jxtl_lex_destroy,
-				    jxtl__scan_buffer,
-				    jxtl__delete_buffer,
-				    jxtl_parse );
+                                    jxtl_lex_init,
+                                    jxtl_set_extra,
+                                    jxtl_lex_destroy,
+                                    jxtl__scan_buffer,
+                                    jxtl__delete_buffer,
+                                    jxtl_parse );
 
   jxtl_callback_t *jxtl_callbacks = apr_palloc( mp, sizeof(jxtl_callback_t) );
   jxtl_callbacks->text_handler = jxtl_text_func;

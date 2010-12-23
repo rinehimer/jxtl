@@ -22,6 +22,7 @@
 #ifndef JXTL_H
 #define JXTL_H
 
+#include <apr_buckets.h>
 #include <apr_pools.h>
 #include <apr_tables.h>
 
@@ -83,8 +84,10 @@ typedef char * ( *jxtl_format_func )( json_t *value, char *format_name,
 
 typedef struct jxtl_template_t {
   apr_array_header_t *content;
-  void *format_data;
+  apr_status_t ( *flush_func )( apr_bucket_brigade *bb, void *ctx );
+  void *flush_data;
   jxtl_format_func format;
+  void *format_data;
 }jxtl_template_t;
 
 parser_t *jxtl_parser_create( apr_pool_t *mp );
