@@ -58,4 +58,15 @@
     }									\
   }
 
+/**
+ * Wrapper around yyless so that we can correctly adjust columns.  This macro
+ * does not check for newlines, so you shouldn't put back newlines.
+ */
+#define PARSER_LESS( n ) do {			\
+    int less = n;				\
+    yycolumn -= yyleng - less;			\
+    yyless( less );				\
+  } while ( 0 );
+
+
 #endif

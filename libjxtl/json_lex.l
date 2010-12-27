@@ -91,8 +91,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
   [ \t\r]+
   "\n"
   . {
-    yyless( 0 );
-    yycolumn--;
+    PARSER_LESS( 0 );
     BEGIN( unmatched );
   }
 }
@@ -163,9 +162,8 @@ exp ("e"|"E")("+"|"-")?[0-9]+
       }
       else if ( value <= 0x7F ) {
 	/* Not a surrogate pair */
-	yyless( 6 );
-	yycolumn = yycolumn - 6;
-	
+	PARSER_LESS( 6 );
+
 	utf8_encode( value, utf8_str );
         str_buf_append( PARSER_STR_BUF, utf8_str );
       }

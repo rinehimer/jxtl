@@ -65,7 +65,7 @@
       yylval->string = apr_pstrndup( PARSER_MP, PARSER_STR_BUF->data,
 				     PARSER_STR_BUF->data_len );
       STR_BUF_CLEAR( PARSER_STR_BUF );
-      yyless( 0 );
+      PARSER_LESS( 0 );
       return T_TEXT;
     }
     else {
@@ -111,7 +111,7 @@
   [ \t\r]+
   "\n"
   . {
-    yyless( 0 );
+    PARSER_LESS( 0 );
     BEGIN( unmatched );
   }
 }

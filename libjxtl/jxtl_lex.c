@@ -941,7 +941,7 @@ YY_RULE_SETUP
       yylval->string = apr_pstrndup( PARSER_MP, PARSER_STR_BUF->data,
 				     PARSER_STR_BUF->data_len );
       STR_BUF_CLEAR( PARSER_STR_BUF );
-      yyless( 0 );
+      PARSER_LESS( 0 );
       return T_TEXT;
     }
     else {
@@ -1080,7 +1080,7 @@ case 24:
 YY_RULE_SETUP
 #line 113 "jxtl_lex.l"
 {
-    yyless( 0 );
+    PARSER_LESS( 0 );
     BEGIN( unmatched );
   }
 	YY_BREAK
