@@ -74,7 +74,7 @@ static void json_add( json_writer_t *writer, json_t *json )
                         json_writer_ctx_get_prop( writer->context ) );
     JSON_NAME( json ) = name;
     tmp_json = apr_hash_get( obj->value.object, JSON_NAME( json ),
-			     APR_HASH_KEY_STRING );
+                             APR_HASH_KEY_STRING );
     if ( tmp_json && tmp_json->type != JSON_ARRAY ) {
       /* Key already exists, make an array and put both objects in it. */
       new_array = json_create_array( writer->json_mp );
@@ -87,7 +87,7 @@ static void json_add( json_writer_t *writer, json_t *json )
       APR_ARRAY_PUSH( new_array->value.array, json_t * ) = tmp_json;
       APR_ARRAY_PUSH( new_array->value.array, json_t * ) = json;
       apr_hash_set( obj->value.object, JSON_NAME( new_array ),
-		    APR_HASH_KEY_STRING, new_array );
+                    APR_HASH_KEY_STRING, new_array );
     }
     else if ( tmp_json && tmp_json->type == JSON_ARRAY ) {
       /* Exists, but we already converted it to an array */
@@ -99,7 +99,7 @@ static void json_add( json_writer_t *writer, json_t *json )
       /* Standard insertion */
       json->parent = obj;
       apr_hash_set( obj->value.object, JSON_NAME( json ),
-		    APR_HASH_KEY_STRING, json );
+                    APR_HASH_KEY_STRING, json );
     }
     break;
 

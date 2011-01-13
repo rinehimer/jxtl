@@ -73,7 +73,7 @@ void str_buf_write( str_buf_t *buf, const char *data, apr_size_t len );
  * @param format The string format.
  * @param args An arg list.
  */
-void str_buf_vprintf( str_buf_t *buf, char *format, va_list args );
+void str_buf_vprintf( str_buf_t *buf, const char *format, va_list args );
 
 /**
  * Write to a buffer using a printf style of arguments.
@@ -81,7 +81,7 @@ void str_buf_vprintf( str_buf_t *buf, char *format, va_list args );
  * @param format The string format.
  * @param ... Arguments to use in the format.
  */
-void str_buf_printf( str_buf_t *buf, char *format, ... );
+void str_buf_printf( str_buf_t *buf, const char *format, ... );
 
 #define STR_BUF_CLEAR( buf ) buf->data_len = 0
 

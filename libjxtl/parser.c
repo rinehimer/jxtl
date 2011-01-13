@@ -41,12 +41,12 @@ static const char *get_filename( parser_t *parser )
 }
 
 parser_t *parser_create( apr_pool_t *mp,
-			 flex_init_func flex_init,
-			 flex_set_extra_func flex_set_extra,
-			 flex_destroy_func flex_destroy,
-			 flex_scan_buffer_func flex_scan,
-			 flex_delete_buffer_func flex_delete,
-			 bison_parse_func bison_parse )
+                         flex_init_func flex_init,
+                         flex_set_extra_func flex_set_extra,
+                         flex_destroy_func flex_destroy,
+                         flex_scan_buffer_func flex_scan,
+                         flex_delete_buffer_func flex_delete,
+                         bison_parse_func bison_parse )
 {
   parser_t *parser = apr_palloc( mp, sizeof(parser_t) );
   parser->mp = mp;
@@ -64,7 +64,7 @@ parser_t *parser_create( apr_pool_t *mp,
   parser->flex_init( &parser->scanner );
   parser->flex_set_extra( parser, parser->scanner );
   apr_pool_cleanup_register( mp, parser->scanner, flex_destroy,
-			     apr_pool_cleanup_null );
+                             apr_pool_cleanup_null );
   return parser;
 }
 
@@ -109,7 +109,7 @@ int parser_parse_file( parser_t *parser, const char *file )
 
   if ( !is_stdin ) {
     status = apr_file_open( &parser->in_file, file, APR_READ | APR_BUFFERED, 0,
-			    parser->mp );
+                            parser->mp );
   }
   else if ( file && is_stdin ) {
     status = apr_file_open_stdin( &parser->in_file, parser->mp );
@@ -141,7 +141,7 @@ int parser_parse_buffer( parser_t *parser, const char *buffer )
   flex_buffer[flex_buffer_len - 1] = '\0';
 
   buffer_state = parser->flex_scan( flex_buffer, flex_buffer_len,
-				    parser->scanner );
+                                    parser->scanner );
 
   result = parser->bison_parse( parser->scanner, parser,
                                 parser->user_data ) == 0;

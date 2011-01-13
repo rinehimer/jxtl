@@ -33,7 +33,7 @@ json_writer_ctx_t *json_writer_ctx_create( apr_pool_t *mp )
   context->mp = mp;
   context->depth = 0;
   context->prop_stack = apr_array_make( context->mp, 1024,
-					sizeof(unsigned char *) );
+                                        sizeof(unsigned char *) );
   context->state_stack = apr_array_make( context->mp, 1024,
                                          sizeof(json_writer_ctx_state) );
   APR_ARRAY_PUSH( context->state_stack, json_writer_ctx_state ) = JSON_INITIAL;
@@ -49,7 +49,7 @@ int json_writer_ctx_can_start_object_or_array( json_writer_ctx_t *context )
 {
   json_writer_ctx_state state = json_writer_ctx_get_state( context );
   return ( state == JSON_INITIAL || state == JSON_PROPERTY ||
-	   state == JSON_IN_ARRAY );
+           state == JSON_IN_ARRAY );
 }
 
 unsigned char *json_writer_ctx_get_prop( json_writer_ctx_t *context )
@@ -96,7 +96,7 @@ int json_writer_ctx_end_array( json_writer_ctx_t *context )
 }
 
 int json_writer_ctx_start_property( json_writer_ctx_t *context,
-				    unsigned char *name )
+                                    unsigned char *name )
 {
   unsigned char *name_copy;
   if ( json_writer_ctx_get_state( context ) != JSON_IN_OBJECT )

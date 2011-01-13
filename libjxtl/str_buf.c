@@ -100,7 +100,7 @@ static int str_buf_flush( apr_vformatter_buff_t *buf )
   return 0;
 }
 
-void str_buf_vprintf( str_buf_t *buf, char *format, va_list args )
+void str_buf_vprintf( str_buf_t *buf, const char *format, va_list args )
 {
   str_buf_printf_data data;
   char tmp_buf[4096];
@@ -111,14 +111,14 @@ void str_buf_vprintf( str_buf_t *buf, char *format, va_list args )
   data.vbuf.endpos = data.buf + 4096;
   data.str_buf = buf;
 
-  count = apr_vformatter( str_buf_flush, 
+  count = apr_vformatter( str_buf_flush,
                           (apr_vformatter_buff_t *) &data, format, args );
   if ( count >= 0 ) {
     str_buf_flush( (apr_vformatter_buff_t *) &data );
   }
 }
 
-void str_buf_printf( str_buf_t *buf, char *format, ... )
+void str_buf_printf( str_buf_t *buf, const char *format, ... )
 {
   va_list args;
 

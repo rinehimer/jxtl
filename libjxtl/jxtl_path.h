@@ -56,7 +56,7 @@ int jxtl_path_parser_parse_buffer( parser_t *parser,
                                    jxtl_path_expr_t **expr );
 
 int jxtl_path_eval( apr_pool_t *mp, const unsigned char *path, json_t *json,
-		    jxtl_path_obj_t **obj_ptr );
+                    jxtl_path_obj_t **obj_ptr );
 int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
                              json_t *json, jxtl_path_obj_t **obj_ptr );
 

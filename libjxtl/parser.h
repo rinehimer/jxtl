@@ -97,12 +97,12 @@ struct parser_t {
  * @return The newly allocated parser.
  */
 parser_t *parser_create( apr_pool_t *mp,
-			 flex_init_func flex_init,
-			 flex_set_extra_func flex_set_extra,
-			 flex_destroy_func flex_destroy,
-			 flex_scan_buffer_func flex_scan,
-			 flex_delete_buffer_func flex_delete,
-			 bison_parse_func bison_parse );
+                         flex_init_func flex_init,
+                         flex_set_extra_func flex_set_extra,
+                         flex_destroy_func flex_destroy,
+                         flex_scan_buffer_func flex_scan,
+                         flex_delete_buffer_func flex_delete,
+                         bison_parse_func bison_parse );
 
 /**
  * Parse a file.

@@ -50,7 +50,7 @@ jxtl_parse.c jxtl_parse.h: jxtl_parse.y
 jxtl_lex.c jxtl_lex.h: jxtl_lex.l
 
 %.c %.h: %.l
-	$(LEXCOMPILE) $<
+        $(LEXCOMPILE) $<
 
 .l.c:
-	$(LEXCOMPILE) $<
+        $(LEXCOMPILE) $<

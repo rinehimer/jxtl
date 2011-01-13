@@ -37,6 +37,8 @@
 
 #define callbacks ((jxtl_path_callback_t *) callbacks_ptr)
 
+int jxtl_path_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param,
+                   yyscan_t yyscanner );
 void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
                       void *callbacks_ptr, const char *error_string, ... );
 %}
@@ -99,7 +101,7 @@ predicate
  * it later and show it in a context that makes sense.
  */
 void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
-		      void *callbacks_ptr, const char *error_string, ... )
+                      void *callbacks_ptr, const char *error_string, ... )
 {
   va_list args;
   va_start( args, error_string );
@@ -242,17 +244,17 @@ static void negate_expression( void *user_data )
 parser_t *jxtl_path_parser_create( apr_pool_t *mp )
 {
   parser_t *parser = parser_create( mp,
-				    jxtl_path_lex_init,
-				    jxtl_path_set_extra,
-				    jxtl_path_lex_destroy,
-				    jxtl_path__scan_buffer,
-				    jxtl_path__delete_buffer,
-				    jxtl_path_parse );
+                                    jxtl_path_lex_init,
+                                    jxtl_path_set_extra,
+                                    jxtl_path_lex_destroy,
+                                    jxtl_path__scan_buffer,
+                                    jxtl_path__delete_buffer,
+                                    jxtl_path_parse );
   jxtl_path_callback_t *jxtl_callbacks;
   path_data_t *jxtl_data;
 
   jxtl_callbacks = apr_palloc( mp, sizeof(jxtl_path_callback_t) );
-  
+
   jxtl_callbacks->identifier_handler = lookup_identifier;
   jxtl_callbacks->root_object_handler = get_root_object;
   jxtl_callbacks->parent_object_handler = get_parent_object;

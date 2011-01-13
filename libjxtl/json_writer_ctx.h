@@ -103,7 +103,7 @@ int json_writer_ctx_end_array( json_writer_ctx_t *context );
  * @return TRUE if the property was stated, FALSE if it could not be started.
  */
 int json_writer_ctx_start_property( json_writer_ctx_t *context,
-				    unsigned char *name );
+                                    unsigned char *name );
 
 /**
  * End a property.

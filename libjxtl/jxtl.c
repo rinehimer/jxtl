@@ -66,7 +66,7 @@ static void print_json_value( json_t *json,
 
   if ( !json )
     return;
-  
+
   if ( format && template->format ) {
     value = template->format( json, format, template->format_data );
   }
@@ -167,7 +167,7 @@ static int is_true_if( apr_pool_t *mp, jxtl_if_t *jxtl_if, json_t *json )
     result = ( !JSON_IS_BOOLEAN( tmp_json ) ||
                JSON_IS_TRUE_BOOLEAN( tmp_json ) );
   }
-  
+
   return jxtl_if->expr->negate ? !result : result;
 }
 
@@ -278,7 +278,7 @@ int jxtl_expand_to_file( jxtl_template_t *template, json_t *json,
                             APR_WRITE | APR_CREATE | APR_BUFFERED |
                             APR_TRUNCATE, APR_OS_DEFAULT, mp );
   }
-  
+
   if ( status == APR_SUCCESS ) {
     template->flush_func = flush_to_file;
     template->flush_data = out;
@@ -320,7 +320,7 @@ char *jxtl_expand_to_buffer( apr_pool_t *mp, jxtl_template_t *template,
 
   bucket_alloc = apr_bucket_alloc_create( tmp_pool );
   bucket_brigade = apr_brigade_create( tmp_pool, bucket_alloc );
-  
+
   expand_content( tmp_pool, template, template->content, json, NULL,
                   PRINT_NORMAL, bucket_brigade );
 

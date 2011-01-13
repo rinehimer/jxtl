@@ -591,8 +591,6 @@ extern int jxtl_path_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
-    static void yyunput (int c,char *buf_ptr  ,yyscan_t yyscanner);
-    
 #ifndef yytext_ptr
 static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
 #endif
@@ -717,10 +715,10 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 55 "jxtl_path_lex.l"
+#line 56 "jxtl_path_lex.l"
 
 
-#line 724 "jxtl_path_lex.c"
+#line 722 "jxtl_path_lex.c"
 
     yylval = yylval_param;
 
@@ -809,42 +807,42 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 57 "jxtl_path_lex.l"
+#line 58 "jxtl_path_lex.l"
 { return '/'; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 58 "jxtl_path_lex.l"
+#line 59 "jxtl_path_lex.l"
 { return '.'; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 59 "jxtl_path_lex.l"
+#line 60 "jxtl_path_lex.l"
 { return T_PARENT; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 60 "jxtl_path_lex.l"
+#line 61 "jxtl_path_lex.l"
 { return '*'; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 61 "jxtl_path_lex.l"
+#line 62 "jxtl_path_lex.l"
 { return '['; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 62 "jxtl_path_lex.l"
+#line 63 "jxtl_path_lex.l"
 { return ']'; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 63 "jxtl_path_lex.l"
+#line 64 "jxtl_path_lex.l"
 { return '!'; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 64 "jxtl_path_lex.l"
+#line 65 "jxtl_path_lex.l"
 {
   yylval->string = apr_pstrdup( PARSER_MP, yytext );
   return T_IDENTIFIER;
@@ -852,18 +850,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 68 "jxtl_path_lex.l"
+#line 69 "jxtl_path_lex.l"
 
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 69 "jxtl_path_lex.l"
+#line 70 "jxtl_path_lex.l"
 
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 70 "jxtl_path_lex.l"
+#line 71 "jxtl_path_lex.l"
 {
   jxtl_lex_error( "illegal character '%c' found in path expression",
                   yytext[0] );
@@ -871,10 +869,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 75 "jxtl_path_lex.l"
+#line 76 "jxtl_path_lex.l"
 ECHO;
 	YY_BREAK
-#line 878 "jxtl_path_lex.c"
+#line 876 "jxtl_path_lex.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1204,44 +1202,6 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	yy_is_jam = (yy_current_state == 17);
 
 	return yy_is_jam ? 0 : yy_current_state;
-}
-
-    static void yyunput (int c, register char * yy_bp , yyscan_t yyscanner)
-{
-	register char *yy_cp;
-    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
-    yy_cp = yyg->yy_c_buf_p;
-
-	/* undo effects of setting up yytext */
-	*yy_cp = yyg->yy_hold_char;
-
-	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
-		{ /* need to shift things up to make room */
-		/* +2 for EOB chars. */
-		register int number_to_move = yyg->yy_n_chars + 2;
-		register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
-					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
-		register char *source =
-				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move];
-
-		while ( source > YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
-			*--dest = *--source;
-
-		yy_cp += (int) (dest - source);
-		yy_bp += (int) (dest - source);
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
-			yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
-
-		if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
-			YY_FATAL_ERROR( "flex scanner push-back overflow" );
-		}
-
-	*--yy_cp = (char) c;
-
-	yyg->yytext_ptr = yy_bp;
-	yyg->yy_hold_char = *yy_cp;
-	yyg->yy_c_buf_p = yy_cp;
 }
 
 #ifndef YY_NO_INPUT
@@ -2053,7 +2013,7 @@ void jxtl_path_free (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 75 "jxtl_path_lex.l"
+#line 76 "jxtl_path_lex.l"
 
 
 

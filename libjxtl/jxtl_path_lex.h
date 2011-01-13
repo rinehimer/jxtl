@@ -337,7 +337,7 @@ extern int jxtl_path_lex \
 #undef YY_DECL
 #endif
 
-#line 75 "jxtl_path_lex.l"
+#line 76 "jxtl_path_lex.l"
 
 
 #line 344 "jxtl_path_lex.h"

@@ -95,12 +95,14 @@
 
 #define callbacks ((json_callback_t *) callbacks_ptr)
 
+int json_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param,
+              yyscan_t yyscanner );
 void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
-		 void *callbacks_ptr, const char *error_string, ... );
+                 void *callbacks_ptr, const char *error_string, ... );
 
 
 /* Line 189 of yacc.c  */
-#line 104 "json_parse.c"
+#line 106 "json_parse.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -151,7 +153,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 58 "json_parse.y"
+#line 60 "json_parse.y"
 
   int integer;
   unsigned char *string;
@@ -160,7 +162,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 164 "json_parse.c"
+#line 166 "json_parse.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -185,7 +187,7 @@ typedef struct YYLTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 189 "json_parse.c"
+#line 191 "json_parse.c"
 
 #ifdef short
 # undef short
@@ -478,9 +480,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    72,    72,    73,    77,    77,    79,    79,    82,    82,
-      88,    89,    93,    93,    99,    99,   101,   101,   104,   104,
-     110,   111,   115,   116,   118,   119,   120,   121,   122,   123
+       0,    74,    74,    75,    79,    79,    81,    81,    84,    84,
+      90,    91,    95,    95,   101,   101,   103,   103,   106,   106,
+     112,   113,   117,   118,   120,   121,   122,   123,   124,   125
 };
 #endif
 
@@ -1467,49 +1469,49 @@ yyreduce:
         case 4:
 
 /* Line 1464 of yacc.c  */
-#line 77 "json_parse.y"
+#line 79 "json_parse.y"
     { callbacks->object_start_handler( callbacks->user_data ); }
     break;
 
   case 5:
 
 /* Line 1464 of yacc.c  */
-#line 78 "json_parse.y"
+#line 80 "json_parse.y"
     { callbacks->object_end_handler( callbacks->user_data ); }
     break;
 
   case 6:
 
 /* Line 1464 of yacc.c  */
-#line 79 "json_parse.y"
+#line 81 "json_parse.y"
     { callbacks->object_start_handler( callbacks->user_data ); }
     break;
 
   case 7:
 
 /* Line 1464 of yacc.c  */
-#line 81 "json_parse.y"
+#line 83 "json_parse.y"
     { callbacks->object_end_handler( callbacks->user_data ); }
     break;
 
   case 8:
 
 /* Line 1464 of yacc.c  */
-#line 82 "json_parse.y"
+#line 84 "json_parse.y"
     { callbacks->object_start_handler( callbacks->user_data ); }
     break;
 
   case 9:
 
 /* Line 1464 of yacc.c  */
-#line 84 "json_parse.y"
+#line 86 "json_parse.y"
     { callbacks->object_end_handler( callbacks->user_data ); }
     break;
 
   case 12:
 
 /* Line 1464 of yacc.c  */
-#line 93 "json_parse.y"
+#line 95 "json_parse.y"
     { callbacks->property_start_handler( callbacks->user_data,
                                                   (yyvsp[(1) - (1)].string) ); }
     break;
@@ -1517,63 +1519,63 @@ yyreduce:
   case 13:
 
 /* Line 1464 of yacc.c  */
-#line 95 "json_parse.y"
+#line 97 "json_parse.y"
     { callbacks->property_end_handler( callbacks->user_data ); }
     break;
 
   case 14:
 
 /* Line 1464 of yacc.c  */
-#line 99 "json_parse.y"
+#line 101 "json_parse.y"
     { callbacks->array_start_handler( callbacks->user_data ); }
     break;
 
   case 15:
 
 /* Line 1464 of yacc.c  */
-#line 100 "json_parse.y"
+#line 102 "json_parse.y"
     { callbacks->array_end_handler( callbacks->user_data ); }
     break;
 
   case 16:
 
 /* Line 1464 of yacc.c  */
-#line 101 "json_parse.y"
+#line 103 "json_parse.y"
     { callbacks->array_start_handler( callbacks->user_data ); }
     break;
 
   case 17:
 
 /* Line 1464 of yacc.c  */
-#line 103 "json_parse.y"
+#line 105 "json_parse.y"
     { callbacks->array_end_handler( callbacks->user_data ); }
     break;
 
   case 18:
 
 /* Line 1464 of yacc.c  */
-#line 104 "json_parse.y"
+#line 106 "json_parse.y"
     { callbacks->array_start_handler( callbacks->user_data ); }
     break;
 
   case 19:
 
 /* Line 1464 of yacc.c  */
-#line 106 "json_parse.y"
+#line 108 "json_parse.y"
     { callbacks->array_end_handler( callbacks->user_data ); }
     break;
 
   case 22:
 
 /* Line 1464 of yacc.c  */
-#line 115 "json_parse.y"
+#line 117 "json_parse.y"
     { callbacks->string_handler( callbacks->user_data, (yyvsp[(1) - (1)].string) ); }
     break;
 
   case 23:
 
 /* Line 1464 of yacc.c  */
-#line 116 "json_parse.y"
+#line 118 "json_parse.y"
     { callbacks->integer_handler( callbacks->user_data,
                                             (yyvsp[(1) - (1)].integer) ); }
     break;
@@ -1581,35 +1583,35 @@ yyreduce:
   case 24:
 
 /* Line 1464 of yacc.c  */
-#line 118 "json_parse.y"
+#line 120 "json_parse.y"
     { callbacks->number_handler( callbacks->user_data, (yyvsp[(1) - (1)].number) ); }
     break;
 
   case 27:
 
 /* Line 1464 of yacc.c  */
-#line 121 "json_parse.y"
+#line 123 "json_parse.y"
     { callbacks->boolean_handler( callbacks->user_data, 1 ); }
     break;
 
   case 28:
 
 /* Line 1464 of yacc.c  */
-#line 122 "json_parse.y"
+#line 124 "json_parse.y"
     { callbacks->boolean_handler( callbacks->user_data, 0 ); }
     break;
 
   case 29:
 
 /* Line 1464 of yacc.c  */
-#line 123 "json_parse.y"
+#line 125 "json_parse.y"
     { callbacks->null_handler( callbacks->user_data ); }
     break;
 
 
 
 /* Line 1464 of yacc.c  */
-#line 1613 "json_parse.c"
+#line 1615 "json_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1828,16 +1830,16 @@ yyreturn:
 
 
 /* Line 1684 of yacc.c  */
-#line 126 "json_parse.y"
+#line 128 "json_parse.y"
 
 
 void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
-		 void *callbacks_ptr, const char *error_string, ... )
+                 void *callbacks_ptr, const char *error_string, ... )
 {
   va_list args;
 
   fprintf( stderr, "%s:%d,%d-%d: ", parser->get_filename( parser ),
-	   yylloc->first_line, yylloc->first_column, yylloc->last_column );
+           yylloc->first_line, yylloc->first_column, yylloc->last_column );
   va_start( args, error_string );
   vfprintf( stderr, error_string, args );
   va_end( args );
@@ -1847,12 +1849,12 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 parser_t *json_parser_create( apr_pool_t *mp )
 {
   parser_t *parser = parser_create( mp,
-				    json_lex_init,
-				    json_set_extra,
-				    json_lex_destroy,
-				    json__scan_buffer,
-				    json__delete_buffer,
-				    json_parse );
+                                    json_lex_init,
+                                    json_set_extra,
+                                    json_lex_destroy,
+                                    json__scan_buffer,
+                                    json__delete_buffer,
+                                    json_parse );
   json_writer_t *writer = json_writer_create( mp, NULL );
 
   json_callback_t *json_callbacks = apr_palloc( mp, sizeof(json_callback_t) );

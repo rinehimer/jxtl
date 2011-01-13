@@ -40,7 +40,7 @@ typedef struct json_writer_t {
    * above memory pool if it is not passed.
    */
   apr_pool_t *json_mp;
-  
+
   /**
    * Root node of the JSON created by the writer.
    */

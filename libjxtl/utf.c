@@ -88,7 +88,7 @@ void utf8_strcpyn( unsigned char *dst, unsigned char *src, int str_len )
   int invalid_seq;
   int i = 0;
   int value;
-  
+
   while( i < str_len ) {
     dst[i] = src[i];
     value = 0;
@@ -108,51 +108,51 @@ void utf8_strcpyn( unsigned char *dst, unsigned char *src, int str_len )
     case UTF8_THREE_BYTE_SEQUENCE:
     case UTF8_FOUR_BYTE_SEQUENCE:
       if ( len == 1 )
-	value = dst[i] & 0x1F;
+        value = dst[i] & 0x1F;
       else if ( len == 2 )
-	value = dst[i] & 0xF;
+        value = dst[i] & 0xF;
       else if ( len == 3 )
-	value = dst[i] & 0x7;
+        value = dst[i] & 0x7;
 
       seq_start = i++;
       chars_left_in_seq = len;
       invalid_seq = 0;
 
       do {
-	dst[i] = src[i];
+        dst[i] = src[i];
         UTF8_BYTE( src[i], byte_type, tmp );
-	if ( byte_type != UTF8_CONTINUATION_BYTE ) {
-	  invalid_seq = 1;
-	  break;
-	}
-	value = ( value << 6 ) + ( src[i] & 0x3F );
+        if ( byte_type != UTF8_CONTINUATION_BYTE ) {
+          invalid_seq = 1;
+          break;
+        }
+        value = ( value << 6 ) + ( src[i] & 0x3F );
       }while ( ( ++i < str_len ) && ( --len > 0 )  );
 
       if ( invalid_seq ) {
-	/* Discard the first byte that started the invalid sequence and
-	   continue. */
+        /* Discard the first byte that started the invalid sequence and
+           continue. */
         fprintf( stderr, "unable to decode 0x%x at offset %d\n", src[seq_start],
                  seq_start );
-	dst[seq_start] = '?';
+        dst[seq_start] = '?';
         i = seq_start;
       }
       else if ( ( value > 0x10FFFF ) ||
-		( ( chars_left_in_seq == 1 ) && value < 0x80 ) ||
-		( ( chars_left_in_seq == 2 ) && value < 0x800 ) ||
-		( ( chars_left_in_seq == 3 ) && value < 0x10000 ) ||
-		( ( value >= 0xD800 ) && ( value <= 0xDFFF ) ) ) {
-	/* We got a valid sequence but the value is not in the correct range
-	   for its length. */
-	fprintf( stderr,
-		 "unable to decode %d byte sequence at pos %d, invalid value 0x%x\n",
-		 chars_left_in_seq + 1, seq_start, value );
-	for ( len = 0; len < chars_left_in_seq; len++ ) {
-	  dst[seq_start + len] = '?';
-	}
-	i = seq_start + chars_left_in_seq;
+                ( ( chars_left_in_seq == 1 ) && value < 0x80 ) ||
+                ( ( chars_left_in_seq == 2 ) && value < 0x800 ) ||
+                ( ( chars_left_in_seq == 3 ) && value < 0x10000 ) ||
+                ( ( value >= 0xD800 ) && ( value <= 0xDFFF ) ) ) {
+        /* We got a valid sequence but the value is not in the correct range
+           for its length. */
+        fprintf( stderr,
+                 "unable to decode %d byte sequence at pos %d, invalid value 0x%x\n",
+                 chars_left_in_seq + 1, seq_start, value );
+        for ( len = 0; len < chars_left_in_seq; len++ ) {
+          dst[seq_start + len] = '?';
+        }
+        i = seq_start + chars_left_in_seq;
       }
       else
-	i = seq_start + chars_left_in_seq;
+        i = seq_start + chars_left_in_seq;
       break;
     }
     i++;

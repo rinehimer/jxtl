@@ -15,7 +15,7 @@ static int text_is_whitespace( apr_text *t )
   for ( ; t; t = t->next ) {
     for ( c = t->text; *c; c++ ) {
       if ( !apr_isspace( *c ) ) {
-	return FALSE;
+        return FALSE;
       }
     }
   }
@@ -30,7 +30,7 @@ static int xml_elem_is_whitespace( apr_xml_elem *elem )
 {
   apr_text *t;
   apr_xml_elem *child;
-  
+
   t = elem->first_cdata.first;
 
   if ( !text_is_whitespace( t ) ) {
@@ -56,7 +56,7 @@ static json_type xml_elem_type( apr_xml_elem *elem )
   if ( APR_XML_ELEM_IS_EMPTY( elem ) && !elem->attr ) {
     return JSON_NULL;
   }
-  
+
   /* Not empty and has attrs, it must be an object. */
   if ( elem->attr ) {
     return JSON_OBJECT;
@@ -120,7 +120,7 @@ static void write_attrs( apr_xml_attr *attr, json_writer_t *writer )
 }
 
 static void xml_elem_to_json( apr_pool_t *mp, apr_xml_elem *root,
-			      json_writer_t *writer )
+                              json_writer_t *writer )
 {
   apr_xml_elem *elem;
   json_type type;
@@ -133,13 +133,13 @@ static void xml_elem_to_json( apr_pool_t *mp, apr_xml_elem *root,
   for ( elem = root; elem; elem = elem->next ) {
     type = xml_elem_type( elem );
     json_writer_start_property( writer, (unsigned char *) elem->name );
-      
+
     if ( type == JSON_NULL ) {
       json_writer_write_null( writer );
     }
     else if ( type == JSON_STRING ) {
       apr_xml_to_text( mp, elem, APR_XML_X2T_INNER, NULL, NULL, &elem_buf,
-		       &buf_size );
+                       &buf_size );
       write_xml_string( writer, elem_buf );
     }
     else if ( type == JSON_OBJECT ) {
@@ -173,7 +173,7 @@ int xml_file_to_json( apr_pool_t *mp, const char *filename, int skip_root,
   }
   else {
     status = apr_file_open( &file, filename, APR_READ | APR_BUFFERED, 0,
-			    tmp_mp );
+                            tmp_mp );
   }
 
   if ( status == APR_SUCCESS ) {

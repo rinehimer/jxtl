@@ -42,30 +42,30 @@
     result = ( PARSER_STATUS == APR_SUCCESS ) ? PARSER_BYTES : YY_NULL; \
  }
 
-#define YY_USER_ACTION {						\
+#define YY_USER_ACTION {                                                \
     yylloc->first_line = PARSER_LINE_NUM;                               \
     yylloc->last_line = PARSER_LINE_NUM;                                \
-    yylloc->first_column = yycolumn + 1;				\
-    yylloc->last_column = yycolumn + yyleng;				\
+    yylloc->first_column = yycolumn + 1;                                \
+    yylloc->last_column = yycolumn + yyleng;                            \
     if ( yytext[yyleng - 1] == '\n' ) {                                 \
       PARSER_LINE_NUM++;                                                \
-      yylloc->first_column = 0;						\
-      yylloc->last_column = 0;						\
+      yylloc->first_column = 0;                                         \
+      yylloc->last_column = 0;                                          \
       yycolumn = 0;                                                     \
-    }									\
-    else {								\
+    }                                                                   \
+    else {                                                              \
       yycolumn += yyleng;                                               \
-    }									\
+    }                                                                   \
   }
 
 /**
  * Wrapper around yyless so that we can correctly adjust columns.  This macro
  * does not check for newlines, so you shouldn't put back newlines.
  */
-#define PARSER_LESS( n ) do {			\
-    int less = n;				\
-    yycolumn -= yyleng - less;			\
-    yyless( less );				\
+#define PARSER_LESS( n ) do {                   \
+    int less = n;                               \
+    yycolumn -= yyleng - less;                  \
+    yyless( less );                             \
   } while ( 0 );
 
 

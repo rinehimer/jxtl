@@ -50,6 +50,7 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %option reentrant
 %option bison-bridge
 %option bison-locations
+%option nounput
 
 %x unmatched squote_str dquote_str
 
@@ -149,31 +150,31 @@ exp ("e"|"E")("+"|"-")?[0-9]+
       memcpy( tmp_str, yytext + 8, 4 );
       value2 = strtol( tmp_str, NULL, 16 );
       if ( value >= 0xD800 && value <= 0xDBFF ) {
-	/* Valid first surrogate */
-	if ( value2 >= 0xDC00 && value2 <= 0xDFFF ) {
-	  /* Valid second surrogate */
-	  value = ( ( value - 0xD800 ) << 10 ) + ( value2 - 0xDC00 ) + 0x10000;
-	  utf8_encode( value, utf8_str );
+        /* Valid first surrogate */
+        if ( value2 >= 0xDC00 && value2 <= 0xDFFF ) {
+          /* Valid second surrogate */
+          value = ( ( value - 0xD800 ) << 10 ) + ( value2 - 0xDC00 ) + 0x10000;
+          utf8_encode( value, utf8_str );
           str_buf_append( PARSER_STR_BUF, utf8_str );
-	}
-	else {
-	  json_lex_error( "invalid unicode \\u%.4x\\u%.4x", value, value2 );
-	}
+        }
+        else {
+          json_lex_error( "invalid unicode \\u%.4x\\u%.4x", value, value2 );
+        }
       }
       else if ( value <= 0x7F ) {
-	/* Not a surrogate pair */
-	PARSER_LESS( 6 );
+        /* Not a surrogate pair */
+        PARSER_LESS( 6 );
 
-	utf8_encode( value, utf8_str );
+        utf8_encode( value, utf8_str );
         str_buf_append( PARSER_STR_BUF, utf8_str );
       }
       else {
-	json_lex_error( "invalid unicode \\u%.4x\\u%.4x", value, value2 );
+        json_lex_error( "invalid unicode \\u%.4x\\u%.4x", value, value2 );
       }
     }
     else if ( value >= 0xD800 && value <= 0xDFFF ) {
       /* These are invalid UTF-8 characters, only can be used as surrogate
-	 pairs */
+         pairs */
       json_lex_error( "invalid unicode \\u%.4x", value );
     }
     else {
@@ -200,7 +201,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
     BEGIN( INITIAL );
     json_lex_error( "unterminated string constant" );
     yylval->string = apr_palloc( PARSER_MP,
-				 PARSER_STR_BUF->data_len + 1 );
+                                 PARSER_STR_BUF->data_len + 1 );
     utf8_strcpyn( yylval->string, PARSER_STR_BUF->data,
                   PARSER_STR_BUF->data_len );
     return T_STRING;

@@ -38,8 +38,10 @@
 
 #define callbacks ((json_callback_t *) callbacks_ptr)
 
+int json_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param,
+              yyscan_t yyscanner );
 void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
-		 void *callbacks_ptr, const char *error_string, ... );
+                 void *callbacks_ptr, const char *error_string, ... );
 %}
 
 %name-prefix="json_"
@@ -126,12 +128,12 @@ value
 %%
 
 void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
-		 void *callbacks_ptr, const char *error_string, ... )
+                 void *callbacks_ptr, const char *error_string, ... )
 {
   va_list args;
 
   fprintf( stderr, "%s:%d,%d-%d: ", parser->get_filename( parser ),
-	   yylloc->first_line, yylloc->first_column, yylloc->last_column );
+           yylloc->first_line, yylloc->first_column, yylloc->last_column );
   va_start( args, error_string );
   vfprintf( stderr, error_string, args );
   va_end( args );
@@ -141,12 +143,12 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 parser_t *json_parser_create( apr_pool_t *mp )
 {
   parser_t *parser = parser_create( mp,
-				    json_lex_init,
-				    json_set_extra,
-				    json_lex_destroy,
-				    json__scan_buffer,
-				    json__delete_buffer,
-				    json_parse );
+                                    json_lex_init,
+                                    json_set_extra,
+                                    json_lex_destroy,
+                                    json__scan_buffer,
+                                    json__delete_buffer,
+                                    json_parse );
   json_writer_t *writer = json_writer_create( mp, NULL );
 
   json_callback_t *json_callbacks = apr_palloc( mp, sizeof(json_callback_t) );

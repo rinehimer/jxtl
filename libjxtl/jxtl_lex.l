@@ -35,8 +35,11 @@
 
 #define YY_DECL int jxtl_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
 
-#define jxtl_error( ... ) \
+#define jxtl_lex_error( ... ) \
   jxtl_error( yylloc, yyscanner, PARSER, NULL, __VA_ARGS__ )
+
+void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
+                 void *callbacks_ptr, const char *error_string, ... );
 
 %}
 
@@ -48,6 +51,7 @@
 %option bison-bridge
 %option bison-locations
 %option case-insensitive
+%option nounput
 
 %x directive options str unmatched path_expr comment
 
@@ -63,7 +67,7 @@
      */
     if ( PARSER_STR_BUF->data_len > 0 )  {
       yylval->string = apr_pstrndup( PARSER_MP, PARSER_STR_BUF->data,
-				     PARSER_STR_BUF->data_len );
+                                     PARSER_STR_BUF->data_len );
       STR_BUF_CLEAR( PARSER_STR_BUF );
       PARSER_LESS( 0 );
       return T_TEXT;
@@ -94,8 +98,8 @@
   "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
   [ \t\r]+
   "\n"
-  . { jxtl_error( "illegal character '%c' found in path expression",
-		  yytext[0] ); }
+  . { jxtl_lex_error( "illegal character '%c' found in path expression",
+                      yytext[0] ); }
 }
 
 <options>{
@@ -134,14 +138,14 @@
     str_buf_write( PARSER_STR_BUF, yytext, yyleng );
   }
   "\n" {
-    jxtl_error( "unterminated string constant" );
+    jxtl_lex_error( "unterminated string constant" );
     BEGIN( INITIAL );
   }
 }
 
 <unmatched>{
   [^ \t\r\n,}]+ {
-    jxtl_error( "bad option '%s'", yytext );
+    jxtl_lex_error( "bad option '%s'", yytext );
     BEGIN( options );
   }
 }
@@ -149,8 +153,8 @@
 <INITIAL><<EOF>> {
   if ( PARSER_STR_BUF->data_len > 0 )  {
     yylval->string = apr_pstrndup( PARSER_MP,
-				   PARSER_STR_BUF->data,
-				   PARSER_STR_BUF->data_len );
+                                   PARSER_STR_BUF->data,
+                                   PARSER_STR_BUF->data_len );
     STR_BUF_CLEAR( PARSER_STR_BUF );
     return T_TEXT;
   }

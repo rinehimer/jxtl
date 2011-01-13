@@ -80,7 +80,7 @@ json_t *json_create_array( apr_pool_t *mp )
   json_t *json;
   JSON_CREATE( mp, json );
   json->value.array = apr_array_make( mp, 8, sizeof(json_t *) );
-  json->type = JSON_ARRAY;  
+  json->type = JSON_ARRAY;
   return json;
 }
 
@@ -192,7 +192,7 @@ static void dump_internal( json_t *json, int first, int depth, int indent )
       apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
       dump_internal( tmp_json, i == 0, depth + 1, indent );
     }
-    
+
     if ( indent && i > 0 ) {
       printf( "\n" );
       print_spaces( depth * indent );
@@ -215,16 +215,16 @@ static void dump_internal( json_t *json, int first, int depth, int indent )
 
     printf( "]" );
     break;
-    
+
   case JSON_BOOLEAN:
     ( json->value.boolean ) ? printf( "true" ) :
                               printf( "false" );
     break;
-    
+
   case JSON_NULL:
     printf( "null" );
     break;
-    
+
   default:
     fprintf( stderr, "error:  unrecognized object type\n" );
     break;
@@ -306,13 +306,13 @@ static void json_to_xml_internal( json_t *json, int indent )
       printf( "</%s>\n", json_name );
     }
     break;
-    
+
   case JSON_BOOLEAN:
     ( json->value.boolean ) ?
       printf( "true" ) :
       printf( "false" );
     break;
-    
+
   case JSON_NULL:
     printf( "null" );
     break;
@@ -348,11 +348,11 @@ char *json_get_string_value( apr_pool_t *mp, json_t *json )
   case JSON_STRING:
     value = apr_psprintf( mp, "%s", json->value.string );
     break;
-    
+
   case JSON_INTEGER:
     value = apr_psprintf( mp, "%d", json->value.integer );
     break;
-    
+
   case JSON_NUMBER:
     value = apr_psprintf( mp, "%g", json->value.number );
     break;

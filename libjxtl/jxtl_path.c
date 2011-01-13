@@ -154,7 +154,7 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
   case JXTL_PATH_CURRENT_OBJ:
     tmp_json = json;
     break;
-    
+
   case JXTL_PATH_ANY_OBJ:
     if ( json && json->type == JSON_OBJECT ) {
       for ( idx = apr_hash_first( NULL, json->value.object ); idx;
@@ -165,7 +165,7 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
     }
     return;
     break;
-    
+
   case JXTL_PATH_LOOKUP:
     if ( json && json->type == JSON_OBJECT ) {
       tmp_json = apr_hash_get( json->value.object, expr->identifier,

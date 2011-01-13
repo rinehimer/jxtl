@@ -94,12 +94,14 @@
 
 #define callbacks ((jxtl_path_callback_t *) callbacks_ptr)
 
+int jxtl_path_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param,
+                   yyscan_t yyscanner );
 void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
                       void *callbacks_ptr, const char *error_string, ... );
 
 
 /* Line 189 of yacc.c  */
-#line 103 "jxtl_path_parse.c"
+#line 105 "jxtl_path_parse.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -142,7 +144,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 57 "jxtl_path_parse.y"
+#line 59 "jxtl_path_parse.y"
 
   int ival;
   unsigned char *string;
@@ -150,7 +152,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 154 "jxtl_path_parse.c"
+#line 156 "jxtl_path_parse.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -175,7 +177,7 @@ typedef struct YYLTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 179 "jxtl_path_parse.c"
+#line 181 "jxtl_path_parse.c"
 
 #ifdef short
 # undef short
@@ -462,8 +464,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    70,    70,    71,    75,    75,    76,    80,    80,    82,
-      83,    84,    84,    85,    88,    90,    90
+       0,    72,    72,    73,    77,    77,    78,    82,    82,    84,
+      85,    86,    86,    87,    90,    92,    92
 };
 #endif
 
@@ -1436,21 +1438,21 @@ yyreduce:
         case 2:
 
 /* Line 1464 of yacc.c  */
-#line 70 "jxtl_path_parse.y"
+#line 72 "jxtl_path_parse.y"
     { callbacks->negate_handler( callbacks->user_data ); }
     break;
 
   case 4:
 
 /* Line 1464 of yacc.c  */
-#line 75 "jxtl_path_parse.y"
+#line 77 "jxtl_path_parse.y"
     { callbacks->root_object_handler( callbacks->user_data ); }
     break;
 
   case 7:
 
 /* Line 1464 of yacc.c  */
-#line 80 "jxtl_path_parse.y"
+#line 82 "jxtl_path_parse.y"
     { callbacks->identifier_handler( callbacks->user_data,
                                                   (yyvsp[(1) - (1)].string) ); }
     break;
@@ -1458,42 +1460,42 @@ yyreduce:
   case 9:
 
 /* Line 1464 of yacc.c  */
-#line 82 "jxtl_path_parse.y"
+#line 84 "jxtl_path_parse.y"
     { callbacks->current_object_handler( callbacks->user_data ); }
     break;
 
   case 10:
 
 /* Line 1464 of yacc.c  */
-#line 83 "jxtl_path_parse.y"
+#line 85 "jxtl_path_parse.y"
     { callbacks->parent_object_handler( callbacks->user_data ); }
     break;
 
   case 11:
 
 /* Line 1464 of yacc.c  */
-#line 84 "jxtl_path_parse.y"
+#line 86 "jxtl_path_parse.y"
     { callbacks->any_object_handler( callbacks->user_data ); }
     break;
 
   case 15:
 
 /* Line 1464 of yacc.c  */
-#line 90 "jxtl_path_parse.y"
+#line 92 "jxtl_path_parse.y"
     { callbacks->predicate_start_handler( callbacks->user_data ); }
     break;
 
   case 16:
 
 /* Line 1464 of yacc.c  */
-#line 92 "jxtl_path_parse.y"
+#line 94 "jxtl_path_parse.y"
     { callbacks->predicate_end_handler( callbacks->user_data ); }
     break;
 
 
 
 /* Line 1464 of yacc.c  */
-#line 1497 "jxtl_path_parse.c"
+#line 1499 "jxtl_path_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1712,7 +1714,7 @@ yyreturn:
 
 
 /* Line 1684 of yacc.c  */
-#line 95 "jxtl_path_parse.y"
+#line 97 "jxtl_path_parse.y"
 
 
 /**
@@ -1720,7 +1722,7 @@ yyreturn:
  * it later and show it in a context that makes sense.
  */
 void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
-		      void *callbacks_ptr, const char *error_string, ... )
+                      void *callbacks_ptr, const char *error_string, ... )
 {
   va_list args;
   va_start( args, error_string );
@@ -1863,17 +1865,17 @@ static void negate_expression( void *user_data )
 parser_t *jxtl_path_parser_create( apr_pool_t *mp )
 {
   parser_t *parser = parser_create( mp,
-				    jxtl_path_lex_init,
-				    jxtl_path_set_extra,
-				    jxtl_path_lex_destroy,
-				    jxtl_path__scan_buffer,
-				    jxtl_path__delete_buffer,
-				    jxtl_path_parse );
+                                    jxtl_path_lex_init,
+                                    jxtl_path_set_extra,
+                                    jxtl_path_lex_destroy,
+                                    jxtl_path__scan_buffer,
+                                    jxtl_path__delete_buffer,
+                                    jxtl_path_parse );
   jxtl_path_callback_t *jxtl_callbacks;
   path_data_t *jxtl_data;
 
   jxtl_callbacks = apr_palloc( mp, sizeof(jxtl_path_callback_t) );
-  
+
   jxtl_callbacks->identifier_handler = lookup_identifier;
   jxtl_callbacks->root_object_handler = get_root_object;
   jxtl_callbacks->parent_object_handler = get_parent_object;

@@ -62,7 +62,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1685 of yacc.c  */
-#line 58 "json_parse.y"
+#line 60 "json_parse.y"
 
   int integer;
   unsigned char *string;

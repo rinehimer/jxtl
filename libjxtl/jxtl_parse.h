@@ -74,7 +74,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1685 of yacc.c  */
-#line 59 "jxtl_parse.y"
+#line 61 "jxtl_parse.y"
 
   int ival;
   unsigned char *string;

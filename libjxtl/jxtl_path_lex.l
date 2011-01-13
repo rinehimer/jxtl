@@ -49,6 +49,7 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %option bison-bridge
 %option bison-locations
 %option case-insensitive
+%option nounput
 
 identifier [a-zA-Z][a-zA-Z0-9_]*
 
