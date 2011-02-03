@@ -1,4 +1,4 @@
-]{{! Print each brewery and break down it's beers by season.  Demonstrates
+{{! Print each brewery and break down it's beers by season.  Demonstrates
     predicates and that lists of nodes can be properly expanded without a
     section. -}}
 {{#section brewery ; separator="\n\n"}}
