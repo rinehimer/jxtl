@@ -23,6 +23,7 @@
 #define JXTL_H
 
 #include <apr_buckets.h>
+#include <apr_hash.h>
 #include <apr_pools.h>
 #include <apr_tables.h>
 
@@ -79,14 +80,14 @@ typedef struct jxtl_callback_t {
   void *user_data;
 } jxtl_callback_t;
 
-typedef char * ( *jxtl_format_func )( json_t *value, char *format_name,
+typedef char * ( *jxtl_format_func )( json_t *value, char *format,
                                       void *user_data );
 
 typedef struct jxtl_template_t {
   apr_array_header_t *content;
   apr_status_t ( *flush_func )( apr_bucket_brigade *bb, void *ctx );
   void *flush_data;
-  jxtl_format_func format;
+  apr_hash_t *formats;
   void *format_data;
 }jxtl_template_t;
 
@@ -96,8 +97,12 @@ int jxtl_parser_parse_file( parser_t *parser, const char *file,
 int jxtl_parser_parse_buffer( parser_t *parser, const char *buffer,
                               jxtl_template_t **template );
 
-void jxtl_template_set_format_func( jxtl_template_t *template,
-                                    jxtl_format_func format_func );
+/**
+ * Register a named format with a callback function.
+ */
+void jxtl_template_register_format( jxtl_template_t *template,
+                                    const char *format_name,
+                                    jxtl_format_func func );
 
 void jxtl_template_set_format_data( jxtl_template_t *template,
                                     void *format_data );

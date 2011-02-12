@@ -1,5 +1,6 @@
 %{
 #include <apr_general.h>
+#include <apr_hash.h>
 #include <apr_pools.h>
 #include "json.h"
 #include "jxtl.h"
@@ -40,7 +41,7 @@
     t->jxtl_parser = jxtl_parser_create( t->mp );
     t->template = NULL;
     t->json = NULL;
-    t->format_func = NULL;
+    t->formats = apr_hash_make( t->mp );
     
     if ( buffer ) {
       jxtl_parser_parse_buffer( t->jxtl_parser, buffer, &t->template );
@@ -67,7 +68,8 @@
   }
   
   /**
-   * Set the context for a template.
+   * Set the context for a template.  This would be used from a format callback
+   * to do inside expansion.
    */
   void set_context( json_t *json )
   {
@@ -75,13 +77,13 @@
   }
 
   /**
-   * Set the format callback for the template.
+   * Register a format callback for the template.
    */
-  void set_format_callback( FORMAT_FUNC_T format_func );
+  void register_format( const char *format, FORMAT_FUNC_T format_func );
 
   /**
-   * Expand a template to a file using a Perl hash reference or the existing
-   * context of the template.
+   * Expand a template to a file using a language specific dictionary or the
+   * existing context of the template.
    */
   int expand_to_file( char *file, DICTIONARY_T input = NULL );
   

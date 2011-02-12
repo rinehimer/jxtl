@@ -11,17 +11,20 @@
 #include "template.h"
 #include "perl_util.h"
 
-static char *format_func( json_t *json, char *format, void *template_ptr )
+static char *perl_format_func( json_t *json, char *format, void *template_ptr )
 {
   Template *t = (Template *) template_ptr;
   char *value = json_get_string_value( t->mp, json );
   int n;
+  SV *format_func;
   SV *context = sv_newmortal();
   SV *perl_ret;
   char *ret_val = NULL;
 
   if ( !value )
     value = "";
+
+  format_func = apr_hash_get( t->formats, format, APR_HASH_KEY_STRING );
 
   dSP;
   ENTER;
@@ -35,7 +38,7 @@ static char *format_func( json_t *json, char *format, void *template_ptr )
   XPUSHs( context );
   PUTBACK;
 
-  n = call_sv( t->format_func, G_SCALAR );
+  n = call_sv( format_func, G_SCALAR );
 
   SPAGAIN;
   if ( n == 1 ) {
@@ -50,19 +53,41 @@ static char *format_func( json_t *json, char *format, void *template_ptr )
   return ret_val;
 }
 
-void Template_set_format_callback( Template *t, SV *format_func )
+void Template_register_format( Template *t, const char *format,
+                               SV *format_func )
 {
+  SV *func_ptr;
+
   if ( SvROK( format_func ) &&
        SvTYPE( SvRV( format_func ) ) == SVt_PVCV ) {
-    if ( t->format_func ) {
-      SvREFCNT_dec( t->format_func );
-    }
-    t->format_func = SvRV( format_func );
-    SvREFCNT_inc( t->format_func );
+    /* TODO:  Check whether or not we should mess with refcount. */
+    func_ptr = SvRV( format_func );
+      /* SvREFCNT_inc( func_ptr ); */
+    apr_hash_set( t->formats, format, APR_HASH_KEY_STRING, func_ptr );
   }
   else {
     fprintf( stderr,
-             "Error setting format function: not a code reference\n" );
+             "Error setting %s format function: not a code reference\n",
+             format );
+  }
+}
+
+static void register_format_funcs( Template *t )
+{
+  apr_hash_index_t *idx;
+  char *format;
+
+  if ( apr_hash_count( t->formats ) > 0 ) {
+    /**
+     * Register the same callback for all functions in here.  We'll call the
+     * correct one from our callback.
+     */
+    for ( idx = apr_hash_first( NULL, t->formats ); idx;
+          idx = apr_hash_next( idx ) ) {
+      apr_hash_this( idx, (void **) &format, NULL, NULL );
+      jxtl_template_register_format( t->template, format, perl_format_func );
+    }
+    jxtl_template_set_format_data( t->template, t );
   }
 }
 
@@ -77,11 +102,7 @@ int Template_expand_to_file( Template *t, char *file, SV *input )
   }
 
   apr_pool_create( &tmp_mp, NULL );
-
-  if ( t->format_func ) {
-    jxtl_template_set_format_func( t->template, format_func );
-    jxtl_template_set_format_data( t->template, t );
-  }
+  register_format_funcs( t );
 
   if ( input ) {
     t->json = perl_variable_to_json( tmp_mp, input );
@@ -105,11 +126,7 @@ char *Template_expand_to_buffer( Template *t, SV *input )
   }
 
   apr_pool_create( &tmp_mp, NULL );
-
-  if ( t->format_func ) {
-    jxtl_template_set_format_func( t->template, format_func );
-    jxtl_template_set_format_data( t->template, t );
-  }
+  register_format_funcs( t );
 
   if ( input ) {
     t->json = perl_variable_to_json( tmp_mp, input );

@@ -39,7 +39,7 @@ def compare( file1, file2 ):
     else:
         os.remove( file2 );
 
-inputs = glob.glob( "/t*/input" );
+inputs = glob.glob( "./t*/input" );
 beers_xml = libjxtl.xml_to_dict( "t.xml" );
 beers_json = libjxtl.json_to_dict( "t.json" );
 t = libjxtl.Template();
@@ -47,7 +47,8 @@ t = libjxtl.Template();
 for input in inputs:
     dir = os.path.dirname( input );
     t.load( input );
-    t.set_format_callback( format );
+    t.register_format( "upper", format );
+    t.register_format( "lower", format );
     t.expand_to_file( dir + "/test.output", beers_xml );
     compare( dir + "/output", dir + "/test.output" );
     t.expand_to_file( dir + "/test.output", beers_json );

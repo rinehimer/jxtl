@@ -8,18 +8,22 @@
 #include "py_util.h"
 #include "template.h"
 
-static char *format_func( json_t *json, char *format, void *template_ptr )
+static char *python_format_func( json_t *json, char *format,
+                                 void *template_ptr )
 {
   Template *t = (Template *) template_ptr;
   char *value = json_get_string_value( t->mp, json );
   char *ret_val = NULL;
+  PyObject *format_func;
   PyObject *arglist;
   PyObject *py_ret;
   PyObject *py_json;
 
+  format_func = apr_hash_get( t->formats, format, APR_HASH_KEY_STRING );
+
   py_json = PyCObject_FromVoidPtrAndDesc( json, "_p_json_t", NULL );
   arglist = Py_BuildValue( "ssO", value, format, py_json );
-  py_ret = PyObject_CallObject( t->format_func, arglist );
+  py_ret = PyObject_CallObject( format_func, arglist );
 
   if ( PyString_CheckExact( py_ret ) ) {
     ret_val = apr_pstrdup( t->mp, PyString_AS_STRING( py_ret ) );
@@ -28,16 +32,32 @@ static char *format_func( json_t *json, char *format, void *template_ptr )
   return ret_val;
 }
 
-void Template_set_format_callback( Template *t, PyObject *format_func )
+static void register_format_funcs( Template *t )
 {
-  PyObject *prev_format_func = t->format_func;
+  apr_hash_index_t *idx;
+  char *format;
 
-  if ( PyCallable_Check( format_func ) ) {
-    if ( prev_format_func ) {
-      Py_XDECREF( prev_format_func );
+  if ( apr_hash_count( t->formats ) > 0 ) {
+    /**
+     * Register the same callback for all functions in here.  We'll call the
+     * correct one from our callback.
+     */
+    for ( idx = apr_hash_first( NULL, t->formats ); idx;
+          idx = apr_hash_next( idx ) ) {
+      apr_hash_this( idx, (void **) &format, NULL, NULL );
+      jxtl_template_register_format( t->template, format, python_format_func );
     }
-    Py_XINCREF( format_func );
-    t->format_func = format_func;
+    jxtl_template_set_format_data( t->template, t );
+  }
+
+}
+
+void Template_register_format( Template *t, char *format,
+                               PyObject *format_func )
+{
+  if ( PyCallable_Check( format_func ) ) {
+    /**TODO: Check whether we should increment ref counts. */
+    apr_hash_set( t->formats, format, APR_HASH_KEY_STRING, format_func );
   }
   else {
     fprintf( stderr, "Error setting format function: not callable\n" );
@@ -55,11 +75,7 @@ int Template_expand_to_file( Template *t, char *file, PyObject *input )
   }
 
   apr_pool_create( &tmp_mp, NULL );
-
-  if ( t->format_func ) {
-    jxtl_template_set_format_func( t->template, format_func );
-    jxtl_template_set_format_data( t->template, t );
-  }
+  register_format_funcs( t );
 
   if ( input ) {
     t->json = py_variable_to_json( t->mp, input );
@@ -83,11 +99,7 @@ char *Template_expand_to_buffer( Template *t, PyObject *input )
   }
 
   apr_pool_create( &tmp_mp, NULL );
-
-  if ( t->format_func ) {
-    jxtl_template_set_format_func( t->template, format_func );
-    jxtl_template_set_format_data( t->template, t );
-  }
+  register_format_funcs( t );
 
   if ( input ) {
     t->json = py_variable_to_json( t->mp, input );

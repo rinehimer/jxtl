@@ -20,6 +20,7 @@
  */
 
 #include <apr_buckets.h>
+#include <apr_hash.h>
 #include <apr_general.h>
 #include <apr_pools.h>
 #include <apr_strings.h>
@@ -63,12 +64,18 @@ static void print_json_value( json_t *json,
                               apr_bucket_brigade *out )
 {
   char *value = NULL;
+  jxtl_format_func format_func = NULL;
 
   if ( !json )
     return;
 
-  if ( format && template->format ) {
-    value = template->format( json, format, template->format_data );
+  if ( format ) {
+    format_func = apr_hash_get( template->formats, format,
+                                APR_HASH_KEY_STRING );
+  }
+
+  if ( format_func ) {
+    value = format_func( json, format, template->format_data );
   }
   else {
     value = json_get_string_value( mp, json );
@@ -243,10 +250,11 @@ static void expand_content( apr_pool_t *mp,
   }
 }
 
-void jxtl_template_set_format_func( jxtl_template_t *template,
-                                    jxtl_format_func format_func )
+void jxtl_template_register_format( jxtl_template_t *template,
+                                    const char *format_name,
+                                    jxtl_format_func func )
 {
-  template->format = format_func;
+  apr_hash_set( template->formats, format_name, APR_HASH_KEY_STRING, func );
 }
 
 void jxtl_template_set_format_data( jxtl_template_t *template,

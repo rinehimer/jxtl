@@ -22,13 +22,78 @@ typedef struct format_data_t {
   apr_array_header_t *string_array;
 }format_data_t;
 
-static char *format_func( json_t *json, char *format_name,
-                          void *format_data_ptr )
+static char *format_upper( json_t *json, char *format, void *format_data_ptr )
+{
+  format_data_t *format_data = (format_data_t *) format_data_ptr;
+  char *value = json_get_string_value( format_data->mp, json );
+  char *c;
+
+  for ( c = value; *c; c++ ) {
+    *c = apr_toupper( *c );
+  }
+
+  return value;
+}
+
+static char *format_lower( json_t *json, char *format, void *format_data_ptr )
+{
+  format_data_t *format_data = (format_data_t *) format_data_ptr;
+  char *value;
+  char *c;
+
+  value = json_get_string_value( format_data->mp, json );
+
+  for ( c = value; *c; c++ ) {
+    *c = apr_tolower( *c );
+  }
+
+  return value;
+}
+
+static char *format_trn_field( json_t *json, char *format,
+                               void *format_data_ptr )
 {
   format_data_t *format_data = (format_data_t *) format_data_ptr;
   char *value;
   char *ret_value;
+  char *c;
   int len = 0;
+
+  APR_ARRAY_CLEAR( format_data->string_array );
+  value = json_get_string_value( format_data->mp, json );
+
+  if ( value ) {
+    len = strlen( value );
+  }
+
+  for ( c = value; *c; c++ ) {
+    if ( *c == '\'' ) {
+      APR_ARRAY_PUSH( format_data->string_array, char ) = '\'';
+    }
+    APR_ARRAY_PUSH( format_data->string_array, char ) = *c;
+  }
+  APR_ARRAY_PUSH( format_data->string_array, char ) = '\0';
+  
+  if ( len > 80 ) {
+    ret_value = apr_pstrcat( format_data->mp,
+                             apr_psprintf( format_data->mp, "%d", len ),
+                             "'", format_data->string_array->elts,
+                             "'", NULL );
+  }
+  else {
+    ret_value = apr_pstrcat( format_data->mp, "'",
+                             format_data->string_array->elts,
+                             "'", NULL );
+  }
+
+  return ret_value;
+}
+
+static char *format_json( json_t *json, char *format, void *format_data_ptr )
+{
+  format_data_t *format_data = (format_data_t *) format_data_ptr;
+  char *value;
+  char *ret_value;
   char *c;
 
   APR_ARRAY_CLEAR( format_data->string_array );
@@ -36,71 +101,37 @@ static char *format_func( json_t *json, char *format_name,
   ret_value = value;
 
   if ( value ) {
-    len = strlen( value );
-    if ( apr_strnatcasecmp( format_name, "upper" ) == 0 ) {
-      for ( c = value; *c; c++ ) {
-        *c = apr_toupper( *c );
-      }
-    }
-    else if ( apr_strnatcasecmp( format_name, "lower" ) == 0 ) {
-      for ( c = value; *c; c++ ) {
-        *c = apr_tolower( *c );
-      }
-    }
-    else if ( apr_strnatcasecmp( format_name, "trn_field" ) == 0 ) {
-      for ( c = value; *c; c++ ) {
-        if ( *c == '\'' ) {
-          APR_ARRAY_PUSH( format_data->string_array, char ) = '\'';
+    for ( c = value; *c; c++ ) {
+      if ( *c > 0x1F ) {
+        if ( *c == '\\' || *c == '/' || *c == '"' ) {
+          APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
         }
         APR_ARRAY_PUSH( format_data->string_array, char ) = *c;
       }
-      APR_ARRAY_PUSH( format_data->string_array, char ) = '\0';
-      
-      if ( len > 80 ) {
-        ret_value = apr_pstrcat( format_data->mp,
-                                 apr_psprintf( format_data->mp, "%d", len ),
-                                 "'", format_data->string_array->elts,
-                                 "'", NULL );
-      }
       else {
-        ret_value = apr_pstrcat( format_data->mp, "'",
-                                 format_data->string_array->elts,
-                                 "'", NULL );
-      }
-    }
-    else if ( apr_strnatcasecmp( format_name, "json" ) == 0 ) {
-      for ( c = value; *c; c++ ) {
-        if ( *c > 0x1F ) {
-          if ( *c == '\\' || *c == '/' || *c == '"' ) {
-            APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
-          }
-          APR_ARRAY_PUSH( format_data->string_array, char ) = *c;
-        }
-        else {
-          APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
-          switch ( *c ) {
-          case '\b':
-            APR_ARRAY_PUSH( format_data->string_array, char ) = 'b';
-            break;
-          case '\f':
-            APR_ARRAY_PUSH( format_data->string_array, char ) = 'f';
-            break;
-          case '\n':
-            APR_ARRAY_PUSH( format_data->string_array, char ) = 'n';
-            break;
-          case '\r':
-            APR_ARRAY_PUSH( format_data->string_array, char ) = 'r';
-            break;
-          case '\t':
-            APR_ARRAY_PUSH( format_data->string_array, char ) = 't';
-            break;
-          }
+        APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
+        switch ( *c ) {
+        case '\b':
+          APR_ARRAY_PUSH( format_data->string_array, char ) = 'b';
+          break;
+        case '\f':
+          APR_ARRAY_PUSH( format_data->string_array, char ) = 'f';
+          break;
+        case '\n':
+          APR_ARRAY_PUSH( format_data->string_array, char ) = 'n';
+          break;
+        case '\r':
+          APR_ARRAY_PUSH( format_data->string_array, char ) = 'r';
+          break;
+        case '\t':
+          APR_ARRAY_PUSH( format_data->string_array, char ) = 't';
+          break;
         }
       }
-      APR_ARRAY_PUSH( format_data->string_array, char ) = '\0';
-      ret_value = apr_pstrdup( format_data->mp,
-                               (char *) format_data->string_array->elts );
     }
+    APR_ARRAY_PUSH( format_data->string_array, char ) = '\0';
+    ret_value = apr_pstrdup( format_data->mp,
+                             (char *) format_data->string_array->elts );
   }
 
   return ret_value;
@@ -230,7 +261,10 @@ int main( int argc, char const * const *argv )
     format_data = apr_palloc( mp, sizeof(format_data_t) );
     format_data->mp = mp;
     format_data->string_array = apr_array_make( mp, 8192, sizeof(char) );
-    jxtl_template_set_format_func( template, format_func );
+    jxtl_template_register_format( template, "upper", format_upper );
+    jxtl_template_register_format( template, "lower", format_lower );
+    jxtl_template_register_format( template, "trn_field", format_trn_field);
+    jxtl_template_register_format( template, "json", format_json );
     jxtl_template_set_format_data( template, format_data );
     jxtl_expand_to_file( template, json, out_file );
   }

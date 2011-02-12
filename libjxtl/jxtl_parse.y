@@ -459,7 +459,7 @@ static jxtl_template_t *jxtl_template_create( apr_pool_t *mp,
   template->content = content;
   template->flush_func = NULL;
   template->flush_data = NULL;
-  template->format = NULL;
+  template->formats = apr_hash_make( mp );
   template->format_data = NULL;
 
   return template;
