@@ -93,3 +93,28 @@
    */
   char *expand_to_buffer( DICTIONARY_T input = NULL );
 }
+
+%{
+  /*
+   * Utility function called from individual template implementations to
+   * actually register the format functions.
+   */
+  void register_format_funcs( Template *t, jxtl_format_func format_func )
+  {
+    apr_hash_index_t *idx;
+    char *format;
+
+    if ( apr_hash_count( t->formats ) > 0 ) {
+      /**
+       * Register the same callback for all functions in here.  We'll call the
+       * correct one from our callback.
+       */
+      for ( idx = apr_hash_first( NULL, t->formats ); idx;
+	    idx = apr_hash_next( idx ) ) {
+	apr_hash_this( idx, (void **) &format, NULL, NULL );
+	jxtl_template_register_format( t->template, format, format_func );
+      }
+      jxtl_template_set_format_data( t->template, t );
+    }
+  }
+%}

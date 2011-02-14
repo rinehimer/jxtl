@@ -8,7 +8,7 @@
 #include "template.h"
 #include "json.h"
 
-void Template_set_format_callback( Template *t, SV *format_func );
+void Template_register_format( Template *t, char* foramt, SV *format_func );
 int Template_expand_to_file( Template *t, char *file, SV *input );
 char *Template_expand_to_buffer( Template *t, SV *input );
 
