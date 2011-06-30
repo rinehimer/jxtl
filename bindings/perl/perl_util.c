@@ -123,7 +123,7 @@ json_t *perl_variable_to_json( apr_pool_t *mp, SV *input )
     apr_pool_create( &tmp_mp, NULL );
     /*
      * Create a writer, using tmp_mp but give it the passed in mp to allocate
-     * the JSON out of.  This allows us to check to destroy tmp_mp and destory
+     * the JSON out of.  This allows us to check to destroy tmp_mp and destroy
      * the writer but keep the JSON around.
      */
     writer = json_writer_create( tmp_mp, mp );
@@ -162,9 +162,9 @@ SV *json_to_perl_variable( json_t *json )
     for ( idx = apr_hash_first( NULL, json->value.object ); idx;
           idx = apr_hash_next( idx ) ) {
       apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
-      hv_store( hash, (char *) JSON_NAME( tmp_json ),
-                strlen( (char * ) JSON_NAME( tmp_json ) ),
-                json_to_perl_variable( tmp_json ), 0 );
+      (void) hv_store( hash, (char *) JSON_NAME( tmp_json ),
+                       strlen( (char * ) JSON_NAME( tmp_json ) ),
+                       json_to_perl_variable( tmp_json ), 0 );
     }
     return newRV_noinc( (SV*) hash);
     break;

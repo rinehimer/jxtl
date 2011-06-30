@@ -32,7 +32,7 @@ static char *python_format_func( json_t *json, char *format,
   return ret_val;
 }
 
-void Template_register_format( Template *t, char *format,
+void Template_register_format( Template *t, const char *format,
                                PyObject *format_func )
 {
   if ( PyCallable_Check( format_func ) ) {

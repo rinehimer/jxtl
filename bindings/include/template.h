@@ -19,4 +19,6 @@ typedef struct Template {
   apr_hash_t *formats;
 }Template;
 
+void register_format_funcs( Template *t, jxtl_format_func format_func );
+
 #endif
