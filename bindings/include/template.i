@@ -14,9 +14,13 @@
 #if defined(SWIGPERL)
 # define FORMAT_FUNC_T SV *
 # define DICTIONARY_T SV *
+# define FORMAT_FUNC perl_format_func
+# define TO_JSON_FUNC perl_variable_to_json
 #elif defined(SWIGPYTHON)
 # define FORMAT_FUNC_T PyObject *
 # define DICTIONARY_T PyObject *
+# define FORMAT_FUNC python_format_func
+# define TO_JSON_FUNC py_variable_to_json
 #endif
 
 %include "template.h"
@@ -85,13 +89,58 @@
    * Expand a template to a file using a language specific dictionary or the
    * existing context of the template.
    */
-  int expand_to_file( char *file, DICTIONARY_T input = NULL );
+  int expand_to_file( char *file, DICTIONARY_T input = NULL )
+  {
+    apr_pool_t *tmp_mp;
+    int status;
+
+    if ( !self->template ) {
+      fprintf( stderr,
+               "Error: a template must be loaded before expanding.\n" );
+      return FALSE;
+    }
+
+    apr_pool_create( &tmp_mp, NULL );
+    register_format_funcs( self, FORMAT_FUNC );
+    
+    if ( input ) {
+      self->json = TO_JSON_FUNC( self->mp, input );
+    }
+
+    status = ( jxtl_expand_to_file( self->template, self->json, file ) == 0 );
+
+    apr_pool_destroy( tmp_mp );
+
+    return status;
+  }
   
   /**
-   * Expand a template to a buffer using a Perl hash reference or the
+   * Expand a template to a buffer using a language specific dictionary or the
    * existing context of the template.
    */
-  char *expand_to_buffer( DICTIONARY_T input = NULL );
+  char *expand_to_buffer( DICTIONARY_T input = NULL )
+  {
+    char *buffer;
+    apr_pool_t *tmp_mp;
+    
+    if ( !self->template ) {
+      fprintf( stderr,
+               "Error: a template must be loaded before expanding.\n" );
+      return "";
+    }
+
+    apr_pool_create( &tmp_mp, NULL );
+    register_format_funcs( self, FORMAT_FUNC );
+
+    if ( input ) {
+      self->json = TO_JSON_FUNC( tmp_mp, input );
+    }
+
+    buffer = jxtl_expand_to_buffer( self->mp, self->template, self->json );
+    apr_pool_destroy( tmp_mp );
+
+    return buffer;
+  }
 }
 
 %{

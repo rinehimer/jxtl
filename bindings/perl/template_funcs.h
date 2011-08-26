@@ -10,7 +10,6 @@
 
 void Template_register_format( Template *t, const char* foramt,
                                SV *format_func );
-int Template_expand_to_file( Template *t, char *file, SV *input );
-char *Template_expand_to_buffer( Template *t, SV *input );
+char *perl_format_func( json_t *json, char *format, void *template_ptr );
 
 #endif
