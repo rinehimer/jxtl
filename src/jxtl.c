@@ -28,7 +28,7 @@ static char *format_upper( json_t *json, char *format, void *format_data_ptr )
   char *value = json_get_string_value( format_data->mp, json );
   char *c;
 
-  for ( c = value; *c; c++ ) {
+  for ( c = value; c && *c; c++ ) {
     *c = apr_toupper( *c );
   }
 
@@ -43,7 +43,7 @@ static char *format_lower( json_t *json, char *format, void *format_data_ptr )
 
   value = json_get_string_value( format_data->mp, json );
 
-  for ( c = value; *c; c++ ) {
+  for ( c = value; c && *c; c++ ) {
     *c = apr_tolower( *c );
   }
 
@@ -66,7 +66,7 @@ static char *format_trn_field( json_t *json, char *format,
     len = strlen( value );
   }
 
-  for ( c = value; *c; c++ ) {
+  for ( c = value; c && *c; c++ ) {
     if ( *c == '\'' ) {
       APR_ARRAY_PUSH( format_data->string_array, char ) = '\'';
     }
@@ -101,7 +101,7 @@ static char *format_json( json_t *json, char *format, void *format_data_ptr )
   ret_value = value;
 
   if ( value ) {
-    for ( c = value; *c; c++ ) {
+    for ( c = value; c && *c; c++ ) {
       if ( *c > 0x1F ) {
         if ( *c == '\\' || *c == '/' || *c == '"' ) {
           APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
