@@ -52,22 +52,3 @@ char *perl_format_func( json_t *json, char *format, void *template_ptr )
 
   return ret_val;
 }
-
-void Template_register_format( Template *t, const char *format,
-                               SV *format_func )
-{
-  SV *func_ptr;
-
-  if ( SvROK( format_func ) &&
-       SvTYPE( SvRV( format_func ) ) == SVt_PVCV ) {
-    /* TODO:  Check whether or not we should mess with refcount. */
-    func_ptr = SvRV( format_func );
-      /* SvREFCNT_inc( func_ptr ); */
-    apr_hash_set( t->formats, format, APR_HASH_KEY_STRING, func_ptr );
-  }
-  else {
-    fprintf( stderr,
-             "Error setting %s format function: not a code reference\n",
-             format );
-  }
-}

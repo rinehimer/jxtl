@@ -30,15 +30,3 @@ char *python_format_func( json_t *json, char *format, void *template_ptr )
 
   return ret_val;
 }
-
-void Template_register_format( Template *t, const char *format,
-                               PyObject *format_func )
-{
-  if ( PyCallable_Check( format_func ) ) {
-    /**TODO: Check whether we should increment ref counts. */
-    apr_hash_set( t->formats, format, APR_HASH_KEY_STRING, format_func );
-  }
-  else {
-    fprintf( stderr, "Error setting format function: not callable\n" );
-  }
-}

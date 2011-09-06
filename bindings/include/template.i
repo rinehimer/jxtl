@@ -16,11 +16,13 @@
 # define DICTIONARY_T SV *
 # define FORMAT_FUNC perl_format_func
 # define TO_JSON_FUNC perl_variable_to_json
+# define VERIFY_FUNC verify_perl_function
 #elif defined(SWIGPYTHON)
 # define FORMAT_FUNC_T PyObject *
 # define DICTIONARY_T PyObject *
 # define FORMAT_FUNC python_format_func
 # define TO_JSON_FUNC py_variable_to_json
+# define VERIFY_FUNC verify_python_function
 #endif
 
 %include "template.h"
@@ -83,7 +85,21 @@
   /**
    * Register a format callback for the template.
    */
-  void register_format( const char *format, FORMAT_FUNC_T format_func );
+  void register_format( const char *format, FORMAT_FUNC_T format_func )
+  {
+    char error_buf[200];
+    FORMAT_FUNC_T func_ptr = VERIFY_FUNC( format_func );
+
+    if ( func_ptr ) {
+      apr_hash_set( self->formats, format, APR_HASH_KEY_STRING, func_ptr );
+    }
+    else {
+      snprintf( error_buf, sizeof(error_buf),
+                "Error registering format \"%s\".  "
+                "The function reference is not valid.", format );
+      SWIG_Error( SWIG_TypeError, error_buf );
+    }
+  }
 
   /**
    * Expand a template to a file using a language specific dictionary or the
@@ -95,11 +111,11 @@
     int status;
 
     if ( !self->template ) {
-      fprintf( stderr,
-               "Error: a template must be loaded before expanding.\n" );
+      SWIG_Error( SWIG_RuntimeError,
+                  "A template must be loaded before expanding." );
       return FALSE;
     }
-
+    
     apr_pool_create( &tmp_mp, NULL );
     register_format_funcs( self, FORMAT_FUNC );
     
@@ -124,8 +140,8 @@
     apr_pool_t *tmp_mp;
     
     if ( !self->template ) {
-      fprintf( stderr,
-               "Error: a template must be loaded before expanding.\n" );
+      SWIG_Error( SWIG_RuntimeError,
+                  "A template must be loaded before expanding." );
       return "";
     }
 
@@ -159,9 +175,9 @@
        * correct one from our callback.
        */
       for ( idx = apr_hash_first( NULL, t->formats ); idx;
-	    idx = apr_hash_next( idx ) ) {
-	apr_hash_this( idx, (const void **) &format, NULL, NULL );
-	jxtl_template_register_format( t->template, format, format_func );
+            idx = apr_hash_next( idx ) ) {
+        apr_hash_this( idx, (const void **) &format, NULL, NULL );
+        jxtl_template_register_format( t->template, format, format_func );
       }
       jxtl_template_set_format_data( t->template, t );
     }

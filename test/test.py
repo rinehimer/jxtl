@@ -25,7 +25,7 @@ import glob;
 import os.path;
 import filecmp;
 
-def format( value, format, context ):
+def format_case( value, format, context ):
     if ( format == "upper" ):
         return value.upper();
     elif ( format == "lower" ):
@@ -47,8 +47,8 @@ t = libjxtl.Template();
 for input in inputs:
     dir = os.path.dirname( input );
     t.load( input );
-    t.register_format( "upper", format );
-    t.register_format( "lower", format );
+    t.register_format( "upper", format_case );
+    t.register_format( "lower", format_case );
     t.expand_to_file( dir + "/test.output", beers_xml );
     compare( dir + "/output", dir + "/test.output" );
     t.expand_to_file( dir + "/test.output", beers_json );

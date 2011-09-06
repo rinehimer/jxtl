@@ -246,3 +246,8 @@ PyObject *json_to_dict( char *json_file )
     Py_RETURN_NONE;
   }
 }
+
+PyObject *verify_python_function( PyObject *func )
+{
+  return PyCallable_Check( func ) ? func : NULL;
+}

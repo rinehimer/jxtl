@@ -47,6 +47,15 @@ static void perl_variable_to_json_internal( SV *input, json_writer_t *writer )
     val = SvPV_nolen( input );
     json_writer_write_string( writer, (unsigned char *) val );
     break;
+
+  case SVt_PVNV:
+    if ( input == &PL_sv_yes ) {
+      json_writer_write_boolean( writer, TRUE );
+    }
+    else if ( input == &PL_sv_no ) {
+      json_writer_write_boolean( writer, FALSE );
+    }
+    break;
       
   case SVt_PVAV:
     perl_array_to_json( input, writer );
@@ -180,8 +189,7 @@ SV *json_to_perl_variable( json_t *json )
     break;
 
   case JSON_BOOLEAN:
-    return ( json->value.boolean ) ? newSVpv( "true", 0 ) :
-                                     newSVpv( "false", 0 );
+    return ( json->value.boolean ) ? &PL_sv_yes : &PL_sv_no;
     break;
 
   case JSON_NULL:
@@ -225,4 +233,17 @@ SV *json_to_hash( const char *json_file )
   apr_pool_destroy( tmp_mp );
 
   return hash;
+}
+
+SV *verify_perl_function( SV *func )
+{
+  SV *func_ptr = NULL;
+
+  if ( SvROK( func ) && SvTYPE( SvRV( func ) ) == SVt_PVCV ) {
+    func_ptr = SvRV( func );
+    /* TODO:  Check whether or not we should mess with refcount. */
+    /* SvREFCNT_inc( func_ptr ); */
+  }
+
+  return func_ptr;
 }
