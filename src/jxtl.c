@@ -94,14 +94,14 @@ static char *format_json( json_t *json, char *format, void *format_data_ptr )
   format_data_t *format_data = (format_data_t *) format_data_ptr;
   char *value;
   char *ret_value;
-  char *c;
+  unsigned char *c;
 
   APR_ARRAY_CLEAR( format_data->string_array );
   value = json_get_string_value( format_data->mp, json );
   ret_value = value;
 
   if ( value ) {
-    for ( c = value; c && *c; c++ ) {
+    for ( c = (unsigned char *) value; c && *c; c++ ) {
       if ( *c > 0x1F ) {
         if ( *c == '\\' || *c == '/' || *c == '"' ) {
           APR_ARRAY_PUSH( format_data->string_array, char ) = '\\';
