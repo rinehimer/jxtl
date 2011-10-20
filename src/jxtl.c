@@ -253,7 +253,7 @@ int main( int argc, char const * const *argv )
   jxtl_init( argc, argv, mp, &template_file, &json_file, &xml_file,
              &skip_root, &out_file );
 
-  jxtl_parser = jxtl_parser_create( mp );
+  jxtl_parser = jxtl_parser_create( mp, NULL );
 
   if ( jxtl_load_data( mp, json_file, xml_file, skip_root, &json ) &&
        jxtl_parser_parse_file( jxtl_parser, template_file,

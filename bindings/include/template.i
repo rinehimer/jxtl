@@ -44,7 +44,7 @@
     Template *t = malloc( sizeof(Template) );
     apr_pool_create( &t->mp, NULL );
     
-    t->jxtl_parser = jxtl_parser_create( t->mp );
+    t->jxtl_parser = jxtl_parser_create( t->mp, NULL );
     t->template = NULL;
     t->json = NULL;
     t->formats = apr_hash_make( t->mp );

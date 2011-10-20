@@ -2111,8 +2111,9 @@ static jxtl_template_t *jxtl_template_create( apr_pool_t *mp,
   return template;
 }
 
-parser_t *jxtl_parser_create( apr_pool_t *mp )
+parser_t *jxtl_parser_create( apr_pool_t *mp, jxtl_callback_t *user_callbacks )
 {
+  jxtl_callback_t *callbacks_ptr;
   parser_t *parser = parser_create( mp,
                                     jxtl_lex_init,
                                     jxtl_set_extra,
@@ -2120,23 +2121,27 @@ parser_t *jxtl_parser_create( apr_pool_t *mp )
                                     jxtl__scan_buffer,
                                     jxtl__delete_buffer,
                                     jxtl_parse );
+  if ( user_callbacks ) {
+    callbacks_ptr = user_callbacks;
+  }
+  else {
+    callbacks_ptr = apr_palloc( mp, sizeof(jxtl_callback_t) );
+    callbacks_ptr->text_handler = jxtl_text_func;
+    callbacks_ptr->section_start_handler = jxtl_section_start;
+    callbacks_ptr->section_end_handler = jxtl_section_end;
+    callbacks_ptr->if_start_handler = jxtl_if_start;
+    callbacks_ptr->elseif_handler = jxtl_elseif;
+    callbacks_ptr->else_handler = jxtl_else;
+    callbacks_ptr->if_end_handler = jxtl_if_end;
+    callbacks_ptr->separator_start_handler = jxtl_separator_start;
+    callbacks_ptr->separator_end_handler = jxtl_separator_end;
+    callbacks_ptr->value_handler = jxtl_value_func;
+    callbacks_ptr->get_error_func = jxtl_get_error;
+    callbacks_ptr->format_handler = jxtl_format;
+    callbacks_ptr->user_data = jxtl_data_create( mp );
+  }
 
-  jxtl_callback_t *jxtl_callbacks = apr_palloc( mp, sizeof(jxtl_callback_t) );
-  jxtl_callbacks->text_handler = jxtl_text_func;
-  jxtl_callbacks->section_start_handler = jxtl_section_start;
-  jxtl_callbacks->section_end_handler = jxtl_section_end;
-  jxtl_callbacks->if_start_handler = jxtl_if_start;
-  jxtl_callbacks->elseif_handler = jxtl_elseif;
-  jxtl_callbacks->else_handler = jxtl_else;
-  jxtl_callbacks->if_end_handler = jxtl_if_end;
-  jxtl_callbacks->separator_start_handler = jxtl_separator_start;
-  jxtl_callbacks->separator_end_handler = jxtl_separator_end;
-  jxtl_callbacks->value_handler = jxtl_value_func;
-  jxtl_callbacks->get_error_func = jxtl_get_error;
-  jxtl_callbacks->format_handler = jxtl_format;
-  jxtl_callbacks->user_data = jxtl_data_create( mp );
-
-  parser_set_user_data( parser, jxtl_callbacks );
+  parser_set_user_data( parser, callbacks_ptr );
 
   return parser;
 }

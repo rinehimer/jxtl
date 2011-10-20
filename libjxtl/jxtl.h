@@ -91,7 +91,7 @@ typedef struct jxtl_template_t {
   void *format_data;
 }jxtl_template_t;
 
-parser_t *jxtl_parser_create( apr_pool_t *mp );
+parser_t *jxtl_parser_create( apr_pool_t *mp, jxtl_callback_t *user_callbacks );
 int jxtl_parser_parse_file( parser_t *parser, const char *file,
                             jxtl_template_t **template );
 int jxtl_parser_parse_buffer( parser_t *parser, const char *buffer,
