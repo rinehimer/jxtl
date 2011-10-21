@@ -2,6 +2,8 @@ SUBDIRS = libjxtl \
           src \
           test
 
+ACLOCAL_AMFLAGS = -I m4
+
 bindings: swig-perl swig-python
 install-bindings: install-swig-perl install-swig-python
 
