@@ -77,6 +77,7 @@ typedef struct jxtl_callback_t {
   int ( *value_handler )( void *user_data, unsigned char *expr );
   void ( *format_handler )( void *user_data, char *format );
   char * ( *get_error_func )( void *user_data );
+  int own_user_data;
   void *user_data;
 } jxtl_callback_t;
 

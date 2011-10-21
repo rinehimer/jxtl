@@ -1929,6 +1929,14 @@ static void jxtl_text_func( void *user_data, unsigned char *text )
   jxtl_content_push( data, JXTL_TEXT, apr_pstrdup( data->mp, (char *) text ) );
 }
 
+/**
+ * Parser callback for starting a section.  We need to allocate a new section,
+ * parse the expression and then add it to our content array.  We also need to
+ * make sure the current_array points to the one in the new section object so 
+ * that content encountered after the section is properly added to it.
+ * @param user_data The jxtl_data
+ * @param expr An expression to evaluate for the section
+ */
 static int jxtl_section_start( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
@@ -1949,9 +1957,9 @@ static int jxtl_section_start( void *user_data, unsigned char *expr )
 }
 
 /**
- * Parser callback for when a section ends.
+ * Parser callback for when a section ends.  All we need to do is reset the
+ * current_array to the previous item on the content_array stack.
  * @param user_data The jxtl_data.
- * @param name The name of the section.
  */
 static void jxtl_section_end( void *user_data )
 {
@@ -1961,6 +1969,11 @@ static void jxtl_section_end( void *user_data )
                                        apr_array_header_t * );
 }
 
+/**
+ * Parser callback for starting an if statement.
+ * @param user_data The jxtl_data
+ * @param expr An expression to evaluate for the if
+ */
 static int jxtl_if_start( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
@@ -1984,6 +1997,13 @@ static int jxtl_if_start( void *user_data, unsigned char *expr )
   return result;
 }
 
+/**
+ * Parser callback for starting an elseif statement.  A little different than
+ * starting an if because we need to get the if_block array and add the new
+ * jxtl_if_t object to that.
+ * @param user_data The jxtl_data
+ * @param expr An expression to evaluate for the elseif
+ */
 static int jxtl_elseif( void *user_data, unsigned char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
@@ -2123,6 +2143,7 @@ parser_t *jxtl_parser_create( apr_pool_t *mp, jxtl_callback_t *user_callbacks )
                                     jxtl_parse );
   if ( user_callbacks ) {
     callbacks_ptr = user_callbacks;
+    callbacks_ptr->own_user_data = FALSE;
   }
   else {
     callbacks_ptr = apr_palloc( mp, sizeof(jxtl_callback_t) );
@@ -2138,6 +2159,7 @@ parser_t *jxtl_parser_create( apr_pool_t *mp, jxtl_callback_t *user_callbacks )
     callbacks_ptr->value_handler = jxtl_value_func;
     callbacks_ptr->get_error_func = jxtl_get_error;
     callbacks_ptr->format_handler = jxtl_format;
+    callbacks_ptr->own_user_data = TRUE;
     callbacks_ptr->user_data = jxtl_data_create( mp );
   }
 
@@ -2154,11 +2176,15 @@ int jxtl_parser_parse_file( parser_t *parser, const char *file,
   int result = FALSE;
 
   *template_ptr = NULL;
-  jxtl_data_reset( jxtl_data );
+  if ( jxtl_callbacks->own_user_data ) {
+    jxtl_data_reset( jxtl_data );
+  }
 
   if ( parser_parse_file( parser, file ) ) {
-    *template_ptr = jxtl_template_create( parser->mp,
-                                          jxtl_data->current_array );
+    if ( jxtl_callbacks->own_user_data ) {
+      *template_ptr = jxtl_template_create( parser->mp,
+                                            jxtl_data->current_array );
+    }
     result = TRUE;
   }
 
@@ -2173,11 +2199,15 @@ int jxtl_parser_parse_buffer( parser_t *parser, const char *buffer,
   int result = FALSE;
 
   *template_ptr = NULL;
-  jxtl_data_reset( jxtl_data );
+  if ( jxtl_callbacks->own_user_data ) {
+    jxtl_data_reset( jxtl_data );
+  }
 
   if ( parser_parse_buffer( parser, buffer ) ) {
-    *template_ptr = jxtl_template_create( parser->mp,
-                                          jxtl_data->current_array );
+    if ( jxtl_callbacks->own_user_data ) {
+      *template_ptr = jxtl_template_create( parser->mp,
+                                            jxtl_data->current_array );
+    }
     result = TRUE;
   }
 
