@@ -80,7 +80,9 @@ text
   : /* empty */
   | text T_TEXT
     {
-      callbacks->text_handler( callbacks->user_data, $<string>2 );
+      if ( callbacks->text_handler ) {
+        callbacks->text_handler( callbacks->user_data, $<string>2 );
+      }
     }
   | text value_directive
   | text section_directive
@@ -90,7 +92,8 @@ text
 value_directive
   : T_DIRECTIVE_START T_PATH_EXPR
     {
-      if ( !callbacks->value_handler( callbacks->user_data, $<string>2 ) ) {
+      if ( callbacks->value_handler &&
+           !callbacks->value_handler( callbacks->user_data, $<string>2 ) ) {
         jxtl_error( &@2, scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );
       }
@@ -101,7 +104,8 @@ value_directive
 section_directive
   : T_DIRECTIVE_START T_SECTION T_PATH_EXPR
     {
-      if ( !callbacks->section_start_handler( callbacks->user_data,
+      if ( callbacks->section_start_handler &&
+          !callbacks->section_start_handler( callbacks->user_data,
                                               $<string>3 ) ) {
         jxtl_error( &@2, scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );
@@ -109,13 +113,18 @@ section_directive
     }
     options T_DIRECTIVE_END section_content
     T_DIRECTIVE_START T_END T_DIRECTIVE_END
-    { callbacks->section_end_handler( callbacks->user_data ); }
+    { 
+      if ( callbacks->section_end_handler ) {
+        callbacks->section_end_handler( callbacks->user_data );
+      }
+    }
 ;
 
 if_directive
   : T_DIRECTIVE_START T_IF T_PATH_EXPR T_DIRECTIVE_END
     {
-      if ( !callbacks->if_start_handler( callbacks->user_data, $<string>3 ) ) {
+      if ( callbacks->if_start_handler &&
+           !callbacks->if_start_handler( callbacks->user_data, $<string>3 ) ) {
         jxtl_error( &@3, scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );
       }
@@ -128,7 +137,8 @@ if_directive
 rest_of_if
   : T_DIRECTIVE_START T_ELSEIF T_PATH_EXPR T_DIRECTIVE_END
     {
-      if ( !callbacks->elseif_handler( callbacks->user_data, $<string>3 ) ) {
+      if ( callbacks->elseif_handler &&
+           !callbacks->elseif_handler( callbacks->user_data, $<string>3 ) ) {
         jxtl_error( &@3, scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );
       }
@@ -136,7 +146,9 @@ rest_of_if
     section_content rest_of_if
   | T_DIRECTIVE_START T_ELSE T_DIRECTIVE_END
     {
-      callbacks->else_handler( callbacks->user_data );
+      if ( callbacks->else_handler ) {
+        callbacks->else_handler( callbacks->user_data );
+      }
     }
     section_content endif
   | endif
@@ -145,14 +157,18 @@ rest_of_if
 endif
   : T_DIRECTIVE_START T_END T_DIRECTIVE_END
     {
-      callbacks->if_end_handler( callbacks->user_data );
+      if ( callbacks->if_end_handler ) {
+        callbacks->if_end_handler( callbacks->user_data );
+      }
     }
 
 section_content
   : /* empty */
   | section_content T_TEXT
     {
-      callbacks->text_handler( callbacks->user_data, $<string>2 );
+      if ( callbacks->text_handler ) {
+        callbacks->text_handler( callbacks->user_data, $<string>2 );
+      }
     }
   | section_content value_directive
   | section_content section_directive
@@ -168,13 +184,21 @@ options
 option
   : T_SEPARATOR '=' T_STRING
     {
-      callbacks->separator_start_handler( callbacks->user_data );
-      callbacks->text_handler( callbacks->user_data, $<string>3 );
-      callbacks->separator_end_handler( callbacks->user_data );
+      if ( callbacks->separator_start_handler ) {
+        callbacks->separator_start_handler( callbacks->user_data );
+      }
+      if ( callbacks->text_handler ) {
+        callbacks->text_handler( callbacks->user_data, $<string>3 );
+      }
+      if ( callbacks->separator_end_handler ) {
+        callbacks->separator_end_handler( callbacks->user_data );
+      }
     }
   | T_FORMAT '=' T_STRING
     {
-      callbacks->format_handler( callbacks->user_data, $<string>3 );
+      if ( callbacks->format_handler ) {
+        callbacks->format_handler( callbacks->user_data, $<string>3 );
+      }
     }
 ;
 

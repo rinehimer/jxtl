@@ -495,9 +495,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    76,    76,    79,    81,    85,    86,    87,    92,    91,
-     103,   102,   117,   116,   130,   129,   138,   137,   142,   146,
-     151,   153,   157,   158,   159,   162,   164,   165,   169,   175
+       0,    76,    76,    79,    81,    87,    88,    89,    94,    93,
+     106,   105,   125,   124,   139,   138,   148,   147,   154,   158,
+     165,   167,   173,   174,   175,   178,   180,   181,   185,   197
 };
 #endif
 
@@ -1494,16 +1494,19 @@ yyreduce:
 /* Line 1464 of yacc.c  */
 #line 82 "jxtl_parse.y"
     {
-      callbacks->text_handler( callbacks->user_data, (yyvsp[(2) - (2)].string) );
+      if ( callbacks->text_handler ) {
+        callbacks->text_handler( callbacks->user_data, (yyvsp[(2) - (2)].string) );
+      }
     }
     break;
 
   case 8:
 
 /* Line 1464 of yacc.c  */
-#line 92 "jxtl_parse.y"
+#line 94 "jxtl_parse.y"
     {
-      if ( !callbacks->value_handler( callbacks->user_data, (yyvsp[(2) - (2)].string) ) ) {
+      if ( callbacks->value_handler &&
+           !callbacks->value_handler( callbacks->user_data, (yyvsp[(2) - (2)].string) ) ) {
         jxtl_error( &(yylsp[(2) - (2)]), scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );
       }
@@ -1513,9 +1516,10 @@ yyreduce:
   case 10:
 
 /* Line 1464 of yacc.c  */
-#line 103 "jxtl_parse.y"
+#line 106 "jxtl_parse.y"
     {
-      if ( !callbacks->section_start_handler( callbacks->user_data,
+      if ( callbacks->section_start_handler &&
+          !callbacks->section_start_handler( callbacks->user_data,
                                               (yyvsp[(3) - (3)].string) ) ) {
         jxtl_error( &(yylsp[(2) - (3)]), scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );
@@ -1526,16 +1530,21 @@ yyreduce:
   case 11:
 
 /* Line 1464 of yacc.c  */
-#line 112 "jxtl_parse.y"
-    { callbacks->section_end_handler( callbacks->user_data ); }
+#line 116 "jxtl_parse.y"
+    { 
+      if ( callbacks->section_end_handler ) {
+        callbacks->section_end_handler( callbacks->user_data );
+      }
+    }
     break;
 
   case 12:
 
 /* Line 1464 of yacc.c  */
-#line 117 "jxtl_parse.y"
+#line 125 "jxtl_parse.y"
     {
-      if ( !callbacks->if_start_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) ) ) {
+      if ( callbacks->if_start_handler &&
+           !callbacks->if_start_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) ) ) {
         jxtl_error( &(yylsp[(3) - (4)]), scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );
       }
@@ -1545,9 +1554,10 @@ yyreduce:
   case 14:
 
 /* Line 1464 of yacc.c  */
-#line 130 "jxtl_parse.y"
+#line 139 "jxtl_parse.y"
     {
-      if ( !callbacks->elseif_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) ) ) {
+      if ( callbacks->elseif_handler &&
+           !callbacks->elseif_handler( callbacks->user_data, (yyvsp[(3) - (4)].string) ) ) {
         jxtl_error( &(yylsp[(3) - (4)]), scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );
       }
@@ -1557,54 +1567,68 @@ yyreduce:
   case 16:
 
 /* Line 1464 of yacc.c  */
-#line 138 "jxtl_parse.y"
+#line 148 "jxtl_parse.y"
     {
-      callbacks->else_handler( callbacks->user_data );
+      if ( callbacks->else_handler ) {
+        callbacks->else_handler( callbacks->user_data );
+      }
     }
     break;
 
   case 19:
 
 /* Line 1464 of yacc.c  */
-#line 147 "jxtl_parse.y"
+#line 159 "jxtl_parse.y"
     {
-      callbacks->if_end_handler( callbacks->user_data );
+      if ( callbacks->if_end_handler ) {
+        callbacks->if_end_handler( callbacks->user_data );
+      }
     }
     break;
 
   case 21:
 
 /* Line 1464 of yacc.c  */
-#line 154 "jxtl_parse.y"
+#line 168 "jxtl_parse.y"
     {
-      callbacks->text_handler( callbacks->user_data, (yyvsp[(2) - (2)].string) );
+      if ( callbacks->text_handler ) {
+        callbacks->text_handler( callbacks->user_data, (yyvsp[(2) - (2)].string) );
+      }
     }
     break;
 
   case 28:
 
 /* Line 1464 of yacc.c  */
-#line 170 "jxtl_parse.y"
+#line 186 "jxtl_parse.y"
     {
-      callbacks->separator_start_handler( callbacks->user_data );
-      callbacks->text_handler( callbacks->user_data, (yyvsp[(3) - (3)].string) );
-      callbacks->separator_end_handler( callbacks->user_data );
+      if ( callbacks->separator_start_handler ) {
+        callbacks->separator_start_handler( callbacks->user_data );
+      }
+      if ( callbacks->text_handler ) {
+        callbacks->text_handler( callbacks->user_data, (yyvsp[(3) - (3)].string) );
+      }
+      if ( callbacks->separator_end_handler ) {
+        callbacks->separator_end_handler( callbacks->user_data );
+      }
     }
     break;
 
   case 29:
 
 /* Line 1464 of yacc.c  */
-#line 176 "jxtl_parse.y"
+#line 198 "jxtl_parse.y"
     {
-      callbacks->format_handler( callbacks->user_data, (yyvsp[(3) - (3)].string) );
+      if ( callbacks->format_handler ) {
+        callbacks->format_handler( callbacks->user_data, (yyvsp[(3) - (3)].string) );
+      }
     }
     break;
 
 
 
 /* Line 1464 of yacc.c  */
-#line 1608 "jxtl_parse.c"
+#line 1632 "jxtl_parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1823,7 +1847,7 @@ yyreturn:
 
 
 /* Line 1684 of yacc.c  */
-#line 181 "jxtl_parse.y"
+#line 205 "jxtl_parse.y"
 
 
 /**
