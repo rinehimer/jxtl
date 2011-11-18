@@ -6,6 +6,7 @@ libjxtlinc_HEADERS = apr_macros.h \
                      json.h \
                      jxtl.h \
                      jxtl_path.h \
+                     jxtl_template.h \
                      json_writer.h \
                      json_writer_ctx.h \
                      parser.h \
@@ -16,12 +17,12 @@ libjxtlinc_HEADERS = apr_macros.h \
 libjxtl_la_SOURCES = json.c \
                      json_lex.l \
                      json_parse.y \
-                     jxtl.c \
                      jxtl_lex.l \
                      jxtl_parse.y \
                      jxtl_path.c \
                      jxtl_path_lex.l \
                      jxtl_path_parse.y \
+                     jxtl_template.c \
                      json_writer.c \
                      json_writer_ctx.c \
                      misc.c \
@@ -42,12 +43,8 @@ libjxtl_la_LDFLAGS = ${APR_LIBS} ${APU_LIBS}
 
 YFLAGS =
 
-json_lex.c json_lex.h: json_lex.l
-json_parse.c json_parse.h: json_parse.y
-jxtl_path_lex.c jxtl_path_lex.h: jxtl_path_lex.l
-jxtl_path_parse.c jxtl_path_parse.h: jxtl_path_parse.y
-jxtl_parse.c jxtl_parse.h: jxtl_parse.y
-jxtl_lex.c jxtl_lex.h: jxtl_lex.l
+%_lex.c %_lex.h: %_lex.l
+%_parse.c %_parse.h: %_parse.y
 
 %.c %.h: %.l
 	$(LEXCOMPILE) $<

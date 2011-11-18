@@ -15,6 +15,7 @@
 #include "jxtl.h"
 #include "jxtl_parse.h"
 #include "jxtl_lex.h"
+#include "jxtl_template.h"
 #include "xml2json.h"
 
 typedef struct format_data_t {
@@ -253,11 +254,11 @@ int main( int argc, char const * const *argv )
   jxtl_init( argc, argv, mp, &template_file, &json_file, &xml_file,
              &skip_root, &out_file );
 
-  jxtl_parser = jxtl_parser_create( mp, NULL );
+  jxtl_parser = jxtl_parser_create( mp );
 
   if ( jxtl_load_data( mp, json_file, xml_file, skip_root, &json ) &&
-       jxtl_parser_parse_file( jxtl_parser, template_file,
-                               &template ) ) {
+       jxtl_parser_parse_file_to_template( mp, jxtl_parser, template_file,
+					   &template ) ) {
     format_data = apr_palloc( mp, sizeof(format_data_t) );
     format_data->mp = mp;
     format_data->string_array = apr_array_make( mp, 8192, sizeof(char) );
@@ -266,7 +267,7 @@ int main( int argc, char const * const *argv )
     jxtl_template_register_format( template, "trn_field", format_trn_field);
     jxtl_template_register_format( template, "json", format_json );
     jxtl_template_set_format_data( template, format_data );
-    jxtl_expand_to_file( template, json, out_file );
+    jxtl_template_expand_to_file( template, json, out_file );
   }
 
   apr_pool_destroy( mp );

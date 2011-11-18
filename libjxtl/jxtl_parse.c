@@ -1,9 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.4.3.  */
+/* A Bison parser, made by GNU Bison 2.5.  */
 
-/* Skeleton implementation for Bison's Yacc-like parsers in C
+/* Bison implementation for Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
-   2009, 2010 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -45,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.4.3"
+#define YYBISON_VERSION "2.5"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -74,7 +73,7 @@
 
 /* Copy the first part of user declarations.  */
 
-/* Line 189 of yacc.c  */
+/* Line 268 of yacc.c  */
 #line 22 "jxtl_parse.y"
 
 #include <stdarg.h>
@@ -103,8 +102,8 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
                  void *callbacks_ptr, const char *error_string, ... );
 
 
-/* Line 189 of yacc.c  */
-#line 108 "jxtl_parse.c"
+/* Line 268 of yacc.c  */
+#line 107 "jxtl_parse.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -166,7 +165,7 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 typedef union YYSTYPE
 {
 
-/* Line 214 of yacc.c  */
+/* Line 293 of yacc.c  */
 #line 61 "jxtl_parse.y"
 
   int ival;
@@ -174,8 +173,8 @@ typedef union YYSTYPE
 
 
 
-/* Line 214 of yacc.c  */
-#line 179 "jxtl_parse.c"
+/* Line 293 of yacc.c  */
+#line 178 "jxtl_parse.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -199,8 +198,8 @@ typedef struct YYLTYPE
 /* Copy the second part of user declarations.  */
 
 
-/* Line 264 of yacc.c  */
-#line 204 "jxtl_parse.c"
+/* Line 343 of yacc.c  */
+#line 203 "jxtl_parse.c"
 
 #ifdef short
 # undef short
@@ -303,11 +302,11 @@ YYID (yyi)
 #    define alloca _alloca
 #   else
 #    define YYSTACK_ALLOC alloca
-#    if ! defined _ALLOCA_H && ! defined _STDLIB_H && (defined __STDC__ || defined __C99__FUNC__ \
+#    if ! defined _ALLOCA_H && ! defined EXIT_SUCCESS && (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 #     include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
-#     ifndef _STDLIB_H
-#      define _STDLIB_H 1
+#     ifndef EXIT_SUCCESS
+#      define EXIT_SUCCESS 0
 #     endif
 #    endif
 #   endif
@@ -330,24 +329,24 @@ YYID (yyi)
 #  ifndef YYSTACK_ALLOC_MAXIMUM
 #   define YYSTACK_ALLOC_MAXIMUM YYSIZE_MAXIMUM
 #  endif
-#  if (defined __cplusplus && ! defined _STDLIB_H \
+#  if (defined __cplusplus && ! defined EXIT_SUCCESS \
        && ! ((defined YYMALLOC || defined malloc) \
 	     && (defined YYFREE || defined free)))
 #   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
-#   ifndef _STDLIB_H
-#    define _STDLIB_H 1
+#   ifndef EXIT_SUCCESS
+#    define EXIT_SUCCESS 0
 #   endif
 #  endif
 #  ifndef YYMALLOC
 #   define YYMALLOC malloc
-#   if ! defined malloc && ! defined _STDLIB_H && (defined __STDC__ || defined __C99__FUNC__ \
+#   if ! defined malloc && ! defined EXIT_SUCCESS && (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 void *malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 #  ifndef YYFREE
 #   define YYFREE free
-#   if ! defined free && ! defined _STDLIB_H && (defined __STDC__ || defined __C99__FUNC__ \
+#   if ! defined free && ! defined EXIT_SUCCESS && (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
@@ -378,23 +377,7 @@ union yyalloc
      ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE) + sizeof (YYLTYPE)) \
       + 2 * YYSTACK_GAP_MAXIMUM)
 
-/* Copy COUNT objects from FROM to TO.  The source and destination do
-   not overlap.  */
-# ifndef YYCOPY
-#  if defined __GNUC__ && 1 < __GNUC__
-#   define YYCOPY(To, From, Count) \
-      __builtin_memcpy (To, From, (Count) * sizeof (*(From)))
-#  else
-#   define YYCOPY(To, From, Count)		\
-      do					\
-	{					\
-	  YYSIZE_T yyi;				\
-	  for (yyi = 0; yyi < (Count); yyi++)	\
-	    (To)[yyi] = (From)[yyi];		\
-	}					\
-      while (YYID (0))
-#  endif
-# endif
+# define YYCOPY_NEEDED 1
 
 /* Relocate STACK from its old location to the new one.  The
    local variables YYSIZE and YYSTACKSIZE give the old and new number of
@@ -413,6 +396,26 @@ union yyalloc
     while (YYID (0))
 
 #endif
+
+#if defined YYCOPY_NEEDED && YYCOPY_NEEDED
+/* Copy COUNT objects from FROM to TO.  The source and destination do
+   not overlap.  */
+# ifndef YYCOPY
+#  if defined __GNUC__ && 1 < __GNUC__
+#   define YYCOPY(To, From, Count) \
+      __builtin_memcpy (To, From, (Count) * sizeof (*(From)))
+#  else
+#   define YYCOPY(To, From, Count)		\
+      do					\
+	{					\
+	  YYSIZE_T yyi;				\
+	  for (yyi = 0; yyi < (Count); yyi++)	\
+	    (To)[yyi] = (From)[yyi];		\
+	}					\
+      while (YYID (0))
+#  endif
+# endif
+#endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  3
@@ -541,8 +544,8 @@ static const yytype_uint8 yyr2[] =
        0,     2,     2,     2,     2,     0,     1,     3,     3,     3
 };
 
-/* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
-   STATE-NUM when YYTABLE doesn't specify something else to do.  Zero
+/* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE doesn't specify something else to do.  Zero
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
@@ -583,8 +586,7 @@ static const yytype_int8 yypgoto[] =
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
-   number is the opposite.  If zero, do what YYDEFACT says.
-   If YYTABLE_NINF, syntax error.  */
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
@@ -595,6 +597,12 @@ static const yytype_uint8 yytable[] =
       10,    30,    46,    47,    11,    48,    49,     6,     7,     8,
       21,    31,    56,    55
 };
+
+#define yypact_value_is_default(yystate) \
+  ((yystate) == (-28))
+
+#define yytable_value_is_error(yytable_value) \
+  YYID (0)
 
 static const yytype_uint8 yycheck[] =
 {
@@ -651,7 +659,6 @@ do								\
     {								\
       yychar = (Token);						\
       yylval = (Value);						\
-      yytoken = YYTRANSLATE (yychar);				\
       YYPOPSTACK (1);						\
       goto yybackup;						\
     }								\
@@ -915,7 +922,6 @@ int yydebug;
 # define YYMAXDEPTH 10000
 #endif
 
-
 
 #if YYERROR_VERBOSE
 
@@ -1018,115 +1024,142 @@ yytnamerr (char *yyres, const char *yystr)
 }
 # endif
 
-/* Copy into YYRESULT an error message about the unexpected token
-   YYCHAR while in state YYSTATE.  Return the number of bytes copied,
-   including the terminating null byte.  If YYRESULT is null, do not
-   copy anything; just return the number of bytes that would be
-   copied.  As a special case, return 0 if an ordinary "syntax error"
-   message will do.  Return YYSIZE_MAXIMUM if overflow occurs during
-   size calculation.  */
-static YYSIZE_T
-yysyntax_error (char *yyresult, int yystate, int yychar)
+/* Copy into *YYMSG, which is of size *YYMSG_ALLOC, an error message
+   about the unexpected token YYTOKEN for the state stack whose top is
+   YYSSP.
+
+   Return 0 if *YYMSG was successfully written.  Return 1 if *YYMSG is
+   not large enough to hold the message.  In that case, also set
+   *YYMSG_ALLOC to the required number of bytes.  Return 2 if the
+   required number of bytes is too large to store.  */
+static int
+yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
+                yytype_int16 *yyssp, int yytoken)
 {
-  int yyn = yypact[yystate];
+  YYSIZE_T yysize0 = yytnamerr (0, yytname[yytoken]);
+  YYSIZE_T yysize = yysize0;
+  YYSIZE_T yysize1;
+  enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
+  /* Internationalized format string. */
+  const char *yyformat = 0;
+  /* Arguments of yyformat. */
+  char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
+  /* Number of reported tokens (one for the "unexpected", one per
+     "expected"). */
+  int yycount = 0;
 
-  if (! (YYPACT_NINF < yyn && yyn <= YYLAST))
-    return 0;
-  else
+  /* There are many possibilities here to consider:
+     - Assume YYFAIL is not used.  It's too flawed to consider.  See
+       <http://lists.gnu.org/archive/html/bison-patches/2009-12/msg00024.html>
+       for details.  YYERROR is fine as it does not invoke this
+       function.
+     - If this state is a consistent state with a default action, then
+       the only way this function was invoked is if the default action
+       is an error action.  In that case, don't check for expected
+       tokens because there are none.
+     - The only way there can be no lookahead present (in yychar) is if
+       this state is a consistent state with a default action.  Thus,
+       detecting the absence of a lookahead is sufficient to determine
+       that there is no unexpected or expected token to report.  In that
+       case, just report a simple "syntax error".
+     - Don't assume there isn't a lookahead just because this state is a
+       consistent state with a default action.  There might have been a
+       previous inconsistent state, consistent state with a non-default
+       action, or user semantic action that manipulated yychar.
+     - Of course, the expected token list depends on states to have
+       correct lookahead information, and it depends on the parser not
+       to perform extra reductions after fetching a lookahead from the
+       scanner and before detecting a syntax error.  Thus, state merging
+       (from LALR or IELR) and default reductions corrupt the expected
+       token list.  However, the list is correct for canonical LR with
+       one exception: it will still contain any token that will not be
+       accepted due to an error action in a later state.
+  */
+  if (yytoken != YYEMPTY)
     {
-      int yytype = YYTRANSLATE (yychar);
-      YYSIZE_T yysize0 = yytnamerr (0, yytname[yytype]);
-      YYSIZE_T yysize = yysize0;
-      YYSIZE_T yysize1;
-      int yysize_overflow = 0;
-      enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-      char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
-      int yyx;
+      int yyn = yypact[*yyssp];
+      yyarg[yycount++] = yytname[yytoken];
+      if (!yypact_value_is_default (yyn))
+        {
+          /* Start YYX at -YYN if negative to avoid negative indexes in
+             YYCHECK.  In other words, skip the first -YYN actions for
+             this state because they are default actions.  */
+          int yyxbegin = yyn < 0 ? -yyn : 0;
+          /* Stay within bounds of both yycheck and yytname.  */
+          int yychecklim = YYLAST - yyn + 1;
+          int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+          int yyx;
 
-# if 0
-      /* This is so xgettext sees the translatable formats that are
-	 constructed on the fly.  */
-      YY_("syntax error, unexpected %s");
-      YY_("syntax error, unexpected %s, expecting %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s or %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s");
-# endif
-      char *yyfmt;
-      char const *yyf;
-      static char const yyunexpected[] = "syntax error, unexpected %s";
-      static char const yyexpecting[] = ", expecting %s";
-      static char const yyor[] = " or %s";
-      char yyformat[sizeof yyunexpected
-		    + sizeof yyexpecting - 1
-		    + ((YYERROR_VERBOSE_ARGS_MAXIMUM - 2)
-		       * (sizeof yyor - 1))];
-      char const *yyprefix = yyexpecting;
-
-      /* Start YYX at -YYN if negative to avoid negative indexes in
-	 YYCHECK.  */
-      int yyxbegin = yyn < 0 ? -yyn : 0;
-
-      /* Stay within bounds of both yycheck and yytname.  */
-      int yychecklim = YYLAST - yyn + 1;
-      int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
-      int yycount = 1;
-
-      yyarg[0] = yytname[yytype];
-      yyfmt = yystpcpy (yyformat, yyunexpected);
-
-      for (yyx = yyxbegin; yyx < yyxend; ++yyx)
-	if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR)
-	  {
-	    if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-	      {
-		yycount = 1;
-		yysize = yysize0;
-		yyformat[sizeof yyunexpected - 1] = '\0';
-		break;
-	      }
-	    yyarg[yycount++] = yytname[yyx];
-	    yysize1 = yysize + yytnamerr (0, yytname[yyx]);
-	    yysize_overflow |= (yysize1 < yysize);
-	    yysize = yysize1;
-	    yyfmt = yystpcpy (yyfmt, yyprefix);
-	    yyprefix = yyor;
-	  }
-
-      yyf = YY_(yyformat);
-      yysize1 = yysize + yystrlen (yyf);
-      yysize_overflow |= (yysize1 < yysize);
-      yysize = yysize1;
-
-      if (yysize_overflow)
-	return YYSIZE_MAXIMUM;
-
-      if (yyresult)
-	{
-	  /* Avoid sprintf, as that infringes on the user's name space.
-	     Don't have undefined behavior even if the translation
-	     produced a string with the wrong number of "%s"s.  */
-	  char *yyp = yyresult;
-	  int yyi = 0;
-	  while ((*yyp = *yyf) != '\0')
-	    {
-	      if (*yyp == '%' && yyf[1] == 's' && yyi < yycount)
-		{
-		  yyp += yytnamerr (yyp, yyarg[yyi++]);
-		  yyf += 2;
-		}
-	      else
-		{
-		  yyp++;
-		  yyf++;
-		}
-	    }
-	}
-      return yysize;
+          for (yyx = yyxbegin; yyx < yyxend; ++yyx)
+            if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR
+                && !yytable_value_is_error (yytable[yyx + yyn]))
+              {
+                if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
+                  {
+                    yycount = 1;
+                    yysize = yysize0;
+                    break;
+                  }
+                yyarg[yycount++] = yytname[yyx];
+                yysize1 = yysize + yytnamerr (0, yytname[yyx]);
+                if (! (yysize <= yysize1
+                       && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
+                  return 2;
+                yysize = yysize1;
+              }
+        }
     }
+
+  switch (yycount)
+    {
+# define YYCASE_(N, S)                      \
+      case N:                               \
+        yyformat = S;                       \
+      break
+      YYCASE_(0, YY_("syntax error"));
+      YYCASE_(1, YY_("syntax error, unexpected %s"));
+      YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
+      YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+      YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+      YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+# undef YYCASE_
+    }
+
+  yysize1 = yysize + yystrlen (yyformat);
+  if (! (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
+    return 2;
+  yysize = yysize1;
+
+  if (*yymsg_alloc < yysize)
+    {
+      *yymsg_alloc = 2 * yysize;
+      if (! (yysize <= *yymsg_alloc
+             && *yymsg_alloc <= YYSTACK_ALLOC_MAXIMUM))
+        *yymsg_alloc = YYSTACK_ALLOC_MAXIMUM;
+      return 1;
+    }
+
+  /* Avoid sprintf, as that infringes on the user's name space.
+     Don't have undefined behavior even if the translation
+     produced a string with the wrong number of "%s"s.  */
+  {
+    char *yyp = *yymsg;
+    int yyi = 0;
+    while ((*yyp = *yyformat) != '\0')
+      if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
+        {
+          yyp += yytnamerr (yyp, yyarg[yyi++]);
+          yyformat += 2;
+        }
+      else
+        {
+          yyp++;
+          yyformat++;
+        }
+  }
+  return 0;
 }
 #endif /* YYERROR_VERBOSE */
-
 
 /*-----------------------------------------------.
 | Release the memory associated to this symbol.  |
@@ -1167,6 +1200,7 @@ yydestruct (yymsg, yytype, yyvaluep, yylocationp, scanner, parser, callbacks_ptr
     }
 }
 
+
 /* Prevent warnings from -Wmissing-prototypes.  */
 #ifdef YYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
@@ -1183,12 +1217,9 @@ int yyparse ();
 #endif /* ! YYPARSE_PARAM */
 
 
-
-
-
-/*-------------------------.
-| yyparse or yypush_parse.  |
-`-------------------------*/
+/*----------.
+| yyparse.  |
+`----------*/
 
 #ifdef YYPARSE_PARAM
 #if (defined __STDC__ || defined __C99__FUNC__ \
@@ -1403,7 +1434,7 @@ yybackup:
 
   /* First try to decide what to do without reference to lookahead token.  */
   yyn = yypact[yystate];
-  if (yyn == YYPACT_NINF)
+  if (yypact_value_is_default (yyn))
     goto yydefault;
 
   /* Not known => get a lookahead token if don't already have one.  */
@@ -1434,8 +1465,8 @@ yybackup:
   yyn = yytable[yyn];
   if (yyn <= 0)
     {
-      if (yyn == 0 || yyn == YYTABLE_NINF)
-	goto yyerrlab;
+      if (yytable_value_is_error (yyn))
+        goto yyerrlab;
       yyn = -yyn;
       goto yyreduce;
     }
@@ -1491,7 +1522,7 @@ yyreduce:
     {
         case 4:
 
-/* Line 1464 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 82 "jxtl_parse.y"
     {
       if ( callbacks->text_handler ) {
@@ -1502,7 +1533,7 @@ yyreduce:
 
   case 8:
 
-/* Line 1464 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 94 "jxtl_parse.y"
     {
       if ( callbacks->value_handler &&
@@ -1515,7 +1546,7 @@ yyreduce:
 
   case 10:
 
-/* Line 1464 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 106 "jxtl_parse.y"
     {
       if ( callbacks->section_start_handler &&
@@ -1529,7 +1560,7 @@ yyreduce:
 
   case 11:
 
-/* Line 1464 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 116 "jxtl_parse.y"
     { 
       if ( callbacks->section_end_handler ) {
@@ -1540,7 +1571,7 @@ yyreduce:
 
   case 12:
 
-/* Line 1464 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 125 "jxtl_parse.y"
     {
       if ( callbacks->if_start_handler &&
@@ -1553,7 +1584,7 @@ yyreduce:
 
   case 14:
 
-/* Line 1464 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 139 "jxtl_parse.y"
     {
       if ( callbacks->elseif_handler &&
@@ -1566,7 +1597,7 @@ yyreduce:
 
   case 16:
 
-/* Line 1464 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 148 "jxtl_parse.y"
     {
       if ( callbacks->else_handler ) {
@@ -1577,7 +1608,7 @@ yyreduce:
 
   case 19:
 
-/* Line 1464 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 159 "jxtl_parse.y"
     {
       if ( callbacks->if_end_handler ) {
@@ -1588,7 +1619,7 @@ yyreduce:
 
   case 21:
 
-/* Line 1464 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 168 "jxtl_parse.y"
     {
       if ( callbacks->text_handler ) {
@@ -1599,7 +1630,7 @@ yyreduce:
 
   case 28:
 
-/* Line 1464 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 186 "jxtl_parse.y"
     {
       if ( callbacks->separator_start_handler ) {
@@ -1616,7 +1647,7 @@ yyreduce:
 
   case 29:
 
-/* Line 1464 of yacc.c  */
+/* Line 1806 of yacc.c  */
 #line 198 "jxtl_parse.y"
     {
       if ( callbacks->format_handler ) {
@@ -1627,10 +1658,21 @@ yyreduce:
 
 
 
-/* Line 1464 of yacc.c  */
-#line 1632 "jxtl_parse.c"
+/* Line 1806 of yacc.c  */
+#line 1663 "jxtl_parse.c"
       default: break;
     }
+  /* User semantic actions sometimes alter yychar, and that requires
+     that yytoken be updated with the new translation.  We take the
+     approach of translating immediately before every use of yytoken.
+     One alternative is translating here after every semantic action,
+     but that translation would be missed if the semantic action invokes
+     YYABORT, YYACCEPT, or YYERROR immediately after altering yychar or
+     if it invokes YYBACKUP.  In the case of YYABORT or YYACCEPT, an
+     incorrect destructor might then be invoked immediately.  In the
+     case of YYERROR or YYBACKUP, subsequent parser actions might lead
+     to an incorrect destructor call or verbose syntax error message
+     before the lookahead is translated.  */
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
 
   YYPOPSTACK (yylen);
@@ -1659,6 +1701,10 @@ yyreduce:
 | yyerrlab -- here on detecting error |
 `------------------------------------*/
 yyerrlab:
+  /* Make sure we have latest lookahead translation.  See comments at
+     user semantic actions for why this is necessary.  */
+  yytoken = yychar == YYEMPTY ? YYEMPTY : YYTRANSLATE (yychar);
+
   /* If not already recovering from an error, report this error.  */
   if (!yyerrstatus)
     {
@@ -1666,37 +1712,36 @@ yyerrlab:
 #if ! YYERROR_VERBOSE
       yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("syntax error"));
 #else
+# define YYSYNTAX_ERROR yysyntax_error (&yymsg_alloc, &yymsg, \
+                                        yyssp, yytoken)
       {
-	YYSIZE_T yysize = yysyntax_error (0, yystate, yychar);
-	if (yymsg_alloc < yysize && yymsg_alloc < YYSTACK_ALLOC_MAXIMUM)
-	  {
-	    YYSIZE_T yyalloc = 2 * yysize;
-	    if (! (yysize <= yyalloc && yyalloc <= YYSTACK_ALLOC_MAXIMUM))
-	      yyalloc = YYSTACK_ALLOC_MAXIMUM;
-	    if (yymsg != yymsgbuf)
-	      YYSTACK_FREE (yymsg);
-	    yymsg = (char *) YYSTACK_ALLOC (yyalloc);
-	    if (yymsg)
-	      yymsg_alloc = yyalloc;
-	    else
-	      {
-		yymsg = yymsgbuf;
-		yymsg_alloc = sizeof yymsgbuf;
-	      }
-	  }
-
-	if (0 < yysize && yysize <= yymsg_alloc)
-	  {
-	    (void) yysyntax_error (yymsg, yystate, yychar);
-	    yyerror (&yylloc, scanner, parser, callbacks_ptr, yymsg);
-	  }
-	else
-	  {
-	    yyerror (&yylloc, scanner, parser, callbacks_ptr, YY_("syntax error"));
-	    if (yysize != 0)
-	      goto yyexhaustedlab;
-	  }
+        char const *yymsgp = YY_("syntax error");
+        int yysyntax_error_status;
+        yysyntax_error_status = YYSYNTAX_ERROR;
+        if (yysyntax_error_status == 0)
+          yymsgp = yymsg;
+        else if (yysyntax_error_status == 1)
+          {
+            if (yymsg != yymsgbuf)
+              YYSTACK_FREE (yymsg);
+            yymsg = (char *) YYSTACK_ALLOC (yymsg_alloc);
+            if (!yymsg)
+              {
+                yymsg = yymsgbuf;
+                yymsg_alloc = sizeof yymsgbuf;
+                yysyntax_error_status = 2;
+              }
+            else
+              {
+                yysyntax_error_status = YYSYNTAX_ERROR;
+                yymsgp = yymsg;
+              }
+          }
+        yyerror (&yylloc, scanner, parser, callbacks_ptr, yymsgp);
+        if (yysyntax_error_status == 2)
+          goto yyexhaustedlab;
       }
+# undef YYSYNTAX_ERROR
 #endif
     }
 
@@ -1756,7 +1801,7 @@ yyerrlab1:
   for (;;)
     {
       yyn = yypact[yystate];
-      if (yyn != YYPACT_NINF)
+      if (!yypact_value_is_default (yyn))
 	{
 	  yyn += YYTERROR;
 	  if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYTERROR)
@@ -1820,8 +1865,13 @@ yyexhaustedlab:
 
 yyreturn:
   if (yychar != YYEMPTY)
-     yydestruct ("Cleanup: discarding lookahead",
-		 yytoken, &yylval, &yylloc, scanner, parser, callbacks_ptr);
+    {
+      /* Make sure we have latest lookahead translation.  See comments at
+         user semantic actions for why this is necessary.  */
+      yytoken = YYTRANSLATE (yychar);
+      yydestruct ("Cleanup: discarding lookahead",
+                  yytoken, &yylval, &yylloc, scanner, parser, callbacks_ptr);
+    }
   /* Do not reclaim the symbols of the rule which action triggered
      this YYABORT or YYACCEPT.  */
   YYPOPSTACK (yylen);
@@ -1846,28 +1896,9 @@ yyreturn:
 
 
 
-/* Line 1684 of yacc.c  */
+/* Line 2067 of yacc.c  */
 #line 205 "jxtl_parse.y"
 
-
-/**
- * Structure to hold data during parsing.  One of these will be passed to the
- * callback functions.
- */
-typedef struct jxtl_data_t {
-  /** Memory pool */
-  apr_pool_t *mp;
-  /** Pointer to the JSON object */
-  json_t *json;
-  /** Pointer to the current content array. */
-  apr_array_header_t *current_array;
-  /** Array of content arrays. */
-  apr_array_header_t *content_array;
-  /** Pointer to the last section or value pushed on. */
-  jxtl_content_t *last_section_or_value;
-  /** Reusable parser. */
-  parser_t *jxtl_path_parser;
-} jxtl_data_t;
 
 void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
                  void *callbacks_ptr, const char *error_string, ... )
@@ -1882,359 +1913,28 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
   va_end( args );
 }
 
-/**
- * Allocate a new jxtl_data_t.
- */
-static jxtl_data_t *jxtl_data_create( apr_pool_t *mp )
+parser_t *jxtl_parser_create( apr_pool_t *mp )
 {
-  jxtl_data_t *data = apr_palloc( mp, sizeof(jxtl_data_t) );
-
-  data->mp = mp;
-  data->json = NULL;
-  data->content_array = apr_array_make( data->mp, 1024,
-                                        sizeof(apr_array_header_t *) );
-  data->current_array = NULL;
-  data->jxtl_path_parser = jxtl_path_parser_create( mp );
-
-  return data;
-}
-
-/**
- * Reset the data each time before parsing.  Basically we have to clear out
- * the content_array and create a new initial array.  Note that the memory
- * pool used is not cleared because it's not owned by us and clearing it could
- * clear the allocation of a previous template that was parsed using the same
- * parser.
- */
-static void jxtl_data_reset( jxtl_data_t *data )
-{
-  apr_array_header_t *initial_array;
-  APR_ARRAY_CLEAR( data->content_array );
-  initial_array = apr_array_make( data->mp, 1024,
-                                  sizeof(apr_array_header_t *) );
-  APR_ARRAY_PUSH( data->content_array, apr_array_header_t * ) = initial_array;
-  data->current_array = initial_array;
-}
-
-/*
- * Convenience function to create a new content object and it on the current
- * array.
- */
-static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
-                               void *value )
-{
-  jxtl_content_t *content = NULL;
-
-  content = apr_palloc( data->mp, sizeof(jxtl_content_t) );
-  content->type = type;
-  content->value = value;
-  content->separator = NULL;
-  content->format = NULL;
-
-  if ( ( type == JXTL_SECTION ) || ( type == JXTL_VALUE ) ) {
-    data->last_section_or_value = content;
-  }
-
-  APR_ARRAY_PUSH( data->current_array, jxtl_content_t * ) = content;
-}
-
-/*****************************************************************************
- * Parser callbacks
- *****************************************************************************/
-
-/**
- * Parser callback for when it finds text.
- * @param user_data The jxtl_data.
- * @param text The text.
- */
-static void jxtl_text_func( void *user_data, unsigned char *text )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_content_push( data, JXTL_TEXT, apr_pstrdup( data->mp, (char *) text ) );
-}
-
-/**
- * Parser callback for starting a section.  We need to allocate a new section,
- * parse the expression and then add it to our content array.  We also need to
- * make sure the current_array points to the one in the new section object so 
- * that content encountered after the section is properly added to it.
- * @param user_data The jxtl_data
- * @param expr An expression to evaluate for the section
- */
-static int jxtl_section_start( void *user_data, unsigned char *expr )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_section_t *section;
-  int result;
-
-  section = apr_palloc( data->mp, sizeof(jxtl_section_t) );
-  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
-                                          &section->expr );
-  section->content = apr_array_make( data->mp, 1024,
-                                     sizeof(jxtl_content_t *) );
-  jxtl_content_push( data, JXTL_SECTION, section );
-  APR_ARRAY_PUSH( data->content_array,
-                  apr_array_header_t * ) = data->current_array;
-  data->current_array = section->content;
-
-  return result;
-}
-
-/**
- * Parser callback for when a section ends.  All we need to do is reset the
- * current_array to the previous item on the content_array stack.
- * @param user_data The jxtl_data.
- */
-static void jxtl_section_end( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-
-  data->current_array = APR_ARRAY_POP( data->content_array,
-                                       apr_array_header_t * );
-}
-
-/**
- * Parser callback for starting an if statement.
- * @param user_data The jxtl_data
- * @param expr An expression to evaluate for the if
- */
-static int jxtl_if_start( void *user_data, unsigned char *expr )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_if_t *jxtl_if;
-  apr_array_header_t *if_block;
-  int result;
-
-  if_block = apr_array_make( data->mp, 8, sizeof(jxtl_if_t *) );
-  jxtl_if = apr_palloc( data->mp, sizeof(jxtl_if_t) );
-  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
-                                          &jxtl_if->expr );
-  jxtl_if->content = apr_array_make( data->mp, 1024,
-                                     sizeof(jxtl_content_t *) );
-  APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
-  jxtl_content_push( data, JXTL_IF, if_block );
-
-  APR_ARRAY_PUSH( data->content_array,
-                  apr_array_header_t * ) = data->current_array;
-  data->current_array = jxtl_if->content;
-
-  return result;
-}
-
-/**
- * Parser callback for starting an elseif statement.  A little different than
- * starting an if because we need to get the if_block array and add the new
- * jxtl_if_t object to that.
- * @param user_data The jxtl_data
- * @param expr An expression to evaluate for the elseif
- */
-static int jxtl_elseif( void *user_data, unsigned char *expr )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  apr_array_header_t *content_array, *if_block;
-  jxtl_if_t *jxtl_if;
-  jxtl_content_t *content;
-  int result;
-
-  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
-  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
-  if_block = (apr_array_header_t *) content->value;
-  jxtl_if = apr_palloc( data->mp, sizeof(jxtl_if_t) );
-  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
-                                          &jxtl_if->expr );
-  jxtl_if->content = apr_array_make( data->mp, 1024,
-                                     sizeof(jxtl_content_t *) );
-  APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
-  data->current_array = jxtl_if->content;
-
-  return result;
-}
-
-static void jxtl_else( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  apr_array_header_t *content_array, *if_block;
-  jxtl_if_t *jxtl_if;
-  jxtl_content_t *content;
-
-  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
-  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
-  if_block = (apr_array_header_t *) content->value;
-
-  jxtl_if = apr_palloc( data->mp, sizeof(jxtl_if_t) );
-  jxtl_if->expr = NULL;
-  jxtl_if->content = apr_array_make( data->mp, 1024,
-                                     sizeof(jxtl_content_t *) );
-  APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
-  data->current_array = jxtl_if->content;
-}
-
-static void jxtl_if_end( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-
-  data->current_array = APR_ARRAY_POP( data->content_array,
-                                       apr_array_header_t * );
-}
-
-/**
- * Parser callback for when it encounters a separator directive.  All this does
- * is take the current section and set its current_array to the separator.
- * @param user_data The jxtl_data.
- */
-static void jxtl_separator_start( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_content_t *content = data->last_section_or_value;
-
-  content->separator = apr_array_make( data->mp, 1, sizeof(jxtl_content_t *) );
-
-  /*
-   * Save off the current array and then make the current array the separator.
-   */
-  APR_ARRAY_PUSH( data->content_array,
-                  apr_array_header_t * ) = data->current_array;
-  data->current_array = content->separator;
-}
-
-/**
- * Parser callback for when a separator directive is ended.  Just sets the
- * current_array of the section back to the content.
- * @param user_data The jxtl_data.
- */
-static void jxtl_separator_end( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  data->current_array = APR_ARRAY_POP( data->content_array,
-                                       apr_array_header_t * );
-}
-
-/**
- * Parser callback function for when it encounters a value reference in the
- * template, i.e. {{value}}.  If we are not nested at all, it is printed
- * immediately.  Otherwise, the name is just saved off for later processing.
- * @param user_data The jxtl_data.
- * @param name The name of the value to lookup.
- */
-static int jxtl_value_func( void *user_data, unsigned char *expr )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_path_expr_t *path_expr;
-  int result;
-
-  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
-                                          &path_expr );
-  jxtl_content_push( data, JXTL_VALUE, path_expr );
-
-  return result;
-}
-
-static char *jxtl_get_error( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  return parser_get_error( data->jxtl_path_parser );
-}
-
-static void jxtl_format( void *user_data, char *format )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  data->last_section_or_value->format = apr_pstrdup( data->mp, format );
-}
-
-static jxtl_template_t *jxtl_template_create( apr_pool_t *mp,
-                                              apr_array_header_t *content )
-{
-  jxtl_template_t *template;
-  template = apr_palloc( mp, sizeof(jxtl_template_t) );
-  template->content = content;
-  template->flush_func = NULL;
-  template->flush_data = NULL;
-  template->formats = apr_hash_make( mp );
-  template->format_data = NULL;
-
-  return template;
-}
-
-parser_t *jxtl_parser_create( apr_pool_t *mp, jxtl_callback_t *user_callbacks )
-{
-  jxtl_callback_t *callbacks_ptr;
-  parser_t *parser = parser_create( mp,
-                                    jxtl_lex_init,
-                                    jxtl_set_extra,
-                                    jxtl_lex_destroy,
-                                    jxtl__scan_buffer,
-                                    jxtl__delete_buffer,
-                                    jxtl_parse );
-  if ( user_callbacks ) {
-    callbacks_ptr = user_callbacks;
-    callbacks_ptr->own_user_data = FALSE;
-  }
-  else {
-    callbacks_ptr = apr_palloc( mp, sizeof(jxtl_callback_t) );
-    callbacks_ptr->text_handler = jxtl_text_func;
-    callbacks_ptr->section_start_handler = jxtl_section_start;
-    callbacks_ptr->section_end_handler = jxtl_section_end;
-    callbacks_ptr->if_start_handler = jxtl_if_start;
-    callbacks_ptr->elseif_handler = jxtl_elseif;
-    callbacks_ptr->else_handler = jxtl_else;
-    callbacks_ptr->if_end_handler = jxtl_if_end;
-    callbacks_ptr->separator_start_handler = jxtl_separator_start;
-    callbacks_ptr->separator_end_handler = jxtl_separator_end;
-    callbacks_ptr->value_handler = jxtl_value_func;
-    callbacks_ptr->get_error_func = jxtl_get_error;
-    callbacks_ptr->format_handler = jxtl_format;
-    callbacks_ptr->own_user_data = TRUE;
-    callbacks_ptr->user_data = jxtl_data_create( mp );
-  }
-
-  parser_set_user_data( parser, callbacks_ptr );
-
-  return parser;
+  return parser_create( mp,
+			jxtl_lex_init,
+			jxtl_set_extra,
+			jxtl_lex_destroy,
+			jxtl__scan_buffer,
+			jxtl__delete_buffer,
+			jxtl_parse );
 }
 
 int jxtl_parser_parse_file( parser_t *parser, const char *file,
-                            jxtl_template_t **template_ptr )
+			    jxtl_callback_t *jxtl_callbacks )
 {
-  jxtl_callback_t *jxtl_callbacks = parser_get_user_data( parser );
-  jxtl_data_t *jxtl_data = (jxtl_data_t *) jxtl_callbacks->user_data;
-  int result = FALSE;
-
-  *template_ptr = NULL;
-  if ( jxtl_callbacks->own_user_data ) {
-    jxtl_data_reset( jxtl_data );
-  }
-
-  if ( parser_parse_file( parser, file ) ) {
-    if ( jxtl_callbacks->own_user_data ) {
-      *template_ptr = jxtl_template_create( parser->mp,
-                                            jxtl_data->current_array );
-    }
-    result = TRUE;
-  }
-
-  return result;
+  parser_set_user_data( parser, jxtl_callbacks );
+  return parser_parse_file( parser, file );
 }
 
 int jxtl_parser_parse_buffer( parser_t *parser, const char *buffer,
-                              jxtl_template_t **template_ptr )
+			      jxtl_callback_t *jxtl_callbacks )
 {
-  jxtl_callback_t *jxtl_callbacks = parser_get_user_data( parser );
-  jxtl_data_t *jxtl_data = (jxtl_data_t *) jxtl_callbacks->user_data;
-  int result = FALSE;
-
-  *template_ptr = NULL;
-  if ( jxtl_callbacks->own_user_data ) {
-    jxtl_data_reset( jxtl_data );
-  }
-
-  if ( parser_parse_buffer( parser, buffer ) ) {
-    if ( jxtl_callbacks->own_user_data ) {
-      *template_ptr = jxtl_template_create( parser->mp,
-                                            jxtl_data->current_array );
-    }
-    result = TRUE;
-  }
-
-  return result;
+  parser_set_user_data( parser, jxtl_callbacks );
+  return parser_parse_buffer( parser, buffer );
 }
 

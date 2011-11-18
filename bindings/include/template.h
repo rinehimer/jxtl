@@ -4,6 +4,7 @@
 #include <apr_hash.h>
 #include <apr_pools.h>
 #include "jxtl.h"
+#include "jxtl_template.h"
 #include "json.h"
 #include "parser.h"
 

@@ -4,6 +4,7 @@
 #include <apr_pools.h>
 #include "json.h"
 #include "jxtl.h"
+#include "jxtl_template.h"
 #include "template.h"
 %}
 
@@ -44,13 +45,14 @@
     Template *t = malloc( sizeof(Template) );
     apr_pool_create( &t->mp, NULL );
     
-    t->jxtl_parser = jxtl_parser_create( t->mp, NULL );
+    t->jxtl_parser = jxtl_parser_create( t->mp );
     t->template = NULL;
     t->json = NULL;
     t->formats = apr_hash_make( t->mp );
     
     if ( buffer ) {
-      jxtl_parser_parse_buffer( t->jxtl_parser, buffer, &t->template );
+      jxtl_parser_parse_buffer_to_template( t->mp, t->jxtl_parser, buffer,
+					    &t->template );
     }
     
     return t;
@@ -70,7 +72,8 @@
    */
   int load( char *file )
   {
-    return jxtl_parser_parse_file( self->jxtl_parser, file, &self->template );
+    return jxtl_parser_parse_file_to_template( self->mp, self->jxtl_parser,
+					       file, &self->template );
   }
   
   /**
@@ -123,7 +126,8 @@
       self->json = TO_JSON_FUNC( self->mp, input );
     }
 
-    status = ( jxtl_expand_to_file( self->template, self->json, file ) == 0 );
+    status = ( jxtl_template_expand_to_file( self->template, self->json,
+					     file ) == 0 );
 
     apr_pool_destroy( tmp_mp );
 
@@ -152,7 +156,8 @@
       self->json = TO_JSON_FUNC( tmp_mp, input );
     }
 
-    buffer = jxtl_expand_to_buffer( self->mp, self->template, self->json );
+    buffer = jxtl_template_expand_to_buffer( self->mp, self->template,
+					     self->json );
     apr_pool_destroy( tmp_mp );
 
     return buffer;
