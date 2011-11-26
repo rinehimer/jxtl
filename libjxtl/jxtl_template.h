@@ -27,6 +27,8 @@
 #include <apr_pools.h>
 #include <apr_tables.h>
 
+#include "jxtl_path_expr.h"
+
 typedef enum jxtl_content_type {
   JXTL_TEXT,
   JXTL_SECTION,

@@ -6,6 +6,7 @@ libjxtlinc_HEADERS = apr_macros.h \
                      json.h \
                      jxtl.h \
                      jxtl_path.h \
+                     jxtl_path_expr.h \
                      jxtl_template.h \
                      json_writer.h \
                      json_writer_ctx.h \
@@ -20,6 +21,7 @@ libjxtl_la_SOURCES = json.c \
                      jxtl_lex.l \
                      jxtl_parse.y \
                      jxtl_path.c \
+                     jxtl_path_expr.c \
                      jxtl_path_lex.l \
                      jxtl_path_parse.y \
                      jxtl_template.c \

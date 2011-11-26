@@ -109,191 +109,24 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
   va_end( args );
 }
 
-typedef struct path_data_t {
-  apr_pool_t *mp;
-  /** Array to store the current expression. */
-  apr_array_header_t *expr_array;
-  /** Root of the path expression. */
-  jxtl_path_expr_t *root;
-  /** The current expression. */
-  jxtl_path_expr_t *curr;
-}path_data_t;
-
-/**
- * Convenience function called by the parser callbacks.
- */
-static void create_expr( path_data_t *data,
-                         jxtl_path_expr_type type,
-                         unsigned char *identifier )
-{
-  jxtl_path_expr_t *expr;
-
-  expr = apr_palloc( data->mp, sizeof( jxtl_path_expr_t ) );
-  expr->type = type;
-  expr->identifier = identifier;
-  expr->root = ( data->root ) ? data->root : expr;
-  expr->next = NULL;
-  expr->predicate = NULL;
-  expr->negate = 0;
-
-  if ( !data->root ) {
-    data->root = expr;
-  }
-
-  if ( !data->curr ) {
-    data->curr = expr;
-  }
-  else {
-    data->curr->next = expr;
-    data->curr = expr;
-  }
-}
-
-/*
- * Begin parser callback functions.
- */
-
-/**
- * Request to lookup an identifier.
- */
-static void lookup_identifier( void *user_data, unsigned char *ident )
-{
-  path_data_t *data = (path_data_t *) user_data;
-  create_expr( data, JXTL_PATH_LOOKUP,
-               (unsigned char *) apr_pstrdup( data->mp, (char *) ident ) );
-}
-
-/**
- * Request for the root object.
- */
-static void get_root_object( void *user_data )
-{
-  create_expr( user_data, JXTL_PATH_ROOT_OBJ, NULL );
-}
-
-/**
- * Request for the parent object.
- */
-static void get_parent_object( void *user_data )
-{
-  create_expr( user_data, JXTL_PATH_PARENT_OBJ, NULL );
-}
-
-/**
- * Request for the current object.
- */
-static void get_current_object( void *user_data )
-{
-  create_expr( user_data, JXTL_PATH_CURRENT_OBJ, NULL );
-}
-
-/**
- * Request for any object.
- */
-static void get_any_object( void *user_data )
-{
-  create_expr( user_data, JXTL_PATH_ANY_OBJ, NULL );
-}
-
-/**
- * Start a predicate.  Push the current expression node on our stack and set
- * root and curr to NULL.
- */
-static void start_predicate( void *user_data )
-{
-  path_data_t *data = (path_data_t *) user_data;
-
-  APR_ARRAY_PUSH( data->expr_array, jxtl_path_expr_t * ) = data->curr;
-
-  data->root = NULL;
-  data->curr = NULL;
-}
-
-/**
- * End a predicate.  Pop off the previous expression node, set its predicate
- * to be this expression and reset the curr and root pointers from what we
- * popped.
- */
-static void end_predicate( void *user_data )
-{
-  path_data_t *data = (path_data_t *) user_data;
-  jxtl_path_expr_t *expr;
-  expr = APR_ARRAY_POP( data->expr_array, jxtl_path_expr_t * );
-
-  expr->predicate = data->root;
-  data->curr = expr;
-  data->root = expr->root;
-}
-
-/**
- * Negate the current expression.
- */
-static void negate_expression( void *user_data )
-{
-  path_data_t *data = (path_data_t *) user_data;
-  data->root->negate = 1;
-}
-
-/*
- * End of parser callback functions.
- */
-
 /**
  * Create a path parser.
  */
 parser_t *jxtl_path_parser_create( apr_pool_t *mp )
 {
-  parser_t *parser = parser_create( mp,
-                                    jxtl_path_lex_init,
-                                    jxtl_path_set_extra,
-                                    jxtl_path_lex_destroy,
-                                    jxtl_path__scan_buffer,
-                                    jxtl_path__delete_buffer,
-                                    jxtl_path_parse );
-  jxtl_path_callback_t *jxtl_callbacks;
-  path_data_t *jxtl_data;
-
-  jxtl_callbacks = apr_palloc( mp, sizeof(jxtl_path_callback_t) );
-
-  jxtl_callbacks->identifier_handler = lookup_identifier;
-  jxtl_callbacks->root_object_handler = get_root_object;
-  jxtl_callbacks->parent_object_handler = get_parent_object;
-  jxtl_callbacks->current_object_handler = get_current_object;
-  jxtl_callbacks->any_object_handler = get_any_object;
-  jxtl_callbacks->predicate_start_handler = start_predicate;
-  jxtl_callbacks->predicate_end_handler = end_predicate;
-  jxtl_callbacks->negate_handler = negate_expression;
-
-  jxtl_data = apr_palloc( mp, sizeof(path_data_t) );
-  jxtl_data->expr_array = apr_array_make( mp, 32, sizeof(jxtl_path_expr_t *) );
-  jxtl_data->mp = mp;
-  jxtl_data->root = NULL;
-  jxtl_data->curr = NULL;
-
-  jxtl_callbacks->user_data = jxtl_data;
-
-  parser_set_user_data( parser, jxtl_callbacks );
-
-  return parser;
+  return parser_create( mp,
+                        jxtl_path_lex_init,
+                        jxtl_path_set_extra,
+                        jxtl_path_lex_destroy,
+                        jxtl_path__scan_buffer,
+                        jxtl_path__delete_buffer,
+                        jxtl_path_parse );
 }
 
 int jxtl_path_parser_parse_buffer( parser_t *parser,
                                    const char *path,
-                                   jxtl_path_expr_t **expr )
+                                   jxtl_path_callback_t *path_callbacks )
 {
-  jxtl_path_callback_t *jxtl_callbacks = parser_get_user_data( parser );
-  path_data_t *jxtl_data = jxtl_callbacks->user_data;
-  int result = FALSE;
-
-  APR_ARRAY_CLEAR( jxtl_data->expr_array );
-  jxtl_data->root = NULL;
-  jxtl_data->curr = NULL;
-  *expr = NULL;
-
-  if ( parser_parse_buffer( parser, path ) ) {
-    *expr = jxtl_data->root;
-    result = TRUE;
-  }
-
-  return result;
+  parser_set_user_data( parser, path_callbacks );
+  return parser_parse_buffer( parser, path );
 }

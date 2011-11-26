@@ -29,6 +29,7 @@
 #include "apr_macros.h"
 #include "jxtl.h"
 #include "jxtl_path.h"
+#include "jxtl_path_expr.h"
 #include "jxtl_template.h"
 #include "json.h"
 
@@ -103,8 +104,10 @@ static int jxtl_section_start( void *user_data, unsigned char *expr )
   int result;
 
   section = apr_palloc( data->mp, sizeof(jxtl_section_t) );
-  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
-                                          &section->expr );
+  result = jxtl_path_parser_parse_buffer_to_expr( data->mp,
+                                                  data->jxtl_path_parser,
+                                                  expr,
+                                                  &section->expr );
   section->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
   jxtl_content_push( data, JXTL_SECTION, section );
@@ -142,8 +145,10 @@ static int jxtl_if_start( void *user_data, unsigned char *expr )
 
   if_block = apr_array_make( data->mp, 8, sizeof(jxtl_if_t *) );
   jxtl_if = apr_palloc( data->mp, sizeof(jxtl_if_t) );
-  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
-                                          &jxtl_if->expr );
+  result = jxtl_path_parser_parse_buffer_to_expr( data->mp,
+                                                  data->jxtl_path_parser,
+                                                  expr,
+                                                  &jxtl_if->expr );
   jxtl_if->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
   APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
@@ -175,8 +180,10 @@ static int jxtl_elseif( void *user_data, unsigned char *expr )
   content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
   if_block = (apr_array_header_t *) content->value;
   jxtl_if = apr_palloc( data->mp, sizeof(jxtl_if_t) );
-  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
-                                          &jxtl_if->expr );
+  result = jxtl_path_parser_parse_buffer_to_expr( data->mp, 
+                                                  data->jxtl_path_parser,
+                                                  expr,
+                                                  &jxtl_if->expr );
   jxtl_if->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
   APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
@@ -257,8 +264,10 @@ static int jxtl_value_func( void *user_data, unsigned char *expr )
   jxtl_path_expr_t *path_expr;
   int result;
 
-  result = jxtl_path_parser_parse_buffer( data->jxtl_path_parser, expr,
-                                          &path_expr );
+  result = jxtl_path_parser_parse_buffer_to_expr( data->mp,
+                                                  data->jxtl_path_parser,
+                                                  expr,
+                                                  &path_expr );
   jxtl_content_push( data, JXTL_VALUE, path_expr );
 
   return result;
@@ -319,7 +328,7 @@ static void initialize_callbacks( apr_pool_t *template_mp,
   APR_ARRAY_PUSH( cb_data->content_array,
 		  apr_array_header_t * ) = initial_array;
   cb_data->current_array = initial_array;
-  cb_data->jxtl_path_parser = jxtl_path_parser_create( cb_data->mp );
+  cb_data->jxtl_path_parser = jxtl_path_parser_create( tmp_mp );
 
   callbacks->user_data = cb_data;
 }

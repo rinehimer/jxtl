@@ -77,11 +77,11 @@ libjxtl_la_LIBADD =
 am_libjxtl_la_OBJECTS = libjxtl_la-json.lo libjxtl_la-json_lex.lo \
 	libjxtl_la-json_parse.lo libjxtl_la-jxtl_lex.lo \
 	libjxtl_la-jxtl_parse.lo libjxtl_la-jxtl_path.lo \
-	libjxtl_la-jxtl_path_lex.lo libjxtl_la-jxtl_path_parse.lo \
-	libjxtl_la-jxtl_template.lo libjxtl_la-json_writer.lo \
-	libjxtl_la-json_writer_ctx.lo libjxtl_la-misc.lo \
-	libjxtl_la-parser.lo libjxtl_la-str_buf.lo libjxtl_la-utf.lo \
-	libjxtl_la-xml2json.lo
+	libjxtl_la-jxtl_path_expr.lo libjxtl_la-jxtl_path_lex.lo \
+	libjxtl_la-jxtl_path_parse.lo libjxtl_la-jxtl_template.lo \
+	libjxtl_la-json_writer.lo libjxtl_la-json_writer_ctx.lo \
+	libjxtl_la-misc.lo libjxtl_la-parser.lo libjxtl_la-str_buf.lo \
+	libjxtl_la-utf.lo libjxtl_la-xml2json.lo
 libjxtl_la_OBJECTS = $(am_libjxtl_la_OBJECTS)
 libjxtl_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libjxtl_la_CFLAGS) \
@@ -241,6 +241,7 @@ libjxtlinc_HEADERS = apr_macros.h \
                      json.h \
                      jxtl.h \
                      jxtl_path.h \
+                     jxtl_path_expr.h \
                      jxtl_template.h \
                      json_writer.h \
                      json_writer_ctx.h \
@@ -255,6 +256,7 @@ libjxtl_la_SOURCES = json.c \
                      jxtl_lex.l \
                      jxtl_parse.y \
                      jxtl_path.c \
+                     jxtl_path_expr.c \
                      jxtl_path_lex.l \
                      jxtl_path_parse.y \
                      jxtl_template.c \
@@ -352,6 +354,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_lex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_parse.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_path.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_path_expr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_path_lex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_path_parse.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libjxtl_la-jxtl_template.Plo@am__quote@
@@ -423,6 +426,13 @@ libjxtl_la-jxtl_path.lo: jxtl_path.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jxtl_path.c' object='libjxtl_la-jxtl_path.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -c -o libjxtl_la-jxtl_path.lo `test -f 'jxtl_path.c' || echo '$(srcdir)/'`jxtl_path.c
+
+libjxtl_la-jxtl_path_expr.lo: jxtl_path_expr.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -MT libjxtl_la-jxtl_path_expr.lo -MD -MP -MF $(DEPDIR)/libjxtl_la-jxtl_path_expr.Tpo -c -o libjxtl_la-jxtl_path_expr.lo `test -f 'jxtl_path_expr.c' || echo '$(srcdir)/'`jxtl_path_expr.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libjxtl_la-jxtl_path_expr.Tpo $(DEPDIR)/libjxtl_la-jxtl_path_expr.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='jxtl_path_expr.c' object='libjxtl_la-jxtl_path_expr.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -c -o libjxtl_la-jxtl_path_expr.lo `test -f 'jxtl_path_expr.c' || echo '$(srcdir)/'`jxtl_path_expr.c
 
 libjxtl_la-jxtl_path_lex.lo: jxtl_path_lex.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libjxtl_la_CFLAGS) $(CFLAGS) -MT libjxtl_la-jxtl_path_lex.lo -MD -MP -MF $(DEPDIR)/libjxtl_la-jxtl_path_lex.Tpo -c -o libjxtl_la-jxtl_path_lex.lo `test -f 'jxtl_path_lex.c' || echo '$(srcdir)/'`jxtl_path_lex.c
