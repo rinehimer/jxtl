@@ -111,7 +111,9 @@
   int expand_to_file( char *file, DICTIONARY_T input = NULL )
   {
     apr_pool_t *tmp_mp;
+    apr_file_t *out;
     int status;
+    int is_stdout;
 
     if ( !self->template ) {
       SWIG_Error( SWIG_RuntimeError,
@@ -126,8 +128,28 @@
       self->json = TO_JSON_FUNC( self->mp, input );
     }
 
+    is_stdout = ( !file || apr_strnatcasecmp( file, "-" ) == 0 );
+    if ( is_stdout ) {
+      status = apr_file_open_stdout( &out, tmp_mp );
+    }
+    else {
+      status = apr_file_open( &out, file,
+                              APR_WRITE | APR_CREATE | APR_BUFFERED |
+                              APR_TRUNCATE, APR_OS_DEFAULT, tmp_mp );
+    }
+
+    if ( status != APR_SUCCESS ) {
+      SWIG_Error( SWIG_RuntimeError,
+                  "Failed to open output file." );
+      return FALSE;
+    }
+
     status = ( jxtl_template_expand_to_file( self->template, self->json,
-					     file ) == 0 );
+					     out ) == 0 );
+
+    if ( !is_stdout ) {
+      apr_file_close( out );
+    }
 
     apr_pool_destroy( tmp_mp );
 
