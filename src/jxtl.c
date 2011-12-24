@@ -1,3 +1,24 @@
+/*
+ * $Id$
+ *
+ * Description
+ *  The jxtl command line processor.
+ *
+ * Copyright 2010 Dan Rinehimer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <apr_general.h>
 #include <apr_getopt.h>
 #include <apr_lib.h>
@@ -21,7 +42,7 @@
 typedef struct format_data_t {
   apr_pool_t *mp;
   apr_array_header_t *string_array;
-}format_data_t;
+} format_data_t;
 
 static char *format_upper( json_t *json, char *format, void *format_data_ptr )
 {
@@ -177,7 +198,7 @@ void jxtl_init( int argc, char const * const *argv, apr_pool_t *mp,
   *template_file = NULL;
   *json_file = NULL;
   *xml_file = NULL;
-  *skip_root = 0;
+  *skip_root = FALSE;
   *output_file = NULL;
 
   apr_getopt_init( &options, mp, argc, argv );
@@ -194,7 +215,7 @@ void jxtl_init( int argc, char const * const *argv, apr_pool_t *mp,
       break;
 
     case 's':
-      *skip_root = 1;
+      *skip_root = TRUE;
       break;
       
     case 'o':
@@ -218,21 +239,37 @@ void jxtl_init( int argc, char const * const *argv, apr_pool_t *mp,
  * Load data from either json_file or xml_file.  One of those has to be
  * non-null.
  */
-int jxtl_load_data( apr_pool_t *mp, const char *json_file,
-                    const char *xml_file, int skip_root, json_t **obj )
+static int load_data( apr_pool_t *mp, const char *json_file,
+                      const char *xml_file, int skip_root, json_t **obj )
 {
-  int ret = 1;
+  int ret;
   parser_t *json_parser;
 
   if ( xml_file ) {
     ret = xml_file_to_json( mp, xml_file, skip_root, obj );
   }
-  else if ( json_file ) {
+  else {
     json_parser = json_parser_create( mp );
     ret = json_parser_parse_file( json_parser, json_file, obj );
   }
 
   return ret;
+}
+
+static int open_output_file( apr_pool_t *mp, const char *file,
+                             apr_file_t **out )
+{
+  int status;
+
+  if ( !file || apr_strnatcasecmp( file, "-" ) == 0 ) {
+    status = apr_file_open_stdout( out, mp );
+  }
+  else {
+    status = apr_file_open( out, file, APR_WRITE | APR_CREATE | APR_BUFFERED |
+                            APR_TRUNCATE, APR_OS_DEFAULT, mp );
+  }
+
+  return ( status == APR_SUCCESS );
 }
 
 int main( int argc, char const * const *argv )
@@ -247,6 +284,8 @@ int main( int argc, char const * const *argv )
   parser_t *jxtl_parser;
   jxtl_template_t *template;
   format_data_t *format_data;
+  apr_file_t *out;
+  int is_stdout;
 
   apr_app_initialize( NULL, NULL, NULL );
   apr_pool_create( &mp, NULL );
@@ -256,7 +295,8 @@ int main( int argc, char const * const *argv )
 
   jxtl_parser = jxtl_parser_create( mp );
 
-  if ( jxtl_load_data( mp, json_file, xml_file, skip_root, &json ) &&
+  if ( load_data( mp, json_file, xml_file, skip_root, &json ) &&
+       open_output_file( mp, out_file, &out ) &&
        jxtl_parser_parse_file_to_template( mp, jxtl_parser, template_file,
 					   &template ) ) {
     format_data = apr_palloc( mp, sizeof(format_data_t) );
@@ -267,9 +307,10 @@ int main( int argc, char const * const *argv )
     jxtl_template_register_format( template, "trn_field", format_trn_field);
     jxtl_template_register_format( template, "json", format_json );
     jxtl_template_set_format_data( template, format_data );
-    jxtl_template_expand_to_file( template, json, out_file );
+    jxtl_template_expand_to_file( template, json, out );
   }
 
+  apr_file_close( out );
   apr_pool_destroy( mp );
   apr_terminate();
 

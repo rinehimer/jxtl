@@ -100,7 +100,7 @@ void jxtl_template_set_format_data( jxtl_template_t *template,
  * Expand a template to a named file.
  */
 int jxtl_template_expand_to_file( jxtl_template_t *template, json_t *json,
-				  const char *file );
+				  apr_file_t *file );
 
 /**
  * Expand a template into a buffer that is allocated from mp.

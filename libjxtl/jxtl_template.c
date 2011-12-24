@@ -612,51 +612,31 @@ void jxtl_template_set_format_data( jxtl_template_t *template,
 }
 
 int jxtl_template_expand_to_file( jxtl_template_t *template, json_t *json,
-				  const char *file )
+				  apr_file_t *out )
 {
   apr_pool_t *mp;
-  apr_file_t *out;
-  apr_status_t status;
   apr_bucket_alloc_t *bucket_alloc;
   apr_bucket_brigade *bucket_brigade;
 
-  int is_stdout;
-
   apr_pool_create( &mp, NULL );
 
-  is_stdout = ( !file || apr_strnatcasecmp( file, "-" ) == 0 );
+  template->flush_func = flush_to_file;
+  template->flush_data = out;
 
-  if ( is_stdout ) {
-    status = apr_file_open_stdout( &out, mp );
-  }
-  else {
-    status = apr_file_open( &out, file,
-                            APR_WRITE | APR_CREATE | APR_BUFFERED |
-                            APR_TRUNCATE, APR_OS_DEFAULT, mp );
-  }
+  bucket_alloc = apr_bucket_alloc_create( mp );
+  bucket_brigade = apr_brigade_create( mp, bucket_alloc );
 
-  if ( status == APR_SUCCESS ) {
-    template->flush_func = flush_to_file;
-    template->flush_data = out;
+  expand_content( mp, template, template->content, json, NULL, PRINT_NORMAL,
+                  bucket_brigade );
 
-    bucket_alloc = apr_bucket_alloc_create( mp );
-    bucket_brigade = apr_brigade_create( mp, bucket_alloc );
+  flush_to_file( bucket_brigade, out );
 
-    expand_content( mp, template, template->content, json, NULL, PRINT_NORMAL,
-                    bucket_brigade );
-
-    flush_to_file( bucket_brigade, out );
-
-    apr_brigade_destroy( bucket_brigade );
-    apr_bucket_alloc_destroy( bucket_alloc );
-    if ( !is_stdout ) {
-      apr_file_close( out );
-    }
-  }
+  apr_brigade_destroy( bucket_brigade );
+  apr_bucket_alloc_destroy( bucket_alloc );
 
   apr_pool_destroy( mp );
 
-  return ( status == APR_SUCCESS ) ? TRUE : FALSE;
+  return APR_SUCCESS;
 }
 
 char *jxtl_template_expand_to_buffer( apr_pool_t *mp,
