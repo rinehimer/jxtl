@@ -300,9 +300,9 @@ static jxtl_template_t *jxtl_template_create( apr_pool_t *mp,
 }
 
 static void initialize_callbacks( apr_pool_t *template_mp, 
-				  apr_pool_t *tmp_mp,
-				  jxtl_callback_t *callbacks,
-				  jxtl_data_t *cb_data )
+                                  apr_pool_t *tmp_mp,
+                                  jxtl_callback_t *callbacks,
+                                  jxtl_data_t *cb_data )
 {
   apr_array_header_t *initial_array;
 
@@ -322,11 +322,11 @@ static void initialize_callbacks( apr_pool_t *template_mp,
   cb_data->mp = template_mp;
   cb_data->json = NULL;
   cb_data->content_array = apr_array_make( tmp_mp, 1024,
-					   sizeof(apr_array_header_t *) );
+                                           sizeof(apr_array_header_t *) );
   initial_array = apr_array_make( cb_data->mp, 1024,
-				  sizeof(apr_array_header_t *) );
+                                  sizeof(apr_array_header_t *) );
   APR_ARRAY_PUSH( cb_data->content_array,
-		  apr_array_header_t * ) = initial_array;
+                  apr_array_header_t * ) = initial_array;
   cb_data->current_array = initial_array;
   cb_data->jxtl_path_parser = jxtl_path_parser_create( tmp_mp );
 
@@ -334,11 +334,11 @@ static void initialize_callbacks( apr_pool_t *template_mp,
 }
 
 static int parse_file_or_buffer( apr_pool_t *mp, parser_t *parser,
-				 const char *file_or_buf,
-				 int ( *parse_func )( parser_t *,
-						      const char *,
-						      jxtl_callback_t * ),
-				 jxtl_template_t **template )
+                                 const char *file_or_buf,
+                                 int ( *parse_func )( parser_t *,
+                                                      const char *,
+                                                      jxtl_callback_t * ),
+                                 jxtl_template_t **template )
 {
   int result = FALSE;
   apr_pool_t *tmp_mp;
@@ -360,19 +360,19 @@ static int parse_file_or_buffer( apr_pool_t *mp, parser_t *parser,
 
 
 int jxtl_parser_parse_file_to_template( apr_pool_t *mp, parser_t *parser,
-					const char *file,
-					jxtl_template_t **template )
+                                        const char *file,
+                                        jxtl_template_t **template )
 {
   return parse_file_or_buffer( mp, parser, file, jxtl_parser_parse_file,
-			       template );
+                               template );
 }
 
 int jxtl_parser_parse_buffer_to_template( apr_pool_t* mp, parser_t *parser,
-					  const char *buffer,
-					  jxtl_template_t **template )
+                                          const char *buffer,
+                                          jxtl_template_t **template )
 {
   return parse_file_or_buffer( mp, parser, buffer, jxtl_parser_parse_buffer,
-			       template );
+                               template );
 }
 
 /***************************************************************************
@@ -408,8 +408,7 @@ static apr_status_t flush_to_file( apr_bucket_brigade *bb, void *ctx )
 static void print_json_value( json_t *json,
                               char *format,
                               apr_pool_t *mp,
-                              jxtl_template_t *template,
-                              apr_bucket_brigade *out )
+                              jxtl_template_t *template )
 {
   char *value = NULL;
   jxtl_format_func format_func = NULL;
@@ -430,8 +429,8 @@ static void print_json_value( json_t *json,
   }
 
   if ( value ) {
-    apr_brigade_printf( out, template->flush_func, template->flush_data, "%s",
-                        value );
+    apr_brigade_printf( template->bb, template->flush_func,
+                        template->flush_data, "%s", value );
   }
 }
 
@@ -439,8 +438,7 @@ static void print_text( char *text,
                         jxtl_content_t *prev_content,
                         jxtl_content_t *next_content,
                         section_print_type print_type,
-                        jxtl_template_t *template,
-                        apr_bucket_brigade *out )
+                        jxtl_template_t *template )
 {
   char *text_ptr = text;
   int len = strlen( text_ptr );
@@ -454,8 +452,8 @@ static void print_text( char *text,
        ( text_ptr[len - 1] == '\n' ) ) {
     len--;
   }
-  apr_brigade_printf( out, template->flush_func, template->flush_data, "%.*s",
-                      len, text_ptr );
+  apr_brigade_printf( template->bb, template->flush_func,
+                      template->flush_data, "%.*s", len, text_ptr );
 }
 
 static void expand_content( apr_pool_t *mp,
@@ -463,8 +461,7 @@ static void expand_content( apr_pool_t *mp,
                             apr_array_header_t *content_array,
                             json_t *json,
                             char *prev_format,
-                            section_print_type print_type,
-                            apr_bucket_brigade *out );
+                            section_print_type print_type );
 
 /**
  * Print a saved section
@@ -475,8 +472,7 @@ static void expand_section( apr_pool_t *mp,
                             apr_array_header_t *separator,
                             json_t *json,
                             char *format,
-                            section_print_type print_type,
-                            apr_bucket_brigade *out )
+                            section_print_type print_type )
 {
   int i;
   int num_items;
@@ -490,11 +486,11 @@ static void expand_section( apr_pool_t *mp,
   for ( i = 0; i < path_obj->nodes->nelts; i++ ) {
     json_value = APR_ARRAY_IDX( path_obj->nodes, i, json_t * );
     expand_content( mp, template, section->content, json_value, format,
-                    PRINT_SECTION, out );
+                    PRINT_SECTION );
     /* Only print the separator if it's not the last one */
     if ( separator && ( i + 1 < num_items ) ) {
       expand_content( mp, template, separator, json_value, format,
-                      PRINT_SEPARATOR, out );
+                      PRINT_SEPARATOR );
     }
   }
 }
@@ -531,8 +527,7 @@ static void expand_content( apr_pool_t *mp,
                             apr_array_header_t *content_array,
                             json_t *json,
                             char *prev_format,
-                            section_print_type print_type,
-                            apr_bucket_brigade *out )
+                            section_print_type print_type )
 {
   int i, j;
   jxtl_content_t *content, *prev_content, *next_content;
@@ -554,14 +549,14 @@ static void expand_content( apr_pool_t *mp,
     switch ( content->type ) {
     case JXTL_TEXT:
       print_text( content->value, prev_content, next_content, print_type,
-                  template, out );
+                  template );
       break;
 
     case JXTL_SECTION:
       tmp_section = (jxtl_section_t *) content->value;
       format = ( content->format ) ? content->format : prev_format;
       expand_section( mp, template, tmp_section, content->separator, json,
-                      format, PRINT_SECTION, out );
+                      format, PRINT_SECTION );
       break;
 
     case JXTL_IF:
@@ -574,7 +569,7 @@ static void expand_content( apr_pool_t *mp,
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
         if ( !jxtl_if->expr || ( is_true_if( mp, jxtl_if, json ) ) ) {
           expand_content( mp, template, jxtl_if->content, json, prev_format,
-                          PRINT_SECTION, out );
+                          PRINT_SECTION );
           break;
         }
       }
@@ -585,10 +580,10 @@ static void expand_content( apr_pool_t *mp,
       if ( jxtl_path_compiled_eval( mp, content->value, json, &path_obj ) ) {
         for ( j = 0; j < path_obj->nodes->nelts; j++ ) {
           json_value = APR_ARRAY_IDX( path_obj->nodes, j, json_t * );
-          print_json_value( json_value, format, mp, template, out );
+          print_json_value( json_value, format, mp, template );
           if ( content->separator && ( j + 1 < path_obj->nodes->nelts ) ) {
             expand_content( mp, template, content->separator, json_value,
-                            format, PRINT_SEPARATOR, out );
+                            format, PRINT_SEPARATOR );
           }
         }
       }
@@ -612,26 +607,23 @@ void jxtl_template_set_format_data( jxtl_template_t *template,
 }
 
 int jxtl_template_expand_to_file( jxtl_template_t *template, json_t *json,
-				  apr_file_t *out )
+                                  apr_file_t *out )
 {
   apr_pool_t *mp;
   apr_bucket_alloc_t *bucket_alloc;
-  apr_bucket_brigade *bucket_brigade;
 
   apr_pool_create( &mp, NULL );
 
   template->flush_func = flush_to_file;
   template->flush_data = out;
-
   bucket_alloc = apr_bucket_alloc_create( mp );
-  bucket_brigade = apr_brigade_create( mp, bucket_alloc );
+  template->bb = apr_brigade_create( mp, bucket_alloc );
 
-  expand_content( mp, template, template->content, json, NULL, PRINT_NORMAL,
-                  bucket_brigade );
+  expand_content( mp, template, template->content, json, NULL, PRINT_NORMAL );
 
-  flush_to_file( bucket_brigade, out );
+  flush_to_file( template->bb, out );
 
-  apr_brigade_destroy( bucket_brigade );
+  apr_brigade_destroy( template->bb );
   apr_bucket_alloc_destroy( bucket_alloc );
 
   apr_pool_destroy( mp );
@@ -639,39 +631,36 @@ int jxtl_template_expand_to_file( jxtl_template_t *template, json_t *json,
   return APR_SUCCESS;
 }
 
-char *jxtl_template_expand_to_buffer( apr_pool_t *mp,
-				      jxtl_template_t *template,
-				      json_t *json )
+char *jxtl_template_expand_to_buffer( apr_pool_t *user_mp,
+                                      jxtl_template_t *template,
+                                      json_t *json )
 {
   apr_bucket_alloc_t *bucket_alloc;
-  apr_bucket_brigade *bucket_brigade;
   char *expanded_template;
   apr_off_t length;
   apr_size_t flatten_len;
-  apr_pool_t *tmp_pool;
+  apr_pool_t *mp;
 
-  apr_pool_create( &tmp_pool, NULL );
+  apr_pool_create( &mp, NULL );
 
   template->flush_func = NULL;
   template->flush_data = NULL;
+  bucket_alloc = apr_bucket_alloc_create( mp );
+  template->bb = apr_brigade_create( mp, bucket_alloc );
 
-  bucket_alloc = apr_bucket_alloc_create( tmp_pool );
-  bucket_brigade = apr_brigade_create( tmp_pool, bucket_alloc );
+  expand_content( mp, template, template->content, json, NULL, PRINT_NORMAL );
 
-  expand_content( tmp_pool, template, template->content, json, NULL,
-                  PRINT_NORMAL, bucket_brigade );
-
-  apr_brigade_length( bucket_brigade, 1, &length );
+  apr_brigade_length( template->bb, 1, &length );
   flatten_len = length;
 
   /* Allocate the string from the user's memory pool */
-  expanded_template = apr_palloc( mp, length + 1 );
-  apr_brigade_flatten( bucket_brigade, expanded_template, &flatten_len );
+  expanded_template = apr_palloc( user_mp, length + 1 );
+  apr_brigade_flatten( template->bb, expanded_template, &flatten_len );
   expanded_template[length] = '\0';
 
-  apr_brigade_destroy( bucket_brigade );
+  apr_brigade_destroy( template->bb );
   apr_bucket_alloc_destroy( bucket_alloc );
-  apr_pool_destroy( tmp_pool );
+  apr_pool_destroy( mp );
 
   return expanded_template;
 }

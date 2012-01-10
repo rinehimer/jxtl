@@ -61,6 +61,7 @@ typedef struct jxtl_section_t {
 
 typedef struct jxtl_template_t {
   apr_array_header_t *content;
+  apr_bucket_brigade *bb;
   apr_status_t ( *flush_func )( apr_bucket_brigade *bb, void *ctx );
   void *flush_data;
   apr_hash_t *formats;
