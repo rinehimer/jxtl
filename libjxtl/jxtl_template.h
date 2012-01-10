@@ -59,10 +59,14 @@ typedef struct jxtl_section_t {
   apr_array_header_t *content;
 } jxtl_section_t;
 
+typedef apr_status_t ( *brigade_flush_func )( apr_bucket_brigade *bb,
+                                              void *ctx );
+
 typedef struct jxtl_template_t {
+  apr_pool_t *expand_mp;
   apr_array_header_t *content;
   apr_bucket_brigade *bb;
-  apr_status_t ( *flush_func )( apr_bucket_brigade *bb, void *ctx );
+  brigade_flush_func flush_func;
   void *flush_data;
   apr_hash_t *formats;
   void *format_data;
@@ -75,14 +79,14 @@ typedef char * ( *jxtl_format_func )( json_t *value, char *format,
  * Parse a file into a jxtl_template.
  */
 int jxtl_parser_parse_file_to_template( apr_pool_t *mp, parser_t *parser,
-					const char *file,
-					jxtl_template_t **template );
+                                        const char *file,
+                                        jxtl_template_t **template );
 /**
  * Parse a buffer into a jxtl_template.
  */
 int jxtl_parser_parse_buffer_to_template( apr_pool_t* mp, parser_t *parser,
-					  const char *buffer,
-					  jxtl_template_t **template );
+                                          const char *buffer,
+                                          jxtl_template_t **template );
 
 /**
  * Register a named format with a callback function.
@@ -98,16 +102,23 @@ void jxtl_template_set_format_data( jxtl_template_t *template,
                                     void *format_data );
 
 /**
- * Expand a template to a named file.
+ * Generic template expansion function.  This function is called by
+ * jxtl_template_expand_to_file and jxtl_template_expand_to_buffer.
+ */
+void expand_template( jxtl_template_t *template, json_t *json,
+                      brigade_flush_func flush_func, void *flush_data );
+
+/**
+ * Expand a template to a file.
  */
 int jxtl_template_expand_to_file( jxtl_template_t *template, json_t *json,
-				  apr_file_t *file );
+                                  apr_file_t *file );
 
 /**
  * Expand a template into a buffer that is allocated from mp.
  */
-char *jxtl_template_expand_to_buffer( apr_pool_t *mp,
-				      jxtl_template_t *template,
-				      json_t *json );
+char *jxtl_template_expand_to_buffer( apr_pool_t *user_mp,
+                                      jxtl_template_t *template,
+                                      json_t *json );
 
 #endif

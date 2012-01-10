@@ -290,6 +290,7 @@ static jxtl_template_t *jxtl_template_create( apr_pool_t *mp,
 {
   jxtl_template_t *template;
   template = apr_palloc( mp, sizeof(jxtl_template_t) );
+  apr_pool_create( &template->expand_mp, NULL );
   template->content = content;
   template->flush_func = NULL;
   template->flush_data = NULL;
@@ -606,28 +607,27 @@ void jxtl_template_set_format_data( jxtl_template_t *template,
   template->format_data = format_data;
 }
 
+void expand_template( jxtl_template_t *template, json_t *json,
+                      brigade_flush_func flush_func, void *flush_data )
+{
+  apr_bucket_alloc_t *bucket_alloc;
+
+  apr_pool_clear( template->expand_mp );
+
+  template->flush_func = flush_func;
+  template->flush_data = flush_data;
+  bucket_alloc = apr_bucket_alloc_create( template->expand_mp );
+  template->bb = apr_brigade_create( template->expand_mp, bucket_alloc );
+
+  expand_content( template->expand_mp, template, template->content, json,
+                  NULL, PRINT_NORMAL );
+}
+
 int jxtl_template_expand_to_file( jxtl_template_t *template, json_t *json,
                                   apr_file_t *out )
 {
-  apr_pool_t *mp;
-  apr_bucket_alloc_t *bucket_alloc;
-
-  apr_pool_create( &mp, NULL );
-
-  template->flush_func = flush_to_file;
-  template->flush_data = out;
-  bucket_alloc = apr_bucket_alloc_create( mp );
-  template->bb = apr_brigade_create( mp, bucket_alloc );
-
-  expand_content( mp, template, template->content, json, NULL, PRINT_NORMAL );
-
+  expand_template( template, json, flush_to_file, out );
   flush_to_file( template->bb, out );
-
-  apr_brigade_destroy( template->bb );
-  apr_bucket_alloc_destroy( bucket_alloc );
-
-  apr_pool_destroy( mp );
-
   return APR_SUCCESS;
 }
 
@@ -635,21 +635,11 @@ char *jxtl_template_expand_to_buffer( apr_pool_t *user_mp,
                                       jxtl_template_t *template,
                                       json_t *json )
 {
-  apr_bucket_alloc_t *bucket_alloc;
   char *expanded_template;
   apr_off_t length;
   apr_size_t flatten_len;
-  apr_pool_t *mp;
 
-  apr_pool_create( &mp, NULL );
-
-  template->flush_func = NULL;
-  template->flush_data = NULL;
-  bucket_alloc = apr_bucket_alloc_create( mp );
-  template->bb = apr_brigade_create( mp, bucket_alloc );
-
-  expand_content( mp, template, template->content, json, NULL, PRINT_NORMAL );
-
+  expand_template( template, json, NULL, NULL );
   apr_brigade_length( template->bb, 1, &length );
   flatten_len = length;
 
@@ -657,10 +647,6 @@ char *jxtl_template_expand_to_buffer( apr_pool_t *user_mp,
   expanded_template = apr_palloc( user_mp, length + 1 );
   apr_brigade_flatten( template->bb, expanded_template, &flatten_len );
   expanded_template[length] = '\0';
-
-  apr_brigade_destroy( template->bb );
-  apr_bucket_alloc_destroy( bucket_alloc );
-  apr_pool_destroy( mp );
 
   return expanded_template;
 }
