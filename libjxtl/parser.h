@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * parser.h
  *
  * Description
  *   A generic parser API that is abstracts some of the details of using flex

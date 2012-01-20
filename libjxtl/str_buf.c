@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * str_buf.c
  *
  * Description
  *   Implementation of a dynamic string buffer.  Unlike almost every other

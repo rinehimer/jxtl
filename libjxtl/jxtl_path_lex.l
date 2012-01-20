@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * jxtl_path_lex.l
  *
  * Description
  *   The lexer for path language used in the templates.

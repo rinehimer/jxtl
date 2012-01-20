@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * jxtl.h
  *
  * Description
  *   API for the parsing and expanding templates.

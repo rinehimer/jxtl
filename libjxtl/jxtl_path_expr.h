@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * jxtl_path_expr.h
  *
  * Description
  *   Contains the implementation of the jxtl path expr object.

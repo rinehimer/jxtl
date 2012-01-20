@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * parser_lex_macros.h
  *
  * Description
  *   Defines some utility macros for accessing pieces of the parser for using

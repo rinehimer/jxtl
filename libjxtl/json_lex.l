@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * json_lex.l
  *
  * Description
  *   The lexer for JSON.

@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * misc.h
  *
  * Description
  *   Any miscellaneous library routines that don't really fit anywhere else.

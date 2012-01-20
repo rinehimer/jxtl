@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * json_writer_ctx.h
  *
  * Description
  *   The API for a JSON writer context.  This is used by the JSON writer to

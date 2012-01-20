@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * parser.c
  *
  * Description
  *   The parser implementation.

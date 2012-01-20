@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * json_writer.c
  *
  * Description
  *   Implementation of the JSON writer.

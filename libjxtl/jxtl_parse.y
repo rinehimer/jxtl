@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * jxtl_parse.y
  *
  * Description
  *   Bison source file for generating the jxtl grammar.

@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * json_writer.h
  *
  * Description
  *   The API for a JSON writer used to construct an in-memory tree.

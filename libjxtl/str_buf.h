@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * str_buf.h
  *
  * Description
  *   API for the dynamic string buffer.

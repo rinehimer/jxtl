@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * json.c
  *
  * Description
  *   Functions for creating and dumping JSON.

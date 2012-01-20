@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * json_writer_ctx.c
  *
  * Description
  *   Implementation of the JSON writer context.

@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * jxtl_template.c
  *
  * Description
  *   API for working with jxtl_templates.

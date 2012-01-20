@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * jxtl_lex.l
  *
  * Description
  *   The lexer for template language.

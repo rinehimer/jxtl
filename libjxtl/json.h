@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * json.h
  *
  * Description
  *   Defines the API for parsing/creating/dumping JSON.

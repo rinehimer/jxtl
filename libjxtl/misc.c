@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * misc.c
  *
  * Description
  *   Contains the misc functions.

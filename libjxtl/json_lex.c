@@ -512,7 +512,7 @@ static yyconst flex_int16_t yy_chk[243] =
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "json_lex.l"
 /*
- * $Id: json_lex.l 174 2010-12-27 14:58:18Z rinehimer $
+ * json_lex.l
  *
  * Description
  *   The lexer for JSON.
@@ -700,7 +700,7 @@ static int input (yyscan_t yyscanner );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO fwrite( yytext, yyleng, 1, yyout )
+#define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -711,7 +711,7 @@ static int input (yyscan_t yyscanner );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		int n; \
+		unsigned n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \

@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * json_parse.y
  *
  * Description
  *   Bison source file for generating the JSON grammar.
