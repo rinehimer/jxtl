@@ -250,7 +250,7 @@ static int load_data( apr_pool_t *mp, const char *json_file,
   }
   else {
     json_parser = json_parser_create( mp );
-    ret = json_parser_parse_file( json_parser, json_file, obj );
+    ret = json_parser_parse_file_to_obj( mp, json_parser, json_file, obj );
   }
 
   return ret;

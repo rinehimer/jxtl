@@ -2,6 +2,7 @@
 #include <apr_general.h>
 #include <apr_hash.h>
 #include <apr_pools.h>
+#include <apr_strings.h>
 #include "json.h"
 #include "jxtl.h"
 #include "jxtl_template.h"

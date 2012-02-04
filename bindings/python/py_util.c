@@ -234,7 +234,8 @@ PyObject *json_to_dict( char *json_file )
 
   apr_pool_create( &tmp_mp, NULL );
   json_parser = json_parser_create( tmp_mp );
-  if ( json_parser_parse_file( json_parser, json_file, &json ) ) {
+  if ( json_parser_parse_file_to_obj( tmp_mp, json_parser, json_file,
+                                      &json ) ) {
     dict = json_to_py_variable( json );
   }
   apr_pool_destroy( tmp_mp );

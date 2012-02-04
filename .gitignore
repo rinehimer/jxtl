@@ -1,7 +1,17 @@
 Makefile
 autom4te.cache/
 bindings/perl/Makefile.PL
+bindings/perl/*.o
+bindings/perl/LibJXTL.bs
+bindings/perl/LibJXTL.pm
+bindings/perl/blib
+bindings/perl/libjxtl_wrap.c
+bindings/perl/pm_to_blib
 bindings/python/setup.py
+bindings/python/_libjxtl.so
+bindings/python/build
+bindings/python/libjxtl.py
+bindings/python/libjxtl_wrap.c
 config.h
 config.log
 config.status

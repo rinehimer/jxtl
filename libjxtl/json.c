@@ -101,6 +101,65 @@ json_t *json_create_null( apr_pool_t *mp )
   return json;
 }
 
+static void initialize_callbacks( apr_pool_t *json_mp, apr_pool_t *tmp_mp,
+                                  json_callback_t *callback_data, 
+                                  json_writer_t *writer )
+{
+  callback_data->object_start_handler = json_writer_start_object;
+  callback_data->object_end_handler = json_writer_end_object;
+  callback_data->array_start_handler = json_writer_start_array;
+  callback_data->array_end_handler = json_writer_end_array;
+  callback_data->property_start_handler = json_writer_start_property;
+  callback_data->property_end_handler = json_writer_end_property;
+  callback_data->string_handler = json_writer_write_string;
+  callback_data->integer_handler = json_writer_write_integer;
+  callback_data->number_handler = json_writer_write_number;
+  callback_data->boolean_handler = json_writer_write_boolean;
+  callback_data->null_handler = json_writer_write_null;
+  callback_data->user_data = writer;
+}
+
+static int parse_file_or_buffer( apr_pool_t *mp, parser_t *parser,
+                                 const char *file_or_buf,
+                                 int ( *parse_func )( parser_t *,
+                                                      const char *,
+                                                      json_callback_t * ),
+                                 json_t **obj )
+{
+  apr_pool_t *tmp_mp;
+  json_writer_t *writer;
+  json_callback_t callback_data;
+  int result = FALSE;
+
+  apr_pool_create( &tmp_mp, NULL );
+  writer = json_writer_create( tmp_mp, mp );
+
+  initialize_callbacks( mp, tmp_mp, &callback_data, writer );
+
+  *obj = NULL;
+  if ( parse_func( parser, file_or_buf, &callback_data ) ) {
+    *obj = writer->json;
+    result = TRUE;
+  }
+
+  apr_pool_destroy( tmp_mp );
+  return result;
+}
+
+int json_parser_parse_file_to_obj( apr_pool_t *mp, parser_t *parser,
+                                   const char *file, json_t **obj )
+{
+  return parse_file_or_buffer( mp, parser, file, json_parser_parse_file,
+                               obj );
+}
+
+int json_parser_parse_buffer_to_obj( apr_pool_t *mp, parser_t *parser,
+                                     const char *buffer, json_t **obj )
+{
+  return parse_file_or_buffer( mp, parser, buffer, json_parser_parse_buffer,
+                               obj );
+}
+
 static void print_spaces( int num )
 {
   while ( num-- > 0 ) {
