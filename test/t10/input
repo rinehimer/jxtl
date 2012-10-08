@@ -1,0 +1,15 @@
+{{! Test to make sure you can use a predicate on the current node and on a
+    parent node. -}}
+{{#section brewery[show] ; separator="\n"}}
+{{ #if .[show]}}
+{{name}}
+{{ #end }}
+{{#end}}
+{{! Now show all the beers of breweries that are shown, we defer the test of the
+    brewery until inside the section.  I don't think you'd want to do it this
+    way, but it should work. -}}
+{{#section brewery/beer ; separator="\n"}}
+{{ #if ..[show]}}
+{{beer_name}}
+{{ #end }}
+{{#end}}

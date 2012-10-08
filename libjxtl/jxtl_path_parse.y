@@ -81,8 +81,8 @@ pattern
 path_pattern
   : T_IDENTIFIER { callbacks->identifier_handler( callbacks->user_data,
                                                   $<string>1 ); } predicate
-  | '.' { callbacks->current_object_handler( callbacks->user_data ); }
-  | T_PARENT { callbacks->parent_object_handler( callbacks->user_data ); }
+  | '.' { callbacks->current_object_handler( callbacks->user_data ); } predicate
+  | T_PARENT { callbacks->parent_object_handler( callbacks->user_data ); } predicate
   | '*' { callbacks->any_object_handler( callbacks->user_data ); } predicate
   | path_pattern '/' path_pattern
 ;
