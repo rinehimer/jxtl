@@ -42,6 +42,12 @@ json_writer_t *json_writer_create( apr_pool_t *mp, apr_pool_t *json_mp )
   return writer;
 }
 
+json_writer_ctx_t *json_writer_get_context( void *writer_ptr )
+{
+  json_writer_t *writer = (json_writer_t *) writer_ptr;
+  return writer->context;
+}
+
 static void json_writer_error( const char *error_string, ... )
 {
   va_list args;
@@ -57,7 +63,7 @@ static void json_add( json_writer_t *writer, json_t *json )
   json_t *obj = NULL;
   json_t *tmp_json;
   json_t *new_array;
-  unsigned char *name;
+  char *name;
 
   if ( writer->json_stack->nelts > 0 ) {
     obj = APR_ARRAY_TAIL( writer->json_stack, json_t * );
@@ -175,7 +181,7 @@ void json_writer_end_array( void *writer_ptr )
  * @param writer The json_writer object.
  * @param name The name of the property to save.
  */
-void json_writer_start_property( void *writer_ptr, unsigned char *name )
+void json_writer_start_property( void *writer_ptr, const char *name )
 {
   json_writer_t *writer = (json_writer_t *) writer_ptr;
   if ( !json_writer_ctx_start_property( writer->context, name ) )
@@ -189,7 +195,7 @@ void json_writer_end_property( void *writer_ptr )
     json_writer_error( "could not end property" );
 }
 
-void json_writer_write_string( void *writer_ptr, unsigned char *value )
+void json_writer_write_strn( void *writer_ptr, const char *value, int len )
 {
   json_writer_t *writer = (json_writer_t *) writer_ptr;
   if ( !json_writer_ctx_can_write_value( writer->context ) ) {
@@ -197,7 +203,12 @@ void json_writer_write_string( void *writer_ptr, unsigned char *value )
     return;
   }
 
-  json_add( writer, json_create_string( writer->json_mp, value ) );
+  json_add( writer, json_create_strn( writer->json_mp, value, len ) );
+}
+
+void json_writer_write_str( void *writer_ptr, const char *value )
+{
+  json_writer_write_strn( writer_ptr, value, strlen( value ) );
 }
 
 void json_writer_write_integer( void *writer_ptr, int value )

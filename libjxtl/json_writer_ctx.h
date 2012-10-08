@@ -67,7 +67,7 @@ int json_writer_ctx_can_start_object_or_array( json_writer_ctx_t *context );
  * @param The writer context.
  * @return The current property.
  */
-unsigned char *json_writer_ctx_get_prop( json_writer_ctx_t *context );
+char *json_writer_ctx_get_prop( json_writer_ctx_t *context );
 
 /**
  * Attempt to start and object.
@@ -103,7 +103,7 @@ int json_writer_ctx_end_array( json_writer_ctx_t *context );
  * @return TRUE if the property was stated, FALSE if it could not be started.
  */
 int json_writer_ctx_start_property( json_writer_ctx_t *context,
-                                    unsigned char *name );
+                                    const char *name );
 
 /**
  * End a property.

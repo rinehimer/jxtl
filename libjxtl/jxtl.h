@@ -30,16 +30,16 @@
  * Structure that holds the callbacks functions for the jxtl parser.
  */
 typedef struct jxtl_callback_t {
-  void ( *text_handler )( void *user_data, unsigned char *text );
-  int ( *section_start_handler )( void *user_data, unsigned char *expr );
+  void ( *text_handler )( void *user_data, char *text );
+  int ( *section_start_handler )( void *user_data, char *expr );
   void ( *section_end_handler )( void *user_data );
-  int ( *if_start_handler )( void *user_data, unsigned char *expr );
-  int ( *elseif_handler )( void *user_data, unsigned char *expr );
+  int ( *if_start_handler )( void *user_data, char *expr );
+  int ( *elseif_handler )( void *user_data, char *expr );
   void ( *else_handler )( void *user_data );
   void ( *if_end_handler )( void *user_data );
   void ( *separator_start_handler )( void *user_data );
   void ( *separator_end_handler )( void *user_data );
-  int ( *value_handler )( void *user_data, unsigned char *expr );
+  int ( *value_handler )( void *user_data, char *expr );
   void ( *format_handler )( void *user_data, char *format );
   char * ( *get_error_func )( void *user_data );
   void *user_data;

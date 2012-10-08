@@ -206,7 +206,7 @@ int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
  * Returns the number of nodes selected or -1 if there was an error parsing
  * the expression.
  */
-int jxtl_path_eval( apr_pool_t *mp, const unsigned char *path, json_t *json,
+int jxtl_path_eval( apr_pool_t *mp, const char *path, json_t *json,
                     jxtl_path_obj_t **obj_ptr )
 {
 

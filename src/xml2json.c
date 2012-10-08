@@ -18,6 +18,10 @@ int main( int argc, char **argv )
   json_t *json;
   int ret;
   apr_pool_t *mp;
+  apr_file_t *file;
+  apr_status_t status;
+  int is_stdin;
+  
 
   apr_app_initialize( NULL, NULL, NULL );
   apr_pool_create( &mp, NULL );
@@ -25,8 +29,17 @@ int main( int argc, char **argv )
   if ( argc < 2 ) {
     xml2json_usage( argv[0] );
   }
-  
-  if ( xml_file_to_json( mp, argv[1], 1, &json ) ) {
+
+  is_stdin = ( argv[1] && strcasecmp( argv[1], "-" ) == 0 );
+
+  if ( is_stdin ) {
+    status = apr_file_open_stdin( &file, mp );
+  }
+  else {
+    status = apr_file_open( &file, argv[1], APR_READ | APR_BUFFERED, 0, mp );
+  }
+
+  if ( status ==  APR_SUCCESS && xml_to_json( mp, file, 1, &json ) ) {
     json_dump( json, 1 );
     ret = 0;
   }
@@ -34,7 +47,7 @@ int main( int argc, char **argv )
     fprintf( stderr, "failed to convert\n" );
     ret = 1;
   }
-  
+
   apr_pool_destroy( mp );
   apr_terminate();
 

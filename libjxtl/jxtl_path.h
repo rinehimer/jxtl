@@ -12,7 +12,7 @@
  * Parser callback prototypes.
  */
 typedef struct jxtl_path_callback_t {
-  void ( *identifier_handler )( void *user_data, unsigned char *ident );
+  void ( *identifier_handler )( void *user_data, char *ident );
   void ( *root_object_handler )( void *user_data );
   void ( *parent_object_handler )( void *user_data );
   void ( *current_object_handler )( void *user_data );
@@ -33,7 +33,7 @@ int jxtl_path_parser_parse_buffer( parser_t *parser,
                                    const char *path,
                                    jxtl_path_callback_t *callbacks );
 
-int jxtl_path_eval( apr_pool_t *mp, const unsigned char *path, json_t *json,
+int jxtl_path_eval( apr_pool_t *mp, const char *path, json_t *json,
                     jxtl_path_obj_t **obj_ptr );
 int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
                              json_t *json, jxtl_path_obj_t **obj_ptr );

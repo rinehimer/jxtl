@@ -22,6 +22,7 @@ static void perl_variable_to_json_internal( SV *input, json_writer_t *writer )
 {
   char *val;
   int ival;
+  STRLEN len;
   double number;
   int type = -1;
   
@@ -44,8 +45,8 @@ static void perl_variable_to_json_internal( SV *input, json_writer_t *writer )
     break;
 
   case SVt_PV:
-    val = SvPV_nolen( input );
-    json_writer_write_string( writer, (unsigned char *) val );
+    val = SvPV( input, len );
+    json_writer_write_strn( writer, val, len );
     break;
 
   case SVt_PVNV:
@@ -84,7 +85,7 @@ static void perl_hash_to_json( SV *input, json_writer_t *writer )
     cnt = hv_iterinit( h );
     while ( cnt-- ) {
       item = hv_iternextsv( h, &prop, &retlen );
-      json_writer_start_property( writer, (unsigned char *) prop );
+      json_writer_start_property( writer, prop );
       perl_variable_to_json_internal( item, writer );
       json_writer_end_property( writer );
     }
@@ -155,7 +156,7 @@ SV *json_to_perl_variable( json_t *json )
 
   switch ( json->type ) {
   case JSON_STRING:
-    return newSVpv( (char *) json->value.string, 0 );
+    return newSVpv( json->value.string, 0 );
     break;
 
   case JSON_INTEGER:
@@ -171,8 +172,8 @@ SV *json_to_perl_variable( json_t *json )
     for ( idx = apr_hash_first( NULL, json->value.object ); idx;
           idx = apr_hash_next( idx ) ) {
       apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
-      (void) hv_store( hash, (char *) JSON_NAME( tmp_json ),
-                       strlen( (char * ) JSON_NAME( tmp_json ) ),
+      (void) hv_store( hash, JSON_NAME( tmp_json ),
+                       strlen( JSON_NAME( tmp_json ) ),
                        json_to_perl_variable( tmp_json ), 0 );
     }
     return newRV_noinc( (SV*) hash);
@@ -205,11 +206,13 @@ SV *json_to_perl_variable( json_t *json )
 SV *xml_to_hash( const char *xml_file )
 {
   apr_pool_t *tmp_mp;
+  apr_file_t *file;
   json_t *json;
   SV *hash = &PL_sv_undef;
 
   apr_pool_create( &tmp_mp, NULL );
-  xml_file_to_json( tmp_mp, xml_file, 1, &json );
+  apr_file_open( &file, xml_file, APR_READ | APR_BUFFERED, 0, tmp_mp );
+  xml_to_json( tmp_mp, file, 1, &json );
   if ( json ) {
     hash = json_to_perl_variable( json );
   }

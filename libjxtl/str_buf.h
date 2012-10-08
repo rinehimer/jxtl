@@ -32,7 +32,7 @@ typedef struct str_buf_t {
   /** Amount allocated. */
   int data_size;
   /** The actual buffer. */
-  unsigned char *data;
+  char *data;
 }str_buf_t;
 
 /**

@@ -76,7 +76,7 @@ typedef union YYSTYPE
 #line 61 "jxtl_parse.y"
 
   int ival;
-  unsigned char *string;
+  char *string;
 
 
 

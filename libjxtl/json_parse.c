@@ -155,7 +155,7 @@ typedef union YYSTYPE
 #line 60 "json_parse.y"
 
   int integer;
-  unsigned char *string;
+  char *string;
   double number;
 
 

@@ -242,11 +242,21 @@ void jxtl_init( int argc, char const * const *argv, apr_pool_t *mp,
 static int load_data( apr_pool_t *mp, const char *json_file,
                       const char *xml_file, int skip_root, json_t **obj )
 {
-  int ret;
+  int ret = FALSE;
   parser_t *json_parser;
+  apr_status_t status;
+  apr_file_t *file;
 
   if ( xml_file ) {
-    ret = xml_file_to_json( mp, xml_file, skip_root, obj );
+    if ( apr_strnatcasecmp( xml_file, "-" ) == 0 ) {
+      status = apr_file_open_stdin( &file, mp );
+    }
+    else {
+      status = apr_file_open( &file, xml_file, APR_READ | APR_BUFFERED, 0, mp );
+    }
+    if ( status == APR_SUCCESS ) {
+      ret = xml_to_json( mp, file, skip_root, obj );
+    }
   }
   else {
     json_parser = json_parser_create( mp );
@@ -285,7 +295,6 @@ int main( int argc, char const * const *argv )
   jxtl_template_t *template;
   format_data_t *format_data;
   apr_file_t *out;
-  int is_stdout;
 
   apr_app_initialize( NULL, NULL, NULL );
   apr_pool_create( &mp, NULL );
@@ -310,7 +319,6 @@ int main( int argc, char const * const *argv )
     jxtl_template_expand_to_file( template, json, out );
   }
 
-  apr_file_close( out );
   apr_pool_destroy( mp );
   apr_terminate();
 

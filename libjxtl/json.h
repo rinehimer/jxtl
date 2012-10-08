@@ -43,11 +43,11 @@ typedef enum json_type {
 } json_type;
 
 typedef struct json_t {
-  unsigned char *name;
+  char *name;
   json_type type;
   struct json_t *parent;
   union {
-    unsigned char *string;
+    char *string;
     int integer;
     double number;
     apr_hash_t *object;
@@ -70,7 +70,8 @@ typedef struct json_t {
 #define JSON_IS_TRUE_BOOLEAN( json )\
  ( JSON_IS_BOOLEAN( json ) && (json)->value.boolean == TRUE )
 
-json_t *json_create_string( apr_pool_t *mp, unsigned char *string );
+json_t *json_create_str( apr_pool_t *mp, const char *string );
+json_t *json_create_strn( apr_pool_t *mp, const char *string, int len );
 json_t *json_create_integer( apr_pool_t *mp, int integer );
 json_t *json_create_number( apr_pool_t *mp, double number );
 json_t *json_create_object( apr_pool_t *mp );
@@ -92,9 +93,9 @@ typedef struct json_callback_t {
   void ( *object_end_handler )( void *user_data );
   void ( *array_start_handler )( void *user_data );
   void ( *array_end_handler )( void *user_data );
-  void ( *property_start_handler )( void *user_data, unsigned char *name );
+  void ( *property_start_handler )( void *user_data, const char *name );
   void ( *property_end_handler )( void *user_data );
-  void ( *string_handler )( void *user_data, unsigned char *value );
+  void ( *string_handler )( void *user_data, const char *value );
   void ( *integer_handler )( void *user_data, int value );
   void ( *number_handler )( void *user_data, double value );
   void ( *boolean_handler )( void *user_data, int value );

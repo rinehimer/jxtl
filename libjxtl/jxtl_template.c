@@ -83,10 +83,10 @@ static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
  * @param user_data The jxtl_data.
  * @param text The text.
  */
-static void jxtl_text_func( void *user_data, unsigned char *text )
+static void jxtl_text_func( void *user_data, char *text )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_content_push( data, JXTL_TEXT, apr_pstrdup( data->mp, (char *) text ) );
+  jxtl_content_push( data, JXTL_TEXT, apr_pstrdup( data->mp, text ) );
 }
 
 /**
@@ -97,7 +97,7 @@ static void jxtl_text_func( void *user_data, unsigned char *text )
  * @param user_data The jxtl_data
  * @param expr An expression to evaluate for the section
  */
-static int jxtl_section_start( void *user_data, unsigned char *expr )
+static int jxtl_section_start( void *user_data, char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_section_t *section;
@@ -136,7 +136,7 @@ static void jxtl_section_end( void *user_data )
  * @param user_data The jxtl_data
  * @param expr An expression to evaluate for the if
  */
-static int jxtl_if_start( void *user_data, unsigned char *expr )
+static int jxtl_if_start( void *user_data, char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_if_t *jxtl_if;
@@ -168,7 +168,7 @@ static int jxtl_if_start( void *user_data, unsigned char *expr )
  * @param user_data The jxtl_data
  * @param expr An expression to evaluate for the elseif
  */
-static int jxtl_elseif( void *user_data, unsigned char *expr )
+static int jxtl_elseif( void *user_data, char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   apr_array_header_t *content_array, *if_block;
@@ -258,7 +258,7 @@ static void jxtl_separator_end( void *user_data )
  * @param user_data The jxtl_data.
  * @param name The name of the value to lookup.
  */
-static int jxtl_value_func( void *user_data, unsigned char *expr )
+static int jxtl_value_func( void *user_data, char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_path_expr_t *path_expr;

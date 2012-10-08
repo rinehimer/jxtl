@@ -38,13 +38,18 @@
   json->name = NULL;                                               \
   json->parent = NULL
 
-json_t *json_create_string( apr_pool_t *mp, unsigned char *string )
+json_t *json_create_strn( apr_pool_t *mp, const char *str, int len )
 {
   json_t *json;
   JSON_CREATE( mp, json );
-  json->value.string = (unsigned char *) apr_pstrdup( mp, (char *) string );
+  json->value.string = apr_pstrndup( mp, str, len );
   json->type = JSON_STRING;
   return json;
+}
+
+json_t *json_create_str( apr_pool_t *mp, const char *str )
+{
+  return json_create_strn( mp, str, strlen( str ) );
 }
 
 json_t *json_create_integer( apr_pool_t *mp, int integer )
@@ -111,7 +116,7 @@ static void initialize_callbacks( apr_pool_t *json_mp, apr_pool_t *tmp_mp,
   callback_data->array_end_handler = json_writer_end_array;
   callback_data->property_start_handler = json_writer_start_property;
   callback_data->property_end_handler = json_writer_end_property;
-  callback_data->string_handler = json_writer_write_string;
+  callback_data->string_handler = json_writer_write_str;
   callback_data->integer_handler = json_writer_write_integer;
   callback_data->number_handler = json_writer_write_number;
   callback_data->boolean_handler = json_writer_write_boolean;
@@ -167,7 +172,7 @@ static void print_spaces( int num )
   }
 }
 
-static void print_string( unsigned char *str )
+static void print_string( char *str )
 {
   unsigned char *c = str;
 
@@ -302,7 +307,7 @@ void json_dump( json_t *json, int indent )
   dump_internal( json, 1, 0, indent );
 }
 
-static void print_xml_string( unsigned char *str )
+static void print_xml_string( char *str )
 {
   unsigned char *c = str;
 
@@ -324,7 +329,7 @@ static void json_to_xml_internal( json_t *json, int indent )
 {
   json_t *tmp_json;
   apr_array_header_t *arr;
-  unsigned char *json_name = JSON_NAME( json );
+  char *json_name = JSON_NAME( json );
   apr_hash_index_t *idx;
   int i;
 

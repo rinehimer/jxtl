@@ -45,7 +45,7 @@ typedef struct path_data_t {
  */
 static void create_expr( path_data_t *data,
                          jxtl_path_expr_type type,
-                         unsigned char *identifier )
+                         char *identifier )
 {
   jxtl_path_expr_t *expr;
 
@@ -77,11 +77,10 @@ static void create_expr( path_data_t *data,
 /**
  * Request to lookup an identifier.
  */
-static void lookup_identifier( void *user_data, unsigned char *ident )
+static void lookup_identifier( void *user_data, char *ident )
 {
   path_data_t *data = (path_data_t *) user_data;
-  create_expr( data, JXTL_PATH_LOOKUP,
-               (unsigned char *) apr_pstrdup( data->mp, (char *) ident ) );
+  create_expr( data, JXTL_PATH_LOOKUP, apr_pstrdup( data->mp, ident ) );
 }
 
 /**
@@ -180,7 +179,7 @@ static void initialize_callbacks( apr_pool_t *mp,
 
 int jxtl_path_parser_parse_buffer_to_expr( apr_pool_t *mp,
 					   parser_t *parser,
-                                           const unsigned char *buf,
+                                           const char *buf,
                                            jxtl_path_expr_t **expr )
 {
   int result = FALSE;

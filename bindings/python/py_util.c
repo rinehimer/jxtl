@@ -35,8 +35,7 @@ static void py_variable_to_json_internal( PyObject *obj,
                                           json_writer_t *writer )
 {
   if ( PyString_CheckExact( obj ) ) {
-    json_writer_write_string( writer,
-                              (unsigned char *) PyString_AS_STRING( obj ) );
+    json_writer_write_str( writer, PyString_AS_STRING( obj ) );
   }
   else if ( PyInt_CheckExact( obj ) ) {
     json_writer_write_integer( writer, PyInt_AS_LONG( obj ) );
@@ -74,8 +73,7 @@ static void py_dict_to_json( PyObject *obj, json_writer_t *writer )
   json_writer_start_object( writer );
 
   while ( PyDict_Next( obj, &pos, &key, &value ) ) {
-    json_writer_start_property( writer,
-                                (unsigned char *) PyString_AsString( key ) );
+    json_writer_start_property( writer, PyString_AsString( key ) );
     py_variable_to_json_internal( value, writer );
     json_writer_end_property( writer );
   }
@@ -207,11 +205,13 @@ PyObject *json_to_py_variable( json_t *json )
 PyObject *xml_to_dict( const char *xml_file )
 {
   apr_pool_t *tmp_mp;
+  apr_file_t *file;
   json_t *json;
   PyObject *dict = NULL;
 
   apr_pool_create( &tmp_mp, NULL );
-  xml_file_to_json( tmp_mp, xml_file, 1, &json );
+  apr_file_open( &file, xml_file, APR_READ | APR_BUFFERED, 0, tmp_mp );
+  xml_to_json( tmp_mp, file, 1, &json );
   if ( json ) {
     dict = json_to_py_variable( json );
   }

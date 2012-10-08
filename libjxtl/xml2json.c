@@ -3,204 +3,174 @@
 #include <apr_pools.h>
 #include <apr_strings.h>
 #include <apr_xml.h>
+#include <expat.h>
 
 #include "json.h"
 #include "json_writer.h"
 #include "xml2json.h"
+#include "str_buf.h"
 
-static int text_is_whitespace( apr_text *t )
+static int str_is_whitespace( const char *str, int len )
 {
-  const char *c;
-
-  for ( ; t; t = t->next ) {
-    for ( c = t->text; *c; c++ ) {
-      if ( !apr_isspace( *c ) ) {
-        return FALSE;
-      }
-    }
-  }
-
-  return TRUE;
-}
-
-/**
- * Determine if an elem contains only whitespace text nodes.
- */
-static int xml_elem_is_whitespace( apr_xml_elem *elem )
-{
-  apr_text *t;
-  apr_xml_elem *child;
-
-  t = elem->first_cdata.first;
-
-  if ( !text_is_whitespace( t ) ) {
-    return FALSE;
-  }
-
-  for ( child = elem->first_child; child; child = child->next ) {
-    t = child->following_cdata.first;
-    if ( !text_is_whitespace( t ) ) {
+  const char *c = str;
+  
+  while ( len-- > 0 ) {
+    if ( !apr_isspace( *c ) ) {
       return FALSE;
     }
+    c++;
   }
 
   return TRUE;
-}
-
-/**
- * Determine a JSON type for given XML elem.
- */
-static json_type xml_elem_type( apr_xml_elem *elem )
-{
-  /* Empty element is null */
-  if ( APR_XML_ELEM_IS_EMPTY( elem ) && !elem->attr ) {
-    return JSON_NULL;
-  }
-
-  /* Not empty and has attrs, it must be an object. */
-  if ( elem->attr ) {
-    return JSON_OBJECT;
-  }
-
-  /* Not empty, does not have attrs, and does not have a first child.  This
-   * must be a text elem.
-   */
-  if ( !elem->first_child ) {
-    return JSON_STRING;
-  }
-
-  /* Not empty, does not have attrs, and has a first child.  If it has text,
-   * verify that it is all white space.  If it's not, that means it has mixed
-   * content and all the content of this elem will be treated as a
-   * string.
-   */
-  if ( elem->first_cdata.first ) {
-    if ( !xml_elem_is_whitespace( elem ) ) {
-      return JSON_STRING;
-    }
-    else {
-      return JSON_OBJECT;
-    }
-  }
-
-  /* Not empty, does not have attrs, has a first child, and has no text. */
-  return JSON_OBJECT;
 }
 
 /**
  * When we have a string to write, check to see if it is a valid boolean value
  * in JSON.  It's possible we may do number checking here in the future.
  */
-static void write_xml_string( json_writer_t *writer, const char *str  )
+static void write_xml_strn( json_writer_t *writer, const char *str, int len )
 {
   if ( *str != 't' && *str != 'f' ) {
     /* Handle the majority of the cases and avoid unnecessary function call to
        compare the strings. */
-    json_writer_write_string( writer, (unsigned char *) str );
+    json_writer_write_strn( writer, str, len );
   }
-  else if ( apr_strnatcmp( str, "true" ) == 0 ) {
+  else if ( strncasecmp( str, "true", len ) == 0 ) {
     json_writer_write_boolean( writer, TRUE );
   }
-  else if ( apr_strnatcmp( str, "false" ) == 0 ) {
+  else if ( strncasecmp( str, "false", len ) == 0 ) {
     json_writer_write_boolean( writer, FALSE );
   }
   else {
-    json_writer_write_string( writer, (unsigned char *) str );
+    json_writer_write_strn( writer, str, len );
   }
 }
 
-static void write_attrs( apr_xml_attr *attr, json_writer_t *writer )
+static void write_xml_str( json_writer_t *writer, const char *src  )
 {
-  while ( attr ) {
-    json_writer_start_property( writer, (unsigned char *) attr->name );
-    write_xml_string( writer, attr->value );
-    json_writer_end_property( writer );
-    attr = attr->next;
+  write_xml_strn( writer, src, strlen( src ) );
+}
+
+
+typedef struct xml_converter_t {
+  json_writer_t *writer;
+  int skip_root;
+  str_buf_t *str_buf;
+  int first_elem;
+  int status;
+}xml_converter_t;
+
+static void start_handler( void *converter_ptr, const char *name,
+                           const char **atts )
+{
+  xml_converter_t *converter = converter_ptr;
+  json_writer_t *writer = converter->writer;
+  str_buf_t *str_buf = converter->str_buf;
+  json_writer_ctx_t *context = json_writer_get_context( writer );
+  json_writer_ctx_state state = json_writer_ctx_get_state( context );
+
+  if ( str_buf->data_len > 0 &&
+       !str_is_whitespace( str_buf->data, str_buf->data_len ) ) {
+    converter->status = FALSE;
+    fprintf( stderr, "Error: mixed content found in %s\ncontent:\n%.*s",
+             json_writer_ctx_get_prop( context ), str_buf->data_len,
+             str_buf->data );
+  }
+
+  STR_BUF_CLEAR( str_buf );
+
+  if ( !converter->first_elem || !converter->skip_root ) {
+    if ( state == JSON_INITIAL || state == JSON_PROPERTY ) {
+      json_writer_start_object( writer );
+    }
+    json_writer_start_property( writer, name );
+  }
+
+  converter->first_elem = FALSE;
+
+  if ( *atts ) {
+    json_writer_start_object( writer );
+    while ( *atts ) {
+      json_writer_start_property( writer, *atts++ );
+      write_xml_str( writer, *atts++ );
+      json_writer_end_property( writer );
+    }
   }
 }
 
-static void xml_elem_to_json( apr_pool_t *mp, apr_xml_elem *root,
-                              json_writer_t *writer )
+static void end_handler( void *converter_ptr, const char *name )
 {
-  apr_xml_elem *elem;
-  json_type type;
-  const char *elem_buf;
-  apr_size_t buf_size;
+  xml_converter_t *converter = converter_ptr;
+  json_writer_t *writer = converter->writer;
+  str_buf_t *str_buf = converter->str_buf;
+  json_writer_ctx_t *context = json_writer_get_context( writer );
+  json_writer_ctx_state state = json_writer_ctx_get_state( context );
 
-  if ( !root )
-    return;
-
-  for ( elem = root; elem; elem = elem->next ) {
-    type = xml_elem_type( elem );
-    json_writer_start_property( writer, (unsigned char *) elem->name );
-
-    if ( type == JSON_NULL ) {
+  if ( state == JSON_PROPERTY ) {
+    if ( str_buf->data_len > 0 ) {
+      write_xml_strn( writer, str_buf->data, str_buf->data_len );
+    }
+    else {
       json_writer_write_null( writer );
     }
-    else if ( type == JSON_STRING ) {
-      apr_xml_to_text( mp, elem, APR_XML_X2T_INNER, NULL, NULL, &elem_buf,
-                       &buf_size );
-      write_xml_string( writer, elem_buf );
-    }
-    else if ( type == JSON_OBJECT ) {
-      json_writer_start_object( writer );
-      write_attrs( elem->attr, writer );
-      xml_elem_to_json( mp, elem->first_child, writer );
-      json_writer_end_object( writer );
-    }
+    STR_BUF_CLEAR( str_buf );
+  }
+  else if ( state == JSON_IN_OBJECT ) {
+    json_writer_end_object( writer );
+  }
+  else if ( state == JSON_IN_ARRAY ) {
+    json_writer_end_array( writer );
+  }
+
+  if ( state != JSON_INITIAL ) {
     json_writer_end_property( writer );
   }
 }
 
-int xml_file_to_json( apr_pool_t *mp, const char *filename, int skip_root,
-                      json_t **json )
+static void cdata_handler( void *converter_ptr, const char *data, int len )
 {
-  apr_pool_t *tmp_mp;
-  apr_xml_parser *parser;
-  apr_xml_doc *doc;
-  apr_xml_elem *elem;
+  xml_converter_t *converter = converter_ptr;
+
+  str_buf_write( converter->str_buf, data, len );
+}
+
+int xml_to_json( apr_pool_t *mp, apr_file_t *xml_file, int skip_root,
+                 json_t **json )
+{
+  xml_converter_t converter;
   json_writer_t *writer;
-  apr_file_t *file;
-  apr_status_t status;
-  int is_stdin;
+  XML_Parser xp;
+  apr_pool_t *tmp_mp;
+  apr_status_t read_val;
+  int xml_stat;
+  char buffer[4096];
+  apr_size_t len;
+  int status;
 
-  *json = NULL;
-  is_stdin = ( filename && apr_strnatcasecmp( filename, "-" ) == 0 );
   apr_pool_create( &tmp_mp, NULL );
+  writer = json_writer_create( tmp_mp, mp );
+  converter.writer = writer;
+  converter.skip_root = skip_root;
+  converter.str_buf = str_buf_create( tmp_mp, 4096 );
+  converter.first_elem = TRUE;
+  converter.status = TRUE;
 
-  if ( is_stdin ) {
-    status = apr_file_open_stdin( &file, tmp_mp );
-  }
-  else {
-    status = apr_file_open( &file, filename, APR_READ | APR_BUFFERED, 0,
-                            tmp_mp );
-  }
+  xp = XML_ParserCreate( NULL );
+  XML_SetUserData( xp, &converter );
+  XML_SetElementHandler( xp, start_handler, end_handler );
+  XML_SetCharacterDataHandler( xp, cdata_handler );
 
-  if ( status == APR_SUCCESS ) {
-    status = apr_xml_parse_file( tmp_mp, &parser, &doc, file, 4096 );
-  }
+  do {
+    len = sizeof(buffer);
+    read_val = apr_file_read( xml_file, buffer, &len );
+    xml_stat = XML_Parse( xp, buffer, len, 0 );
+  }while ( ( read_val == APR_SUCCESS ) && ( xml_stat == XML_STATUS_OK ) );
 
-  if ( status == APR_SUCCESS ) {
-    elem = doc->root;
-    writer = json_writer_create( tmp_mp, mp );
-    json_writer_start_object( writer );
-
-    if ( skip_root ) {
-      /* Even if skipping root, we want attributes of the root elem. */
-      write_attrs( elem->attr, writer );
-      elem = elem->first_child;
-    }
-
-    xml_elem_to_json( tmp_mp, elem, writer );
-    json_writer_end_object( writer );
-    *json = writer->json;
-  }
-
-  if ( status == APR_SUCCESS && !is_stdin ) {
-    apr_file_close( file );
-  }
-
+  *json = writer->json;
   apr_pool_destroy( tmp_mp );
+  XML_ParserFree( xp );
 
-  return status == APR_SUCCESS;
+  status = ( ( xml_stat == XML_STATUS_OK ) && ( converter.status == TRUE ) );
+
+  return status;
 }

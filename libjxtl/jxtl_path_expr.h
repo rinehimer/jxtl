@@ -38,7 +38,7 @@ typedef struct jxtl_path_expr_t {
   /** What type of expression this is. */
   jxtl_path_expr_type type;
   /** A name to lookup. */
-  unsigned char *identifier;
+  char *identifier;
   /** The beginning of this expression. */
   struct jxtl_path_expr_t *root;
   /** Next expression. */
@@ -50,7 +50,7 @@ typedef struct jxtl_path_expr_t {
 } jxtl_path_expr_t;
 
 int jxtl_path_parser_parse_buffer_to_expr( apr_pool_t *mp, parser_t *parser,
-                                           const unsigned char *buf,
+                                           const char *buf,
                                            jxtl_path_expr_t **expr );
 
 #endif

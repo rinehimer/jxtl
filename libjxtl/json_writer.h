@@ -68,6 +68,12 @@ typedef struct json_writer_t {
 json_writer_t *json_writer_create( apr_pool_t *mp, apr_pool_t *json_mp );
 
 /**
+ * @param writer_ptr The JSON writer.
+ * @return The context used by this JSON writer.
+ */
+json_writer_ctx_t *json_writer_get_context( void *writer_ptr );
+
+/**
  * Start an object.
  * @param writer_ptr The JSON writer.
  */
@@ -96,7 +102,7 @@ void json_writer_end_array( void *writer_ptr );
  * @param writer_ptr The JSON writer.
  * @param name The name of the property to start.
  */
-void json_writer_start_property( void *writer_ptr, unsigned char *name );
+void json_writer_start_property( void *writer_ptr, const char *name );
 
 /**
  * End a property.
@@ -109,7 +115,15 @@ void json_writer_end_property( void *writer_ptr );
  * @param writer_ptr The JSON writer.
  * @param value The string to write.
  */
-void json_writer_write_string( void *writer_ptr, unsigned char *value );
+void json_writer_write_str( void *writer_ptr, const char *value );
+
+/**
+ * Write a string of a specific length.
+ * @param writer_ptr The JSON writer.
+ * @param value The string to write.
+ * @param len The length of the string.
+ */
+void json_writer_write_strn( void *writer_ptr, const char *value, int len );
 
 /**
  * Write an integer.

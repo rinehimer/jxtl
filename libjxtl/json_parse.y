@@ -59,7 +59,7 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 
 %union {
   int integer;
-  unsigned char *string;
+  char *string;
   double number;
 }
 
