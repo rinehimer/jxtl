@@ -422,8 +422,8 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     6,     2,     2,     2,     2,     2,     2,
-       2,     2,     8,     2,     2,     2,     7,     5,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     8,     2,     2,     2,     7,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     5,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -478,7 +478,7 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "\"identifier\"", "\"..\"", "'/'", "'!'",
+  "$end", "error", "$undefined", "\"identifier\"", "\"..\"", "':'", "'!'",
   "'.'", "'*'", "'['", "']'", "$accept", "path_expr", "pattern", "$@1",
   "path_pattern", "$@2", "$@3", "$@4", "$@5", "predicate", "$@6", 0
 };
@@ -489,7 +489,7 @@ static const char *const yytname[] =
    token YYLEX-NUM.  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,   259,    47,    33,    46,    42,    91,
+       0,   256,   257,   258,   259,    58,    33,    46,    42,    91,
       93
 };
 # endif

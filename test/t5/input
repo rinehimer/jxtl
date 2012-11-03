@@ -1,5 +1,5 @@
 {{! An if test. -}}
-{{#if brewery/beer/season}}
+{{ if brewery:beer:season }}
 There are seasonal beers, they are:
-{{ brewery/beer[season]/beer_name ; separator=", "}}
-{{#end}}
+{{ brewery:beer[season]:beer_name ; separator=", " /}}
+{{ /if }}

@@ -1,10 +1,10 @@
 {{! Print each brewery and break down it's beers by season.  Demonstrates
     predicates and that lists of nodes can be properly expanded without a
     section. -}}
-{{#section brewery ; separator="\n\n"}}
-{{name}} Brewery:
-  Year Round Beers:  {{beer[!season]/beer_name ; separator=", "}}
-{{ #if beer[season]}}
-  Seasonal Beers:  {{#section beer[season] ; separator=", "}}{{beer_name}} ({{season}}){{#end}}
-{{ #end}}
-{{#end}}
+{{ foreach brewery ; separator="\n\n" }}
+{{ name /}} Brewery:
+  Year Round Beers:  {{ beer[!season]:beer_name ; separator=", " /}}
+{{   if beer[season] }}
+  Seasonal Beers:  {{ foreach beer[season] ; separator=", " }}{{ beer_name /}} ({{ season /}}){{ /foreach }}
+{{   /if }}
+{{ /foreach }}

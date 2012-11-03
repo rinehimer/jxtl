@@ -1,4 +1,4 @@
 {{! Simple test that will print out the brewery names with no spacing. -}}
-{{#section brewery}}
-{{name}} Brewery
-{{#end}}
+{{ foreach brewery }}
+{{ name /}} Brewery
+{{ /foreach }}

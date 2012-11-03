@@ -4,7 +4,7 @@
  * Description
  *   Bison source file for generating the jxtl grammar.
  *
- * Copyright 2010 Dan Rinehimer
+ * Copyright 2010-2012 Dan Rinehimer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,8 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 }
 
 %token T_DIRECTIVE_START "{{" T_DIRECTIVE_END "}}"
-       T_SECTION "section" T_SEPARATOR "separator" T_FORMAT "format"
-       T_END "end" T_IF "if" T_ELSEIF "elseif" T_ELSE "else"
+       T_FOREACH "foreach" T_SEPARATOR "separator" T_FORMAT "format"
+       T_IF "if" T_ELSEIF "elseif" T_ELSE "else"
 %token <string> T_TEXT "text"  T_PATH_EXPR "path expression" T_STRING "string"
 
 %left T_ELSEIF T_ELSE
@@ -98,11 +98,11 @@ value_directive
                     callbacks->get_error_func( callbacks->user_data ) );
       }
     }
-    options T_DIRECTIVE_END
+    options '/' T_DIRECTIVE_END
 ;
 
 section_directive
-  : T_DIRECTIVE_START T_SECTION T_PATH_EXPR
+  : T_DIRECTIVE_START T_FOREACH T_PATH_EXPR
     {
       if ( callbacks->section_start_handler &&
           !callbacks->section_start_handler( callbacks->user_data,
@@ -112,7 +112,7 @@ section_directive
       }
     }
     options T_DIRECTIVE_END section_content
-    T_DIRECTIVE_START T_END T_DIRECTIVE_END
+    T_DIRECTIVE_START '/' T_FOREACH T_DIRECTIVE_END
     { 
       if ( callbacks->section_end_handler ) {
         callbacks->section_end_handler( callbacks->user_data );
@@ -155,7 +155,7 @@ rest_of_if
   ;
 
 endif
-  : T_DIRECTIVE_START T_END T_DIRECTIVE_END
+  : T_DIRECTIVE_START '/' T_IF T_DIRECTIVE_END
     {
       if ( callbacks->if_end_handler ) {
         callbacks->if_end_handler( callbacks->user_data );

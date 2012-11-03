@@ -1,4 +1,4 @@
 {{! Test the '*' (any node). -}}
-{{#section brewery/beer/* ; separator="\n"}}
-{{.}}
-{{#end}}
+{{ foreach brewery:beer:* ; separator="\n"}}
+{{ . /}}
+{{ /foreach }}

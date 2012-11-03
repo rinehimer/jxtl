@@ -63,7 +63,7 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 
 %token T_IDENTIFIER "identifier" T_PARENT ".."
 
-%left '/'
+%left ':'
 %nonassoc '!'
 
 %%
@@ -74,7 +74,7 @@ path_expr
 ;
 
 pattern
-  : '/' { callbacks->root_object_handler( callbacks->user_data ); } path_pattern
+  : ':' { callbacks->root_object_handler( callbacks->user_data ); } path_pattern
   | path_pattern
 ;
 
@@ -84,7 +84,7 @@ path_pattern
   | '.' { callbacks->current_object_handler( callbacks->user_data ); } predicate
   | T_PARENT { callbacks->parent_object_handler( callbacks->user_data ); } predicate
   | '*' { callbacks->any_object_handler( callbacks->user_data ); } predicate
-  | path_pattern '/' path_pattern
+  | path_pattern ':' path_pattern
 ;
 
 predicate

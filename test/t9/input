@@ -1,16 +1,16 @@
 {{! Extensive if testing to make sure it works correctly.  This interesting
     test in here is that Magic Hat has two false nodes for show, but that
     should actually evaluate to true.  -}}
-{{#section brewery ; separator="\n"}}
-{{ #if show}}
-Show {{name}}
-{{ #elseif !show}}
-Don't Show {{name}}
-{{ #end}}
-{{#end}}
-{{#section brewery[show] ; separator="\n"}}
-Show {{name}}
-{{#end}}
-{{#section brewery[!show] ; separator="\n"}}
-Don't Show {{name}}
-{{#end}}
+{{ foreach brewery ; separator="\n" }}
+{{ if show }}
+Show {{ name /}}
+{{ elseif !show }}
+Don't Show {{name /}}
+{{ /if }}
+{{ /foreach }}
+{{ foreach brewery[show] ; separator="\n" }}
+Show {{name /}}
+{{ /foreach }}
+{{ foreach brewery[!show] ; separator="\n" }}
+Don't Show {{ name /}}
+{{ /foreach }}

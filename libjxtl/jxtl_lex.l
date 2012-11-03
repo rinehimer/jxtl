@@ -4,7 +4,7 @@
  * Description
  *   The lexer for template language.
  *
- * Copyright 2010 Dan Rinehimer
+ * Copyright 2010-2012 Dan Rinehimer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,16 +85,16 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 }
 
 <directive>{
-  "#section" { return T_SECTION; }
-  "#end" { return T_END; }
-  "#if" { return T_IF; }
-  "#else" { return T_ELSE; }
-  "#elseif" { return T_ELSEIF; }
-  [a-zA-Z0-9_/.*\[\]!]+ {
+  "foreach" { return T_FOREACH; }
+  "if" { return T_IF; }
+  "else" { return T_ELSE; }
+  "elseif" { return T_ELSEIF; }
+  [a-zA-Z0-9_:.*\[\]!]+ {
     yylval->string = apr_pstrndup( PARSER_MP, yytext, yyleng );
     return T_PATH_EXPR;
   }
   ";" { BEGIN( options ); }
+  "/" { return '/'; }
   "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
   [ \t\r]+
   "\n"
@@ -107,6 +107,7 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
   "format" { return T_FORMAT; }
   "=" { return '='; }
   "," { return ','; }
+  "/" { return '/'; }
   "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
   "\"" {
     STR_BUF_CLEAR( PARSER_STR_BUF );
