@@ -55,6 +55,8 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 
 %x directive options str unmatched path_expr comment
 
+path_expr [a-zA-Z0-9_:.*\[\]!]+
+
 %%
 
 <INITIAL>{
@@ -89,7 +91,7 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
   "if" { return T_IF; }
   "else" { return T_ELSE; }
   "elseif" { return T_ELSEIF; }
-  [a-zA-Z0-9_:.*\[\]!]+ {
+  {path_expr} {
     yylval->string = apr_pstrndup( PARSER_MP, yytext, yyleng );
     return T_PATH_EXPR;
   }

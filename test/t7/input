@@ -1,4 +1,4 @@
 {{! Test the '*' (any node). -}}
 {{ foreach brewery:beer:* ; separator="\n"}}
-{{ . /}}
+{{ . }}
 {{ /foreach }}

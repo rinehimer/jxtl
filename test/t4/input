@@ -2,9 +2,9 @@
     predicates and that lists of nodes can be properly expanded without a
     section. -}}
 {{ foreach brewery ; separator="\n\n" }}
-{{ name /}} Brewery:
-  Year Round Beers:  {{ beer[!season]:beer_name ; separator=", " /}}
+{{ name }} Brewery:
+  Year Round Beers:  {{ beer[!season]:beer_name ; separator=", " }}
 {{   if beer[season] }}
-  Seasonal Beers:  {{ foreach beer[season] ; separator=", " }}{{ beer_name /}} ({{ season /}}){{ /foreach }}
+  Seasonal Beers:  {{ foreach beer[season] ; separator=", " }}{{ beer_name }} ({{ season }}){{ /foreach }}
 {{   /if }}
 {{ /foreach }}

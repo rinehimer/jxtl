@@ -2,7 +2,7 @@
     parent node. -}}
 {{ foreach brewery[show] ; separator="\n" }}
 {{   if .[show]}}
-{{ name /}}
+{{ name }}
 {{   /if }}
 {{ /foreach }}
 {{! Now show all the beers of breweries that are shown, we defer the test of the
@@ -10,6 +10,6 @@
     way, but it should work. -}}
 {{ foreach brewery:beer ; separator="\n" }}
 {{   if ..[show] }}
-{{ beer_name /}}
+{{ beer_name }}
 {{   /if }}
 {{ /foreach }}

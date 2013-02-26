@@ -3,14 +3,14 @@
     should actually evaluate to true.  -}}
 {{ foreach brewery ; separator="\n" }}
 {{ if show }}
-Show {{ name /}}
+Show {{ name }}
 {{ elseif !show }}
-Don't Show {{name /}}
+Don't Show {{ name }}
 {{ /if }}
 {{ /foreach }}
 {{ foreach brewery[show] ; separator="\n" }}
-Show {{name /}}
+Show {{ name }}
 {{ /foreach }}
 {{ foreach brewery[!show] ; separator="\n" }}
-Don't Show {{ name /}}
+Don't Show {{ name }}
 {{ /foreach }}

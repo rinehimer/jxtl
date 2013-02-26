@@ -1,8 +1,8 @@
 {{! Basically the same as test 4, but tests format functions in jxtl. -}}
 {{ foreach brewery ; separator="\n\n", format="upper"}}
-{{ name /}} Brewery:
+{{ name }} Brewery:
   Year Round Beers:  {{ beer[!season]:beer_name ;
-                        separator=", ", format="lower" /}}
+                        separator=", ", format="lower" }}
 {{   if beer[season] }}
   Seasonal Beers:  {{ foreach beer[season] ;
                      separator=", "}}{{beer_name}} ({{season}}){{ /foreach }}

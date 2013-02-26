@@ -1,4 +1,4 @@
 {{! Print each brewery and then the beers it has. -}}
 {{ foreach brewery ; separator="\n" }}
-{{ name /}} Brewery:  {{ beer:beer_name ; separator=", " /}}
+{{ name }} Brewery:  {{ beer:beer_name ; separator=", " /}}
 {{ /foreach }}
