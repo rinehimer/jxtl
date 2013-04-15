@@ -40,8 +40,6 @@
 typedef struct jxtl_data_t {
   /** Memory pool */
   apr_pool_t *mp;
-  /** Pointer to the JSON object */
-  json_t *json;
   /** Pointer to the current content array. */
   apr_array_header_t *current_array;
   /** Array of content arrays. */
@@ -321,7 +319,6 @@ static void initialize_callbacks( apr_pool_t *template_mp,
   callbacks->format_handler = jxtl_format;
 
   cb_data->mp = template_mp;
-  cb_data->json = NULL;
   cb_data->content_array = apr_array_make( tmp_mp, 1024,
                                            sizeof(apr_array_header_t *) );
   initial_array = apr_array_make( cb_data->mp, 1024,
