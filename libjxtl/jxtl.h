@@ -33,6 +33,9 @@ typedef struct jxtl_callback_t {
   void ( *text_handler )( void *user_data, char *text );
   int ( *section_start_handler )( void *user_data, char *expr );
   void ( *section_end_handler )( void *user_data );
+  void ( *var_start_handler )( void *user_data, char *name );
+  void ( *var_end_handler )( void *user_data );
+  int ( *var_usage_handler )( void *user_data, char *name );
   int ( *if_start_handler )( void *user_data, char *expr );
   int ( *elseif_handler )( void *user_data, char *expr );
   void ( *else_handler )( void *user_data );

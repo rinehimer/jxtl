@@ -85,4 +85,6 @@ void str_buf_printf( str_buf_t *buf, const char *format, ... );
 
 #define STR_BUF_CLEAR( buf ) buf->data_len = 0
 
+#define STR_BUF_NULL_TERMINATE( buf ) str_buf_putc( buf, '\0' )
+
 #endif

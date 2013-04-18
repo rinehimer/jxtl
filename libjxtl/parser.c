@@ -92,7 +92,7 @@ void *parser_get_user_data( parser_t *parser )
 char *parser_get_error( parser_t *parser )
 {
   /* Make sure we NULL terminate it before returning. */
-  str_buf_putc( parser->err_buf, '\0' );
+  STR_BUF_NULL_TERMINATE( parser->err_buf );
   return parser->err_buf->data;
 }
 

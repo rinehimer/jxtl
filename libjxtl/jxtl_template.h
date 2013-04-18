@@ -33,18 +33,37 @@ typedef enum jxtl_content_type {
   JXTL_TEXT,
   JXTL_SECTION,
   JXTL_VALUE,
-  JXTL_IF
+  JXTL_IF,
+  JXTL_VAR_REF,
+  JXTL_VAR_DECL
 } jxtl_content_type;
 
 typedef struct jxtl_content_t {
-  /** What this content contains in its value pointer. */
+  /**
+   * What this content contains in its value pointer.
+   */
   jxtl_content_type type;
-  /** A string, pointer to a jxtl_section_t, jxtl_if_t or a jxtl_path_expr_t */
+
+  /**
+   * A string, pointer to a jxtl_section_t, jxtl_if_t, jxtl_path_expr_t or
+   * jxtl_var_t.
+   */
   void *value;
-  /** Array of content for the separator. */
+
+  /**
+   * Array of content for the separator.
+   */
   apr_array_header_t *separator;
-  /** A format to be applied. */
+
+  /**
+   * A format to be applied.
+   */
   char *format;
+
+  /**
+   * Variables decalred within this content scope.
+   */
+  apr_hash_t *variables;
 } jxtl_content_t;
 
 typedef struct jxtl_if_t {
@@ -58,6 +77,14 @@ typedef struct jxtl_section_t {
   /** Array of the content in the section. */
   apr_array_header_t *content;
 } jxtl_section_t;
+
+/**
+ * Type that stores a reusable variable.  Variables are lexically scoped.
+ */
+typedef struct jxtl_var_t {
+  char *name;
+  apr_array_header_t *content;
+} jxtl_var_t;
 
 typedef apr_status_t ( *brigade_flush_func )( apr_bucket_brigade *bb,
                                               void *ctx );

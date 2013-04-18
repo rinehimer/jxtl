@@ -32,30 +32,52 @@
 #include "jxtl_path_expr.h"
 #include "jxtl_template.h"
 #include "json.h"
+#include "str_buf.h"
 
 /**
  * Structure to hold data during parsing.  One of these will be passed to the
  * callback functions.
  */
 typedef struct jxtl_data_t {
-  /** Memory pool */
+  /**
+   * Memory pool used to allocate all objects during parsing.
+   */
   apr_pool_t *mp;
-  /** Pointer to the current content array. */
+
+  /**
+   * Pointer to the current content array.
+   */
   apr_array_header_t *current_array;
-  /** Array of content arrays. */
+
+  /**
+   * Stack of our content arrays.
+   */
   apr_array_header_t *content_array;
-  /** Pointer to the last section or value pushed on. */
+
+  /**
+   * Pointer to the last section or value pushed on.  This pointer only matters
+   * when we encounter a separator.
+   */
   jxtl_content_t *last_section_or_value;
-  /** Reusable parser. */
+
+  /**
+   * Reusable path parser.
+   */
   parser_t *jxtl_path_parser;
+
+  /**
+   * Last error encountered during parsing.  Could come from the path
+   * parser or be something like an invalid variable reference.
+   */
+  str_buf_t *error_buf;
 } jxtl_data_t;
 
 /*
  * Convenience function to create a new content object and it on the current
  * array.
  */
-static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
-                               void *value )
+static void content_push( jxtl_data_t *data, jxtl_content_type type,
+                          void *value )
 {
   jxtl_content_t *content = NULL;
 
@@ -64,12 +86,91 @@ static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
   content->value = value;
   content->separator = NULL;
   content->format = NULL;
+  content->variables = apr_hash_make( data->mp );
 
   if ( ( type == JXTL_SECTION ) || ( type == JXTL_VALUE ) ) {
     data->last_section_or_value = content;
   }
 
   APR_ARRAY_PUSH( data->current_array, jxtl_content_t * ) = content;
+}
+
+/**
+ * Update the current content array.  We push the existing current_array
+ * onto our stack and then update the pointer.
+ */
+static void set_content_array( jxtl_data_t *data,
+                                apr_array_header_t *content_array )
+{
+  /* Save off the current one */
+  APR_ARRAY_PUSH( data->content_array,
+                  apr_array_header_t * ) = data->current_array;
+
+  /* Update the pointer */
+  data->current_array = content_array;;
+}
+
+static jxtl_content_t *jxtl_get_last_content( jxtl_data_t *data )
+{
+  apr_array_header_t *content_array;
+  jxtl_content_t *content;
+
+  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
+  return APR_ARRAY_TAIL( content_array, jxtl_content_t * );
+}
+
+static jxtl_var_t *lookup_var_in_content_array( apr_array_header_t *content_array,
+                                                char *name )
+{
+  int i;
+  jxtl_content_t *content;
+  jxtl_var_t *var;
+
+  for ( i = 0; i < content_array->nelts; i++ ) {
+    content = APR_ARRAY_IDX( content_array, i, jxtl_content_t * );
+    var = apr_hash_get( content->variables, name, APR_HASH_KEY_STRING );
+    if ( var ) {
+      return var;
+    }
+  }
+
+  return NULL;
+}
+
+static jxtl_var_t *lookup_var( jxtl_data_t *data, char *name )
+{
+  apr_array_header_t *content_array;
+  jxtl_var_t *var;
+  int i;
+ 
+  var = lookup_var_in_content_array( data->current_array, name );
+
+  if ( var ) {
+    return var;
+  }
+
+  for ( i = data->content_array->nelts - 1; i > 0; i-- ) {
+    content_array = APR_ARRAY_IDX( data->content_array, i,
+                                   apr_array_header_t * );
+    var = lookup_var_in_content_array( content_array, name );
+    if ( var ) {
+      return var;
+    }
+  }
+
+  return NULL;
+}
+
+static void jxtl_set_error( jxtl_data_t *data, const char *error_string, ... )
+{
+  va_list args;
+
+  STR_BUF_CLEAR( data->error_buf );
+
+  va_start( args, error_string );
+  str_buf_vprintf( data->error_buf, error_string, args );
+  STR_BUF_NULL_TERMINATE( data->error_buf );
+  va_end( args );
 }
 
 /*****************************************************************************
@@ -84,7 +185,7 @@ static void jxtl_content_push( jxtl_data_t *data, jxtl_content_type type,
 static void jxtl_text_func( void *user_data, char *text )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_content_push( data, JXTL_TEXT, apr_pstrdup( data->mp, text ) );
+  content_push( data, JXTL_TEXT, apr_pstrdup( data->mp, text ) );
 }
 
 /**
@@ -106,12 +207,14 @@ static int jxtl_section_start( void *user_data, char *expr )
                                                   data->jxtl_path_parser,
                                                   expr,
                                                   &section->expr );
+  if ( !result ) {
+    jxtl_set_error( data, parser_get_error( data->jxtl_path_parser ) );
+  }
+
   section->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
-  jxtl_content_push( data, JXTL_SECTION, section );
-  APR_ARRAY_PUSH( data->content_array,
-                  apr_array_header_t * ) = data->current_array;
-  data->current_array = section->content;
+  content_push( data, JXTL_SECTION, section );
+  set_content_array( data, section->content );
 
   return result;
 }
@@ -127,6 +230,45 @@ static void jxtl_section_end( void *user_data )
 
   data->current_array = APR_ARRAY_POP( data->content_array,
                                        apr_array_header_t * );
+}
+
+static void jxtl_var_start( void *user_data, char *name )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  jxtl_content_t *content;
+  jxtl_var_t *var;
+  
+  content = jxtl_get_last_content( data );
+  var = apr_palloc( data->mp, sizeof(jxtl_var_t) );
+  var->name = apr_pstrdup( data->mp, name );
+  var->content = apr_array_make( data->mp, 1024, sizeof(jxtl_content_t *) );
+
+  apr_hash_set( content->variables, var->name, APR_HASH_KEY_STRING, var );
+  set_content_array( data, var->content );
+}
+
+static void jxtl_var_end( void *user_data )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  data->current_array = APR_ARRAY_POP( data->content_array,
+                                       apr_array_header_t * );
+}
+
+static int jxtl_var_usage( void *user_data, char *name )
+{
+  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  jxtl_var_t *var;
+
+  var = lookup_var( data, name );
+  if ( ! var ) {
+    jxtl_set_error( data, "Invalid variable reference:  \"%s\"", name );
+    return FALSE;
+  }
+  else {
+    content_push( data, JXTL_VAR_REF, var );
+  }
+
+  return TRUE;
 }
 
 /**
@@ -147,14 +289,15 @@ static int jxtl_if_start( void *user_data, char *expr )
                                                   data->jxtl_path_parser,
                                                   expr,
                                                   &jxtl_if->expr );
+  if ( !result ) {
+    jxtl_set_error( data, parser_get_error( data->jxtl_path_parser ) );
+  }
+
   jxtl_if->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
   APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
-  jxtl_content_push( data, JXTL_IF, if_block );
-
-  APR_ARRAY_PUSH( data->content_array,
-                  apr_array_header_t * ) = data->current_array;
-  data->current_array = jxtl_if->content;
+  content_push( data, JXTL_IF, if_block );
+  set_content_array( data, jxtl_if->content );
 
   return result;
 }
@@ -169,19 +312,22 @@ static int jxtl_if_start( void *user_data, char *expr )
 static int jxtl_elseif( void *user_data, char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  apr_array_header_t *content_array, *if_block;
+  apr_array_header_t *if_block;
   jxtl_if_t *jxtl_if;
   jxtl_content_t *content;
   int result;
 
-  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
-  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
+  content = jxtl_get_last_content( data );
   if_block = (apr_array_header_t *) content->value;
   jxtl_if = apr_palloc( data->mp, sizeof(jxtl_if_t) );
   result = jxtl_path_parser_parse_buffer_to_expr( data->mp, 
                                                   data->jxtl_path_parser,
                                                   expr,
                                                   &jxtl_if->expr );
+  if ( !result ) {
+    jxtl_set_error( data, parser_get_error( data->jxtl_path_parser ) );
+  }
+
   jxtl_if->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
   APR_ARRAY_PUSH( if_block, jxtl_if_t * ) = jxtl_if;
@@ -193,12 +339,11 @@ static int jxtl_elseif( void *user_data, char *expr )
 static void jxtl_else( void *user_data )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  apr_array_header_t *content_array, *if_block;
+  apr_array_header_t *if_block;
   jxtl_if_t *jxtl_if;
   jxtl_content_t *content;
 
-  content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
-  content = APR_ARRAY_TAIL( content_array, jxtl_content_t * );
+  content = jxtl_get_last_content( data );
   if_block = (apr_array_header_t *) content->value;
 
   jxtl_if = apr_palloc( data->mp, sizeof(jxtl_if_t) );
@@ -228,13 +373,7 @@ static void jxtl_separator_start( void *user_data )
   jxtl_content_t *content = data->last_section_or_value;
 
   content->separator = apr_array_make( data->mp, 1, sizeof(jxtl_content_t *) );
-
-  /*
-   * Save off the current array and then make the current array the separator.
-   */
-  APR_ARRAY_PUSH( data->content_array,
-                  apr_array_header_t * ) = data->current_array;
-  data->current_array = content->separator;
+  set_content_array( data, content->separator );
 }
 
 /**
@@ -251,10 +390,9 @@ static void jxtl_separator_end( void *user_data )
 
 /**
  * Parser callback function for when it encounters a value reference in the
- * template, i.e. {{value}}.  If we are not nested at all, it is printed
- * immediately.  Otherwise, the name is just saved off for later processing.
+ * template, i.e. {{value}}. The expression is parsed and the result saved off.
  * @param user_data The jxtl_data.
- * @param name The name of the value to lookup.
+ * @param expr The value expression to parse.
  */
 static int jxtl_value_func( void *user_data, char *expr )
 {
@@ -266,7 +404,11 @@ static int jxtl_value_func( void *user_data, char *expr )
                                                   data->jxtl_path_parser,
                                                   expr,
                                                   &path_expr );
-  jxtl_content_push( data, JXTL_VALUE, path_expr );
+  if ( !result ) {
+    jxtl_set_error( data, parser_get_error( data->jxtl_path_parser ) );
+  }
+
+  content_push( data, JXTL_VALUE, path_expr );
 
   return result;
 }
@@ -274,7 +416,7 @@ static int jxtl_value_func( void *user_data, char *expr )
 static char *jxtl_get_error( void *user_data )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  return parser_get_error( data->jxtl_path_parser );
+  return data->error_buf->data;
 }
 
 static void jxtl_format( void *user_data, char *format )
@@ -308,6 +450,9 @@ static void initialize_callbacks( apr_pool_t *template_mp,
   callbacks->text_handler = jxtl_text_func;
   callbacks->section_start_handler = jxtl_section_start;
   callbacks->section_end_handler = jxtl_section_end;
+  callbacks->var_start_handler = jxtl_var_start;
+  callbacks->var_end_handler = jxtl_var_end;
+  callbacks->var_usage_handler = jxtl_var_usage;
   callbacks->if_start_handler = jxtl_if_start;
   callbacks->elseif_handler = jxtl_elseif;
   callbacks->else_handler = jxtl_else;
@@ -327,6 +472,7 @@ static void initialize_callbacks( apr_pool_t *template_mp,
                   apr_array_header_t * ) = initial_array;
   cb_data->current_array = initial_array;
   cb_data->jxtl_path_parser = jxtl_path_parser_create( tmp_mp );
+  cb_data->error_buf = str_buf_create( tmp_mp, 512 );
 
   callbacks->user_data = cb_data;
 }
@@ -452,8 +598,10 @@ static void print_text( char *text,
        ( text_ptr[len - 1] == '\n' ) ) {
     len--;
   }
-  apr_brigade_printf( template->bb, template->flush_func,
-                      template->flush_data, "%.*s", len, text_ptr );
+  if ( len > 0 ) {
+    apr_brigade_printf( template->bb, template->flush_func,
+                        template->flush_data, "%.*s", len, text_ptr );
+  }
 }
 
 static void expand_content( apr_pool_t *mp,
@@ -536,6 +684,7 @@ static void expand_content( apr_pool_t *mp,
   jxtl_if_t *jxtl_if;
   apr_array_header_t *if_block;
   jxtl_path_obj_t *path_obj;
+  jxtl_var_t *var;
   char *format;
 
   prev_content = NULL;
@@ -587,6 +736,12 @@ static void expand_content( apr_pool_t *mp,
           }
         }
       }
+      break;
+
+    case JXTL_VAR_REF:
+      var = (jxtl_var_t *) content->value;
+      expand_content( mp, template, var->content, json, prev_format,
+                      PRINT_SECTION );
       break;
     }
     prev_content = content;
