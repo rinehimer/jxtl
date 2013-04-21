@@ -104,13 +104,13 @@ typedef struct json_callback_t {
 } json_callback_t;
 
 parser_t *json_parser_create( apr_pool_t *mp );
-int json_parser_parse_file( parser_t *parser, const char *file,
+int json_parser_parse_file( parser_t *parser, const void *file,
                             json_callback_t *json_callbacks );
-int json_parser_parse_buffer( parser_t *parser, const char *buffer,
+int json_parser_parse_buffer( parser_t *parser, const void *buffer,
                               json_callback_t *json_callbacks );
 
 int json_parser_parse_file_to_obj( apr_pool_t *mp, parser_t *parser,
-                                   const char *file, json_t **obj );
+                                   apr_file_t *file, json_t **obj );
 int json_parser_parse_buffer_to_obj( apr_pool_t *mp, parser_t *parser,
                                      const char *buffer, json_t **obj );
 

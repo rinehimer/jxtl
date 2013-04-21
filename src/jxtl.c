@@ -248,44 +248,26 @@ static int load_data( apr_pool_t *mp, const char *json_file,
   apr_file_t *file;
 
   if ( xml_file ) {
-    if ( apr_strnatcasecmp( xml_file, "-" ) == 0 ) {
-      status = apr_file_open_stdin( &file, mp );
-    }
-    else {
-      status = apr_file_open( &file, xml_file, APR_READ | APR_BUFFERED, 0, mp );
-    }
-    if ( status == APR_SUCCESS ) {
+    ret = open_apr_input_file( mp, xml_file, &file );
+    if ( ret ) {
       ret = xml_to_json( mp, file, skip_root, obj );
     }
   }
   else {
-    json_parser = json_parser_create( mp );
-    ret = json_parser_parse_file_to_obj( mp, json_parser, json_file, obj );
+    ret = open_apr_input_file( mp, json_file, &file );
+    if ( ret ) {
+      json_parser = json_parser_create( mp );
+      ret = json_parser_parse_file_to_obj( mp, json_parser, file, obj );
+    }
   }
 
   return ret;
 }
 
-static int open_output_file( apr_pool_t *mp, const char *file,
-                             apr_file_t **out )
-{
-  int status;
-
-  if ( !file || apr_strnatcasecmp( file, "-" ) == 0 ) {
-    status = apr_file_open_stdout( out, mp );
-  }
-  else {
-    status = apr_file_open( out, file, APR_WRITE | APR_CREATE | APR_BUFFERED |
-                            APR_TRUNCATE, APR_OS_DEFAULT, mp );
-  }
-
-  return ( status == APR_SUCCESS );
-}
-
 int main( int argc, char const * const *argv )
 {
   apr_pool_t *mp;
-  const char *template_file = NULL;
+  const char *template_file_name = NULL;
   const char *json_file = NULL;
   const char *xml_file = NULL;
   const char *out_file = NULL;
@@ -295,17 +277,19 @@ int main( int argc, char const * const *argv )
   jxtl_template_t *template;
   format_data_t *format_data;
   apr_file_t *out;
+  apr_file_t *template_file;
 
   apr_app_initialize( NULL, NULL, NULL );
   apr_pool_create( &mp, NULL );
 
-  jxtl_init( argc, argv, mp, &template_file, &json_file, &xml_file,
+  jxtl_init( argc, argv, mp, &template_file_name, &json_file, &xml_file,
              &skip_root, &out_file );
 
   jxtl_parser = jxtl_parser_create( mp );
 
   if ( load_data( mp, json_file, xml_file, skip_root, &json ) &&
-       open_output_file( mp, out_file, &out ) &&
+       open_apr_output_file( mp, out_file, &out ) &&
+       open_apr_input_file( mp, template_file_name, &template_file ) &&
        jxtl_parser_parse_file_to_template( mp, jxtl_parser, template_file,
 					   &template ) ) {
     format_data = apr_palloc( mp, sizeof(format_data_t) );

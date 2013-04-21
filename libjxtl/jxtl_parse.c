@@ -1924,7 +1924,7 @@ parser_t *jxtl_parser_create( apr_pool_t *mp )
 			jxtl_parse );
 }
 
-int jxtl_parser_parse_file( parser_t *parser, const char *file,
+int jxtl_parser_parse_file( parser_t *parser, apr_file_t *file,
 			    jxtl_callback_t *jxtl_callbacks )
 {
   parser_set_user_data( parser, jxtl_callbacks );
