@@ -66,7 +66,7 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %token T_DIRECTIVE_START "{{" T_DIRECTIVE_END "}}"
        T_SECTION "section" T_SEPARATOR "separator" T_FORMAT "format"
        T_END "end" T_IF "if" T_ELSEIF "elseif" T_ELSE "else"
-       T_VAR "var"
+
 %token <string> T_TEXT "text"  T_PATH_EXPR "path expression" T_STRING "string"
                 T_IDENTIFIER "identifier"
 
@@ -122,11 +122,11 @@ section_directive
     }
 ;
 
-var_usage
+param_usage
   : T_DIRECTIVE_START '$' T_IDENTIFIER T_DIRECTIVE_END
     {
-      if ( callbacks->var_usage_handler &&
-           ! callbacks->var_usage_handler( callbacks->user_data, $<string>3 ) ) {
+      if ( callbacks->param_usage_handler &&
+           ! callbacks->param_usage_handler( callbacks->user_data, $<string>3 ) ) {
         jxtl_error( &@3, scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );
       }
@@ -188,7 +188,7 @@ section_content
   | section_content value_directive
   | section_content section_directive
   | section_content if_directive
-  | section_content var_usage
+  | section_content param_usage
 ;
 
 options
@@ -212,8 +212,8 @@ option
     }
   | T_IDENTIFIER '=' T_STRING
     {
-      if ( callbacks->var_decl_handler &&
-           ! callbacks->var_decl_handler( callbacks->user_data, $<string>1,
+      if ( callbacks->param_decl_handler &&
+           ! callbacks->param_decl_handler( callbacks->user_data, $<string>1,
                                           $<string>3 ) ) {
         jxtl_error( &@3, scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );        

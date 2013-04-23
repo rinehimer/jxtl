@@ -72,7 +72,7 @@ typedef struct jxtl_data_t {
 
   /**
    * Last error encountered during parsing.  Could come from the path
-   * parser or be something like an invalid variable reference.
+   * parser or be something like an invalid parameter reference.
    */
   str_buf_t *error_buf;
 } jxtl_data_t;
@@ -91,7 +91,7 @@ static void content_push( jxtl_data_t *data, jxtl_content_type type,
   content->value = value;
   content->separator = NULL;
   content->format = NULL;
-  content->variables = apr_hash_make( data->mp );
+  content->params = apr_hash_make( data->mp );
 
   if ( ( type == JXTL_SECTION ) || ( type == JXTL_VALUE ) ) {
     data->last_section_or_value = content;
@@ -124,42 +124,42 @@ static jxtl_content_t *jxtl_get_last_content( jxtl_data_t *data )
   return APR_ARRAY_TAIL( content_array, jxtl_content_t * );
 }
 
-static jxtl_var_t *lookup_var_in_content_array( apr_array_header_t *content_array,
-                                                char *name )
+static jxtl_param_t *lookup_param_in_content_array( apr_array_header_t *content_array,
+                                                    char *name )
 {
   int i;
   jxtl_content_t *content;
-  jxtl_var_t *var;
+  jxtl_param_t *param;
 
   for ( i = 0; i < content_array->nelts; i++ ) {
     content = APR_ARRAY_IDX( content_array, i, jxtl_content_t * );
-    var = apr_hash_get( content->variables, name, APR_HASH_KEY_STRING );
-    if ( var ) {
-      return var;
+    param = apr_hash_get( content->params, name, APR_HASH_KEY_STRING );
+    if ( param ) {
+      return param;
     }
   }
 
   return NULL;
 }
 
-static jxtl_var_t *lookup_var( jxtl_data_t *data, char *name )
+static jxtl_param_t *lookup_param( jxtl_data_t *data, char *name )
 {
   apr_array_header_t *content_array;
-  jxtl_var_t *var;
+  jxtl_param_t *param;
   int i;
  
-  var = lookup_var_in_content_array( data->current_array, name );
+  param = lookup_param_in_content_array( data->current_array, name );
 
-  if ( var ) {
-    return var;
+  if ( param ) {
+    return param;
   }
 
   for ( i = data->content_array->nelts - 1; i > 0; i-- ) {
     content_array = APR_ARRAY_IDX( data->content_array, i,
                                    apr_array_header_t * );
-    var = lookup_var_in_content_array( content_array, name );
-    if ( var ) {
-      return var;
+    param = lookup_param_in_content_array( content_array, name );
+    if ( param ) {
+      return param;
     }
   }
 
@@ -237,11 +237,11 @@ static void jxtl_section_end( void *user_data )
                                        apr_array_header_t * );
 }
 
-static int jxtl_var_decl( void *user_data, char *name, char *expr )
+static int jxtl_param_decl( void *user_data, char *name, char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_content_t *content;
-  jxtl_var_t *var;
+  jxtl_param_t *param;
   jxtl_template_t *template;
   int result;
 
@@ -253,26 +253,26 @@ static int jxtl_var_decl( void *user_data, char *name, char *expr )
   
   content = jxtl_get_last_content( data );
 
-  var = apr_palloc( data->mp, sizeof(jxtl_var_t) );
-  var->name = apr_pstrdup( data->mp, name );
-  var->content = template->content;
+  param = apr_palloc( data->mp, sizeof(jxtl_param_t) );
+  param->name = apr_pstrdup( data->mp, name );
+  param->content = template->content;
 
-  apr_hash_set( content->variables, var->name, APR_HASH_KEY_STRING, var );
+  apr_hash_set( content->params, param->name, APR_HASH_KEY_STRING, param );
 
   return result;
 }
-static int jxtl_var_usage( void *user_data, char *name )
+static int jxtl_param_usage( void *user_data, char *name )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_var_t *var;
+  jxtl_param_t *param;
 
-  var = lookup_var( data, name );
-  if ( ! var ) {
-    jxtl_set_error( data, "Invalid variable reference:  \"%s\"", name );
+  param = lookup_param( data, name );
+  if ( ! param ) {
+    jxtl_set_error( data, "Invalid parameter reference:  \"%s\"", name );
     return FALSE;
   }
   else {
-    content_push( data, JXTL_VAR_REF, var );
+    content_push( data, JXTL_PARAM_REF, param );
   }
 
   return TRUE;
@@ -448,8 +448,8 @@ static void initialize_callbacks( apr_pool_t *template_mp,
   callbacks->text_handler = jxtl_text_handler;
   callbacks->section_start_handler = jxtl_section_start;
   callbacks->section_end_handler = jxtl_section_end;
-  callbacks->var_decl_handler = jxtl_var_decl;
-  callbacks->var_usage_handler = jxtl_var_usage;
+  callbacks->param_decl_handler = jxtl_param_decl;
+  callbacks->param_usage_handler = jxtl_param_usage;
   callbacks->if_start_handler = jxtl_if_start;
   callbacks->elseif_handler = jxtl_elseif;
   callbacks->else_handler = jxtl_else;
@@ -681,7 +681,7 @@ static void expand_content( apr_pool_t *mp,
   jxtl_if_t *jxtl_if;
   apr_array_header_t *if_block;
   jxtl_path_obj_t *path_obj;
-  jxtl_var_t *var;
+  jxtl_param_t *param;
   char *format;
 
   prev_content = NULL;
@@ -735,9 +735,9 @@ static void expand_content( apr_pool_t *mp,
       }
       break;
 
-    case JXTL_VAR_REF:
-      var = (jxtl_var_t *) content->value;
-      expand_content( mp, template, var->content, json, prev_format,
+    case JXTL_PARAM_REF:
+      param = (jxtl_param_t *) content->value;
+      expand_content( mp, template, param->content, json, prev_format,
                       PRINT_SECTION );
       break;
     }

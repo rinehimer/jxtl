@@ -46,11 +46,10 @@
      T_IF = 264,
      T_ELSEIF = 265,
      T_ELSE = 266,
-     T_VAR = 267,
-     T_TEXT = 268,
-     T_PATH_EXPR = 269,
-     T_STRING = 270,
-     T_IDENTIFIER = 271
+     T_TEXT = 267,
+     T_PATH_EXPR = 268,
+     T_STRING = 269,
+     T_IDENTIFIER = 270
    };
 #endif
 /* Tokens.  */
@@ -63,11 +62,10 @@
 #define T_IF 264
 #define T_ELSEIF 265
 #define T_ELSE 266
-#define T_VAR 267
-#define T_TEXT 268
-#define T_PATH_EXPR 269
-#define T_STRING 270
-#define T_IDENTIFIER 271
+#define T_TEXT 267
+#define T_PATH_EXPR 268
+#define T_STRING 269
+#define T_IDENTIFIER 270
 
 
 
@@ -85,7 +83,7 @@ typedef union YYSTYPE
 
 
 /* Line 2068 of yacc.c  */
-#line 89 "jxtl_parse.h"
+#line 87 "jxtl_parse.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

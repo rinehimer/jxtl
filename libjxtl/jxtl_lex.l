@@ -89,7 +89,6 @@ path_expr [a-zA-Z0-9_/.*\[\]!]+
 
 <directive>{
   "#section" { return T_SECTION; }
-  "#var" { BEGIN( ident ); return T_VAR; }
   "#end" { return T_END; }
   "#if" { return T_IF; }
   "#else" { return T_ELSE; }
