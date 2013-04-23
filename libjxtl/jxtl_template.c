@@ -66,6 +66,11 @@ typedef struct jxtl_data_t {
   parser_t *jxtl_path_parser;
 
   /**
+   * Reusable parser when we need to parse a quoted string.
+   */
+  parser_t *jxtl_parser;
+
+  /**
    * Last error encountered during parsing.  Could come from the path
    * parser or be something like an invalid variable reference.
    */
@@ -182,7 +187,7 @@ static void jxtl_set_error( jxtl_data_t *data, const char *error_string, ... )
  * @param user_data The jxtl_data.
  * @param text The text.
  */
-static void jxtl_text_func( void *user_data, char *text )
+static void jxtl_text_handler( void *user_data, char *text )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   content_push( data, JXTL_TEXT, apr_pstrdup( data->mp, text ) );
@@ -232,28 +237,30 @@ static void jxtl_section_end( void *user_data )
                                        apr_array_header_t * );
 }
 
-static void jxtl_var_start( void *user_data, char *name )
+static int jxtl_var_decl( void *user_data, char *name, char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_content_t *content;
   jxtl_var_t *var;
+  jxtl_template_t *template;
+  int result;
+
+  result = jxtl_parser_parse_buffer_to_template( data->mp, data->jxtl_parser,
+                                                 expr, &template );
+  if ( !result ) {
+    jxtl_set_error( data, parser_get_error( data->jxtl_parser ) );
+  }
   
   content = jxtl_get_last_content( data );
+
   var = apr_palloc( data->mp, sizeof(jxtl_var_t) );
   var->name = apr_pstrdup( data->mp, name );
-  var->content = apr_array_make( data->mp, 1024, sizeof(jxtl_content_t *) );
+  var->content = template->content;
 
   apr_hash_set( content->variables, var->name, APR_HASH_KEY_STRING, var );
-  set_content_array( data, var->content );
-}
 
-static void jxtl_var_end( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  data->current_array = APR_ARRAY_POP( data->content_array,
-                                       apr_array_header_t * );
+  return result;
 }
-
 static int jxtl_var_usage( void *user_data, char *name )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
@@ -363,27 +370,18 @@ static void jxtl_if_end( void *user_data )
 }
 
 /**
- * Parser callback for when it encounters a separator directive.  All this does
- * is take the current section and set its current_array to the separator.
- * @param user_data The jxtl_data.
+ * Parser callback for when it encounters a separator option.  This funciton
+ * is currently bastardized.  Really what should happen here is that the
+ * expr should be recursively parsed.
  */
-static void jxtl_separator_start( void *user_data )
+static void jxtl_separator_handler( void *user_data, char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_content_t *content = data->last_section_or_value;
 
   content->separator = apr_array_make( data->mp, 1, sizeof(jxtl_content_t *) );
   set_content_array( data, content->separator );
-}
-
-/**
- * Parser callback for when a separator directive is ended.  Just sets the
- * current_array of the section back to the content.
- * @param user_data The jxtl_data.
- */
-static void jxtl_separator_end( void *user_data )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
+  jxtl_text_handler( data, expr );
   data->current_array = APR_ARRAY_POP( data->content_array,
                                        apr_array_header_t * );
 }
@@ -394,7 +392,7 @@ static void jxtl_separator_end( void *user_data )
  * @param user_data The jxtl_data.
  * @param expr The value expression to parse.
  */
-static int jxtl_value_func( void *user_data, char *expr )
+static int jxtl_value_handler( void *user_data, char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_path_expr_t *path_expr;
@@ -419,7 +417,7 @@ static char *jxtl_get_error( void *user_data )
   return data->error_buf->data;
 }
 
-static void jxtl_format( void *user_data, char *format )
+static void jxtl_format_handler( void *user_data, char *format )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   data->last_section_or_value->format = apr_pstrdup( data->mp, format );
@@ -447,21 +445,19 @@ static void initialize_callbacks( apr_pool_t *template_mp,
 {
   apr_array_header_t *initial_array;
 
-  callbacks->text_handler = jxtl_text_func;
+  callbacks->text_handler = jxtl_text_handler;
   callbacks->section_start_handler = jxtl_section_start;
   callbacks->section_end_handler = jxtl_section_end;
-  callbacks->var_start_handler = jxtl_var_start;
-  callbacks->var_end_handler = jxtl_var_end;
+  callbacks->var_decl_handler = jxtl_var_decl;
   callbacks->var_usage_handler = jxtl_var_usage;
   callbacks->if_start_handler = jxtl_if_start;
   callbacks->elseif_handler = jxtl_elseif;
   callbacks->else_handler = jxtl_else;
   callbacks->if_end_handler = jxtl_if_end;
-  callbacks->separator_start_handler = jxtl_separator_start;
-  callbacks->separator_end_handler = jxtl_separator_end;
-  callbacks->value_handler = jxtl_value_func;
+  callbacks->separator_handler = jxtl_separator_handler;
+  callbacks->value_handler = jxtl_value_handler;
   callbacks->get_error_func = jxtl_get_error;
-  callbacks->format_handler = jxtl_format;
+  callbacks->format_handler = jxtl_format_handler;
 
   cb_data->mp = template_mp;
   cb_data->content_array = apr_array_make( tmp_mp, 1024,
@@ -472,6 +468,7 @@ static void initialize_callbacks( apr_pool_t *template_mp,
                   apr_array_header_t * ) = initial_array;
   cb_data->current_array = initial_array;
   cb_data->jxtl_path_parser = jxtl_path_parser_create( tmp_mp );
+  cb_data->jxtl_parser = jxtl_parser_create( tmp_mp );
   cb_data->error_buf = str_buf_create( tmp_mp, 512 );
 
   callbacks->user_data = cb_data;

@@ -89,7 +89,6 @@ text
   | text value_directive
   | text section_directive
   | text if_directive
-  | text var_directive
 ;
 
 value_directive
@@ -119,22 +118,6 @@ section_directive
     { 
       if ( callbacks->section_end_handler ) {
         callbacks->section_end_handler( callbacks->user_data );
-      }
-    }
-;
-
-var_directive
-  : T_DIRECTIVE_START T_VAR T_IDENTIFIER T_DIRECTIVE_END
-    {
-      if ( callbacks->var_start_handler ) {
-        callbacks->var_start_handler( callbacks->user_data, $<string>3 );
-      }
-    }
-    section_content
-    T_DIRECTIVE_START T_END T_DIRECTIVE_END
-    { 
-      if ( callbacks->var_end_handler ) {
-        callbacks->var_end_handler( callbacks->user_data );
       }
     }
 ;
@@ -205,7 +188,6 @@ section_content
   | section_content value_directive
   | section_content section_directive
   | section_content if_directive
-  | section_content var_directive
   | section_content var_usage
 ;
 
@@ -218,14 +200,8 @@ options
 option
   : T_SEPARATOR '=' T_STRING
     {
-      if ( callbacks->separator_start_handler ) {
-        callbacks->separator_start_handler( callbacks->user_data );
-      }
-      if ( callbacks->text_handler ) {
-        callbacks->text_handler( callbacks->user_data, $<string>3 );
-      }
-      if ( callbacks->separator_end_handler ) {
-        callbacks->separator_end_handler( callbacks->user_data );
+      if ( callbacks->separator_handler ) {
+        callbacks->separator_handler( callbacks->user_data, $<string>3 );
       }
     }
   | T_FORMAT '=' T_STRING
@@ -234,6 +210,16 @@ option
         callbacks->format_handler( callbacks->user_data, $<string>3 );
       }
     }
+  | T_IDENTIFIER '=' T_STRING
+    {
+      if ( callbacks->var_decl_handler &&
+           ! callbacks->var_decl_handler( callbacks->user_data, $<string>1,
+                                          $<string>3 ) ) {
+        jxtl_error( &@3, scanner, parser, callbacks_ptr,
+                    callbacks->get_error_func( callbacks->user_data ) );        
+      }
+    }
+  | T_IDENTIFIER '=' T_PATH_EXPR
 ;
 
 %%

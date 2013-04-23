@@ -56,6 +56,7 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %x directive ident options str unmatched path_expr comment
 
 identifier [a-zA-Z][a-zA-Z0-9_]*
+path_expr [a-zA-Z0-9_/.*\[\]!]+
 
 %%
 
@@ -94,7 +95,7 @@ identifier [a-zA-Z][a-zA-Z0-9_]*
   "#else" { return T_ELSE; }
   "#elseif" { return T_ELSEIF; }
   "$" { BEGIN( ident ); return '$'; }
-  [a-zA-Z0-9_/.*\[\]!]+ {
+  {path_expr} {
     yylval->string = apr_pstrndup( PARSER_MP, yytext, yyleng );
     return T_PATH_EXPR;
   }
@@ -120,6 +121,14 @@ identifier [a-zA-Z][a-zA-Z0-9_]*
 <options>{
   "separator" { return T_SEPARATOR; }
   "format" { return T_FORMAT; }
+  {identifier} {
+    yylval->string = apr_pstrndup( PARSER_MP, yytext, yyleng );
+    return T_IDENTIFIER;
+  }
+  {path_expr} {
+    yylval->string = apr_pstrndup( PARSER_MP, yytext, yyleng );
+    return T_PATH_EXPR;
+  }
   "=" { return '='; }
   "," { return ','; }
   "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
@@ -149,6 +158,7 @@ identifier [a-zA-Z][a-zA-Z0-9_]*
   "\\r" { str_buf_putc( PARSER_STR_BUF, '\r' ); }
   "\\t" { str_buf_putc( PARSER_STR_BUF, '\t' ); }
   "\\\"" { str_buf_putc( PARSER_STR_BUF, '"' ); }
+  "\\\n" { str_buf_putc( PARSER_STR_BUF, ' ' ); }
   [^\"\\\n]+ {
     str_buf_write( PARSER_STR_BUF, yytext, yyleng );
   }
