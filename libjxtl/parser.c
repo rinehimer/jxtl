@@ -96,35 +96,11 @@ char *parser_get_error( parser_t *parser )
   return parser->err_buf->data;
 }
 
-int parser_parse_file( parser_t *parser, const char *file )
+int parser_parse_file( parser_t *parser, apr_file_t *file )
 {
-  apr_status_t status;
-  int is_stdin;
-  char error_str[1024];
-  int result = FALSE;
-
   reset_parser( parser );
-
-  is_stdin = ( file && apr_strnatcasecmp( file, "-" ) == 0 );
-
-  if ( !is_stdin ) {
-    status = apr_file_open( &parser->in_file, file, APR_READ | APR_BUFFERED, 0,
-                            parser->mp );
-  }
-  else if ( file && is_stdin ) {
-    status = apr_file_open_stdin( &parser->in_file, parser->mp );
-  }
-
-  if ( status != APR_SUCCESS ) {
-    apr_strerror( status, error_str, sizeof(error_str) );
-    str_buf_append( parser->err_buf, error_str );
-  }
-  else {
-    result = parser->bison_parse( parser->scanner, parser,
-                                  parser->user_data ) == 0;
-  }
-
-  return result;
+  parser->in_file = file;
+  return parser->bison_parse( parser->scanner, parser, parser->user_data ) == 0;
 }
 
 int parser_parse_buffer( parser_t *parser, const char *buffer )

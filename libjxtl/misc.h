@@ -18,8 +18,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <apr_file_io.h>
+#include <apr_pools.h>
+#include <apr_file_io.h>
 
 /**
  * Function that just calls free and returns APR_SUCCESS.
  */
 apr_status_t mem_free( void *ptr );
+
+/**
+ * Wrapper function that opens stdin if file_name is "-".
+ */
+int open_apr_input_file( apr_pool_t *mp, const char *file_name,
+                         apr_file_t **file );
+int open_apr_output_file( apr_pool_t *mp, const char *file_name,
+                          apr_file_t **file );

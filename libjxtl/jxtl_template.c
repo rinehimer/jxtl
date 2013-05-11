@@ -334,12 +334,9 @@ static void initialize_callbacks( apr_pool_t *template_mp,
   callbacks->user_data = cb_data;
 }
 
-static int parse_file_or_buffer( apr_pool_t *mp, parser_t *parser,
-                                 const char *file_or_buf,
-                                 int ( *parse_func )( parser_t *,
-                                                      const char *,
-                                                      jxtl_callback_t * ),
-                                 jxtl_template_t **template )
+int jxtl_parser_parse_file_to_template( apr_pool_t *mp, parser_t *parser,
+                                        apr_file_t *file,
+                                        jxtl_template_t **template )
 {
   int result = FALSE;
   apr_pool_t *tmp_mp;
@@ -350,7 +347,7 @@ static int parse_file_or_buffer( apr_pool_t *mp, parser_t *parser,
   initialize_callbacks( mp, tmp_mp, &callbacks, &callback_data );
   *template = NULL;
 
-  if ( parse_func( parser, file_or_buf, &callbacks ) ) {
+  if ( jxtl_parser_parse_file( parser, file, &callbacks ) ) {
     *template = jxtl_template_create( mp, callback_data.current_array );
     result = TRUE;
   }
@@ -359,21 +356,26 @@ static int parse_file_or_buffer( apr_pool_t *mp, parser_t *parser,
   return result;
 }
 
-
-int jxtl_parser_parse_file_to_template( apr_pool_t *mp, parser_t *parser,
-                                        const char *file,
-                                        jxtl_template_t **template )
-{
-  return parse_file_or_buffer( mp, parser, file, jxtl_parser_parse_file,
-                               template );
-}
-
 int jxtl_parser_parse_buffer_to_template( apr_pool_t* mp, parser_t *parser,
                                           const char *buffer,
                                           jxtl_template_t **template )
 {
-  return parse_file_or_buffer( mp, parser, buffer, jxtl_parser_parse_buffer,
-                               template );
+  int result = FALSE;
+  apr_pool_t *tmp_mp;
+  jxtl_callback_t callbacks;
+  jxtl_data_t callback_data;
+
+  apr_pool_create( &tmp_mp, NULL );
+  initialize_callbacks( mp, tmp_mp, &callbacks, &callback_data );
+  *template = NULL;
+
+  if ( jxtl_parser_parse_buffer( parser, buffer, &callbacks ) ) {
+    *template = jxtl_template_create( mp, callback_data.current_array );
+    result = TRUE;
+  }
+
+  apr_pool_destroy( tmp_mp );
+  return result;
 }
 
 /***************************************************************************

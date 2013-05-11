@@ -79,7 +79,7 @@ typedef char * ( *jxtl_format_func )( json_t *value, char *format,
  * Parse a file into a jxtl_template.
  */
 int jxtl_parser_parse_file_to_template( apr_pool_t *mp, parser_t *parser,
-                                        const char *file,
+                                        apr_file_t *file,
                                         jxtl_template_t **template );
 /**
  * Parse a buffer into a jxtl_template.

@@ -110,7 +110,7 @@ parser_t *parser_create( apr_pool_t *mp,
  * @param file The filename to parse.
  * @return TRUE or FALSE.
  */
-int parser_parse_file( parser_t *parser, const char *file );
+int parser_parse_file( parser_t *parser, apr_file_t *file );
 
 /**
  * Parse a buffer.

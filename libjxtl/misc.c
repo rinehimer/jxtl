@@ -21,10 +21,43 @@
 
 #include <stdlib.h>
 #include <apr_errno.h>
+#include <apr_general.h>
+#include <apr_file_io.h>
+#include <apr_pools.h>
+#include <apr_strings.h>
 
 apr_status_t mem_free( void *ptr )
 {
   free( ptr );
 
   return APR_SUCCESS;
+}
+
+int open_apr_input_file( apr_pool_t *mp, const char *file_name,
+                         apr_file_t **file )
+{
+  apr_status_t status;
+
+  if ( apr_strnatcasecmp( file_name, "-" ) == 0 ) {
+    status = apr_file_open_stdin( file, mp );
+  }
+  else {
+    status = apr_file_open( file, file_name, APR_READ | APR_BUFFERED, 0, mp );
+  }
+  return ( status == APR_SUCCESS );
+}
+
+int open_apr_output_file( apr_pool_t *mp, const char *file_name,
+                          apr_file_t **file )
+{
+  apr_status_t status;
+
+  if ( !file_name || apr_strnatcasecmp( file_name, "-" ) == 0 ) {
+    status = apr_file_open_stdout( file, mp );
+  }
+  else {
+    status = apr_file_open( file, file_name, APR_WRITE | APR_CREATE |
+                            APR_BUFFERED | APR_TRUNCATE, APR_OS_DEFAULT, mp );
+  }
+  return ( status == APR_SUCCESS );
 }

@@ -151,16 +151,16 @@ parser_t *json_parser_create( apr_pool_t *mp )
                         json_parse );
 }
 
-int json_parser_parse_file( parser_t *parser, const char *file,
+int json_parser_parse_file( parser_t *parser, const void *file,
                             json_callback_t *json_callbacks )
 {
   parser_set_user_data( parser, json_callbacks );
-  return parser_parse_file( parser, file );
+  return parser_parse_file( parser, (apr_file_t *) file );
 }
 
-int json_parser_parse_buffer( parser_t *parser, const char *buffer,
+int json_parser_parse_buffer( parser_t *parser, const void *buffer,
                               json_callback_t *json_callbacks )
 {
   parser_set_user_data( parser, json_callbacks );
-  return parser_parse_buffer( parser, buffer );
+  return parser_parse_buffer( parser, (const char *) buffer );
 }

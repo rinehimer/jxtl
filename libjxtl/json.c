@@ -125,9 +125,9 @@ static void initialize_callbacks( apr_pool_t *json_mp, apr_pool_t *tmp_mp,
 }
 
 static int parse_file_or_buffer( apr_pool_t *mp, parser_t *parser,
-                                 const char *file_or_buf,
+                                 const void *file_or_buf,
                                  int ( *parse_func )( parser_t *,
-                                                      const char *,
+                                                      const void *,
                                                       json_callback_t * ),
                                  json_t **obj )
 {
@@ -152,17 +152,17 @@ static int parse_file_or_buffer( apr_pool_t *mp, parser_t *parser,
 }
 
 int json_parser_parse_file_to_obj( apr_pool_t *mp, parser_t *parser,
-                                   const char *file, json_t **obj )
+                                   apr_file_t *file, json_t **obj )
 {
-  return parse_file_or_buffer( mp, parser, file, json_parser_parse_file,
-                               obj );
+  return parse_file_or_buffer( mp, parser, (const void *) file,
+                               json_parser_parse_file, obj );
 }
 
 int json_parser_parse_buffer_to_obj( apr_pool_t *mp, parser_t *parser,
                                      const char *buffer, json_t **obj )
 {
-  return parse_file_or_buffer( mp, parser, buffer, json_parser_parse_buffer,
-                               obj );
+  return parse_file_or_buffer( mp, parser, (const void *) buffer,
+                               json_parser_parse_buffer, obj );
 }
 
 static void print_spaces( int num )
