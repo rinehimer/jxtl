@@ -70,6 +70,8 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %token <string> T_TEXT "text"  T_PATH_EXPR "path expression" T_STRING "string"
                 T_IDENTIFIER "identifier"
 
+%type <string> var_type
+
 %left T_ELSEIF T_ELSE
 
 %%
@@ -121,19 +123,6 @@ section_directive
       }
     }
 ;
-
-param_usage
-  : T_DIRECTIVE_START '$' T_IDENTIFIER T_DIRECTIVE_END
-    {
-      if ( callbacks->param_usage_handler &&
-           ! callbacks->param_usage_handler( callbacks->user_data, $<string>3 ) ) {
-        jxtl_error( &@3, scanner, parser, callbacks_ptr,
-                    callbacks->get_error_func( callbacks->user_data ) );
-      }
-
-    }
-;
-    
 
 if_directive
   : T_DIRECTIVE_START T_IF T_PATH_EXPR T_DIRECTIVE_END
@@ -188,7 +177,6 @@ section_content
   | section_content value_directive
   | section_content section_directive
   | section_content if_directive
-  | section_content param_usage
 ;
 
 options
@@ -210,16 +198,21 @@ option
         callbacks->format_handler( callbacks->user_data, $<string>3 );
       }
     }
-  | T_IDENTIFIER '=' T_STRING
+  | T_IDENTIFIER '=' var_type
     {
-      if ( callbacks->param_decl_handler &&
-           ! callbacks->param_decl_handler( callbacks->user_data, $<string>1,
+      if ( callbacks->var_decl_handler &&
+           ! callbacks->var_decl_handler( callbacks->user_data, $<string>1,
                                           $<string>3 ) ) {
         jxtl_error( &@3, scanner, parser, callbacks_ptr,
                     callbacks->get_error_func( callbacks->user_data ) );        
       }
     }
-  | T_IDENTIFIER '=' T_PATH_EXPR
+;
+
+var_type
+  : T_STRING { $$ = $<string>1; }
+  | T_PATH_EXPR { $$ = $<string>1; }
+  | T_IDENTIFIER { $$ = $<string>1; }
 ;
 
 %%

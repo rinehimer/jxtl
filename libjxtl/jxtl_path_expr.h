@@ -32,6 +32,7 @@ typedef enum jxtl_path_expr_type {
   JXTL_PATH_CURRENT_OBJ,
   JXTL_PATH_ANY_OBJ,
   JXTL_PATH_LOOKUP,
+  JXTL_PATH_VARIABLE,
 } jxtl_path_expr_type;
 
 typedef struct jxtl_path_expr_t {

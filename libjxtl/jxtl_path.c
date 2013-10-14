@@ -9,6 +9,7 @@
 #include "jxtl_path.h"
 #include "jxtl_path_parse.h"
 #include "jxtl_path_lex.h"
+#include "jxtl_template.h"
 #include "parser.h"
 
 #define NODELIST_SIZE 1024
@@ -16,10 +17,13 @@
 static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
                                      json_t *json,
                                      apr_array_header_t *nodes,
+                                     apr_hash_t *vars,
                                      int predicate_depth );
+
 static void jxtl_path_test_node( jxtl_path_expr_t *expr,
                                  json_t *json,
                                  apr_array_header_t *nodes,
+                                 apr_hash_t *vars,
                                  int predicate_depth );
 
 static jxtl_path_obj_t *jxtl_path_obj_create( apr_pool_t *mp )
@@ -41,6 +45,7 @@ static jxtl_path_obj_t *jxtl_path_obj_create( apr_pool_t *mp )
 static void jxtl_finish_predicate( jxtl_path_expr_t *expr,
                                    json_t *json,
                                    apr_array_header_t *nodes,
+                                   apr_hash_t *vars,
                                    int predicate_nodes,
                                    int predicate_depth )
 {
@@ -50,13 +55,14 @@ static void jxtl_finish_predicate( jxtl_path_expr_t *expr,
     APR_ARRAY_PUSH( nodes, json_t * ) = json;
   }
   else if ( result && expr->next ) {
-    jxtl_path_eval_internal( expr->next, json, nodes, predicate_depth );
+    jxtl_path_eval_internal( expr->next, json, nodes, vars, predicate_depth );
   }
 }
 
 static void jxtl_path_test_node( jxtl_path_expr_t *expr,
                                  json_t *json,
                                  apr_array_header_t *nodes,
+                                 apr_hash_t *vars,
                                  int predicate_depth )
 {
   if ( json && expr ) {
@@ -77,22 +83,22 @@ static void jxtl_path_test_node( jxtl_path_expr_t *expr,
           APR_ARRAY_CLEAR( predicate_nodes );
           tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
           jxtl_path_eval_internal( expr->predicate, tmp_json, predicate_nodes,
-                                   predicate_depth + 1 );
-          jxtl_finish_predicate( expr, tmp_json, nodes,
+                                   vars, predicate_depth + 1 );
+          jxtl_finish_predicate( expr, tmp_json, nodes, vars,
                                  predicate_nodes->nelts, predicate_depth );
         }
       }
       else {
         jxtl_path_eval_internal( expr->predicate, json, predicate_nodes,
-                                 predicate_depth + 1 );
-        jxtl_finish_predicate( expr, json, nodes, predicate_nodes->nelts,
+                                 vars, predicate_depth + 1 );
+        jxtl_finish_predicate( expr, json, nodes, vars, predicate_nodes->nelts,
                                predicate_depth );
       }
       apr_pool_destroy( mp );
     }
     else if ( expr->next ) {
       /* No predicate, but expression keeps going. */
-      jxtl_path_eval_internal( expr->next, json, nodes, predicate_depth );
+      jxtl_path_eval_internal( expr->next, json, nodes, vars, predicate_depth );
     }
     else {
       /* This is the end of the expression, push on whatever nodes are left. */
@@ -118,11 +124,12 @@ static void jxtl_path_test_node( jxtl_path_expr_t *expr,
 static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
                                      json_t *json,
                                      apr_array_header_t *nodes,
+                                     apr_hash_t *vars,
                                      int predicate_depth )
 {
-  int i;
   json_t *tmp_json = NULL;
   apr_hash_index_t *idx;
+  int i;
 
   if ( !json )
     return;
@@ -133,7 +140,7 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
   if ( json->type == JSON_ARRAY ) {
     for ( i = 0; i < json->value.array->nelts; i++ ) {
       tmp_json = APR_ARRAY_IDX( json->value.array, i, json_t * );
-      jxtl_path_eval_internal( expr, tmp_json, nodes, predicate_depth );
+      jxtl_path_eval_internal( expr, tmp_json, nodes, vars, predicate_depth );
     }
     return;
   }
@@ -160,7 +167,7 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
       for ( idx = apr_hash_first( NULL, json->value.object ); idx;
             idx = apr_hash_next( idx ) ) {
         apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
-        jxtl_path_test_node( expr, tmp_json, nodes, predicate_depth );
+        jxtl_path_test_node( expr, tmp_json, nodes, vars, predicate_depth );
       }
     }
     return;
@@ -173,18 +180,40 @@ static void jxtl_path_eval_internal( jxtl_path_expr_t *expr,
     }
     break;
 
+  case JXTL_PATH_VARIABLE:
+    if ( vars ) {
+      jxtl_var_t *var = apr_hash_get( vars, expr->identifier,
+                                      APR_HASH_KEY_STRING );
+      if ( var ) {
+        jxtl_path_obj_t *obj;
+        apr_pool_t *tmp_mp;
+        apr_pool_create( &tmp_mp, NULL );
+        if ( jxtl_path_compiled_eval( tmp_mp, var->expr, json, vars, &obj ) ) {
+          for ( i = 0; i < obj->nodes->nelts; i++ ) {
+            tmp_json = APR_ARRAY_IDX( obj->nodes, i, json_t * );
+            jxtl_path_test_node( expr, tmp_json, nodes, vars,
+                                 predicate_depth );
+          }
+        }
+        apr_pool_destroy( tmp_mp );
+      }
+    }
+    return;
+    break;
+
   default:
     break;
   }
 
-  jxtl_path_test_node( expr, tmp_json, nodes, predicate_depth );
+  jxtl_path_test_node( expr, tmp_json, nodes, vars, predicate_depth );
 }
 
 /**
  * Evaluate a pre-compiled expression.  Returns the number of nodes.
  */
 int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
-                             json_t *json, jxtl_path_obj_t **obj_ptr )
+                             json_t *json, apr_hash_t *vars,
+                             jxtl_path_obj_t **obj_ptr )
 {
   jxtl_path_obj_t *obj;
 
@@ -195,7 +224,7 @@ int jxtl_path_compiled_eval( apr_pool_t *mp, jxtl_path_expr_t *expr,
   }
 
   obj = jxtl_path_obj_create( mp );
-  jxtl_path_eval_internal( expr, json, obj->nodes, 0 );
+  jxtl_path_eval_internal( expr, json, obj->nodes, vars, 0 );
   *obj_ptr = obj;
 
   return obj->nodes->nelts;
@@ -216,7 +245,7 @@ int jxtl_path_eval( apr_pool_t *mp, const char *path, json_t *json,
   parser = jxtl_path_parser_create( mp );
 
   if ( jxtl_path_parser_parse_buffer_to_expr( mp, parser, path, &expr ) ) {
-    return jxtl_path_compiled_eval( mp, expr, json, obj_ptr );
+    return jxtl_path_compiled_eval( mp, expr, json, NULL, obj_ptr );
   }
   else {
     return -1;

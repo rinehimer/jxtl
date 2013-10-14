@@ -61,6 +61,11 @@ typedef struct jxtl_data_t {
   jxtl_content_t *last_section_or_value;
 
   /**
+   * Pointer to the last section pushed into the content.
+   */
+  jxtl_section_t *last_section;
+
+  /**
    * Reusable path parser.
    */
   parser_t *jxtl_path_parser;
@@ -72,7 +77,7 @@ typedef struct jxtl_data_t {
 
   /**
    * Last error encountered during parsing.  Could come from the path
-   * parser or be something like an invalid parameter reference.
+   * parser or be something like an invalid variable reference.
    */
   str_buf_t *error_buf;
 } jxtl_data_t;
@@ -91,7 +96,6 @@ static void content_push( jxtl_data_t *data, jxtl_content_type type,
   content->value = value;
   content->separator = NULL;
   content->format = NULL;
-  content->params = apr_hash_make( data->mp );
 
   if ( ( type == JXTL_SECTION ) || ( type == JXTL_VALUE ) ) {
     data->last_section_or_value = content;
@@ -122,48 +126,6 @@ static jxtl_content_t *jxtl_get_last_content( jxtl_data_t *data )
 
   content_array = APR_ARRAY_TAIL( data->content_array, apr_array_header_t * );
   return APR_ARRAY_TAIL( content_array, jxtl_content_t * );
-}
-
-static jxtl_param_t *lookup_param_in_content_array( apr_array_header_t *content_array,
-                                                    char *name )
-{
-  int i;
-  jxtl_content_t *content;
-  jxtl_param_t *param;
-
-  for ( i = 0; i < content_array->nelts; i++ ) {
-    content = APR_ARRAY_IDX( content_array, i, jxtl_content_t * );
-    param = apr_hash_get( content->params, name, APR_HASH_KEY_STRING );
-    if ( param ) {
-      return param;
-    }
-  }
-
-  return NULL;
-}
-
-static jxtl_param_t *lookup_param( jxtl_data_t *data, char *name )
-{
-  apr_array_header_t *content_array;
-  jxtl_param_t *param;
-  int i;
- 
-  param = lookup_param_in_content_array( data->current_array, name );
-
-  if ( param ) {
-    return param;
-  }
-
-  for ( i = data->content_array->nelts - 1; i > 0; i-- ) {
-    content_array = APR_ARRAY_IDX( data->content_array, i,
-                                   apr_array_header_t * );
-    param = lookup_param_in_content_array( content_array, name );
-    if ( param ) {
-      return param;
-    }
-  }
-
-  return NULL;
 }
 
 static void jxtl_set_error( jxtl_data_t *data, const char *error_string, ... )
@@ -218,6 +180,8 @@ static int jxtl_section_start( void *user_data, char *expr )
 
   section->content = apr_array_make( data->mp, 1024,
                                      sizeof(jxtl_content_t *) );
+  section->vars = apr_hash_make( data->mp );
+  data->last_section = section;
   content_push( data, JXTL_SECTION, section );
   set_content_array( data, section->content );
 
@@ -237,45 +201,26 @@ static void jxtl_section_end( void *user_data )
                                        apr_array_header_t * );
 }
 
-static int jxtl_param_decl( void *user_data, char *name, char *expr )
+static int jxtl_var_decl( void *user_data, char *name, char *expr )
 {
   jxtl_data_t *data = (jxtl_data_t *) user_data;
   jxtl_content_t *content;
-  jxtl_param_t *param;
+  jxtl_var_t *var;
   jxtl_template_t *template;
   int result;
 
-  result = jxtl_parser_parse_buffer_to_template( data->mp, data->jxtl_parser,
-                                                 expr, &template );
+  var = apr_palloc( data->mp, sizeof(jxtl_var_t) );
+  var->name = apr_pstrdup( data->mp, name );
+  result = jxtl_path_parser_parse_buffer_to_expr( data->mp,
+                                                  data->jxtl_path_parser,
+                                                  expr, &var->expr );
   if ( !result ) {
-    jxtl_set_error( data, parser_get_error( data->jxtl_parser ) );
+    jxtl_set_error( data, parser_get_error( data->jxtl_path_parser ) );
   }
   
-  content = jxtl_get_last_content( data );
-
-  param = apr_palloc( data->mp, sizeof(jxtl_param_t) );
-  param->name = apr_pstrdup( data->mp, name );
-  param->content = template->content;
-
-  apr_hash_set( content->params, param->name, APR_HASH_KEY_STRING, param );
+  apr_hash_set( data->last_section->vars, var->name, APR_HASH_KEY_STRING, var );
 
   return result;
-}
-static int jxtl_param_usage( void *user_data, char *name )
-{
-  jxtl_data_t *data = (jxtl_data_t *) user_data;
-  jxtl_param_t *param;
-
-  param = lookup_param( data, name );
-  if ( ! param ) {
-    jxtl_set_error( data, "Invalid parameter reference:  \"%s\"", name );
-    return FALSE;
-  }
-  else {
-    content_push( data, JXTL_PARAM_REF, param );
-  }
-
-  return TRUE;
 }
 
 /**
@@ -448,8 +393,7 @@ static void initialize_callbacks( apr_pool_t *template_mp,
   callbacks->text_handler = jxtl_text_handler;
   callbacks->section_start_handler = jxtl_section_start;
   callbacks->section_end_handler = jxtl_section_end;
-  callbacks->param_decl_handler = jxtl_param_decl;
-  callbacks->param_usage_handler = jxtl_param_usage;
+  callbacks->var_decl_handler = jxtl_var_decl;
   callbacks->if_start_handler = jxtl_if_start;
   callbacks->elseif_handler = jxtl_elseif;
   callbacks->else_handler = jxtl_else;
@@ -605,6 +549,7 @@ static void expand_content( apr_pool_t *mp,
                             jxtl_template_t *template,
                             apr_array_header_t *content_array,
                             json_t *json,
+                            apr_hash_t *vars,
                             char *prev_format,
                             section_print_type print_type );
 
@@ -627,15 +572,16 @@ static void expand_section( apr_pool_t *mp,
   if ( !json )
     return;
 
-  num_items = jxtl_path_compiled_eval( mp, section->expr, json, &path_obj );
+  num_items = jxtl_path_compiled_eval( mp, section->expr, json, section->vars,
+                                       &path_obj );
   for ( i = 0; i < path_obj->nodes->nelts; i++ ) {
     json_value = APR_ARRAY_IDX( path_obj->nodes, i, json_t * );
-    expand_content( mp, template, section->content, json_value, format,
-                    PRINT_SECTION );
+    expand_content( mp, template, section->content, json_value, section->vars,
+                    format, PRINT_SECTION );
     /* Only print the separator if it's not the last one */
     if ( separator && ( i + 1 < num_items ) ) {
-      expand_content( mp, template, separator, json_value, format,
-                      PRINT_SEPARATOR );
+      expand_content( mp, template, separator, json_value, section->vars,
+                      format, PRINT_SEPARATOR );
     }
   }
 }
@@ -647,13 +593,14 @@ static void expand_section( apr_pool_t *mp,
  * 3) If there was exactly one node and it is a boolean and it's value is true.
  * 4) Anything else is false.
  */
-static int is_true_if( apr_pool_t *mp, jxtl_if_t *jxtl_if, json_t *json )
+static int is_true_if( apr_pool_t *mp, jxtl_if_t *jxtl_if, json_t *json,
+                       apr_hash_t *vars )
 {
   json_t *tmp_json;
   int result = FALSE;
   jxtl_path_obj_t *path_obj;
 
-  jxtl_path_compiled_eval( mp, jxtl_if->expr, json, &path_obj );
+  jxtl_path_compiled_eval( mp, jxtl_if->expr, json, vars, &path_obj );
 
   if ( path_obj->nodes->nelts > 1 ) {
     result = TRUE;
@@ -671,6 +618,7 @@ static void expand_content( apr_pool_t *mp,
                             jxtl_template_t *template,
                             apr_array_header_t *content_array,
                             json_t *json,
+                            apr_hash_t *vars,
                             char *prev_format,
                             section_print_type print_type )
 {
@@ -681,7 +629,7 @@ static void expand_content( apr_pool_t *mp,
   jxtl_if_t *jxtl_if;
   apr_array_header_t *if_block;
   jxtl_path_obj_t *path_obj;
-  jxtl_param_t *param;
+  jxtl_var_t *var;
   char *format;
 
   prev_content = NULL;
@@ -704,7 +652,7 @@ static void expand_content( apr_pool_t *mp,
       expand_section( mp, template, tmp_section, content->separator, json,
                       format, PRINT_SECTION );
       break;
-
+      
     case JXTL_IF:
       /*
        * Loop through all of the ifs until we find a true one and then break
@@ -713,32 +661,27 @@ static void expand_content( apr_pool_t *mp,
       if_block = (apr_array_header_t *) content->value;
       for ( j = 0; j < if_block->nelts; j++ ) {
         jxtl_if = APR_ARRAY_IDX( if_block, j, jxtl_if_t * );
-        if ( !jxtl_if->expr || ( is_true_if( mp, jxtl_if, json ) ) ) {
-          expand_content( mp, template, jxtl_if->content, json, prev_format,
-                          PRINT_SECTION );
+        if ( !jxtl_if->expr || ( is_true_if( mp, jxtl_if, json, vars ) ) ) {
+          expand_content( mp, template, jxtl_if->content, json, vars,
+                          prev_format, PRINT_SECTION );
           break;
         }
       }
       break;
-
+      
     case JXTL_VALUE:
       format = ( content->format ) ? content->format : prev_format;
-      if ( jxtl_path_compiled_eval( mp, content->value, json, &path_obj ) ) {
+      if ( jxtl_path_compiled_eval( mp, content->value, json, vars,
+                                    &path_obj ) ) {
         for ( j = 0; j < path_obj->nodes->nelts; j++ ) {
           json_value = APR_ARRAY_IDX( path_obj->nodes, j, json_t * );
           print_json_value( json_value, format, mp, template );
           if ( content->separator && ( j + 1 < path_obj->nodes->nelts ) ) {
             expand_content( mp, template, content->separator, json_value,
-                            format, PRINT_SEPARATOR );
+                            vars, format, PRINT_SEPARATOR );
           }
         }
       }
-      break;
-
-    case JXTL_PARAM_REF:
-      param = (jxtl_param_t *) content->value;
-      expand_content( mp, template, param->content, json, prev_format,
-                      PRINT_SECTION );
       break;
     }
     prev_content = content;
@@ -771,9 +714,9 @@ void expand_template( jxtl_template_t *template, json_t *json,
   template->bb = apr_brigade_create( template->expand_mp, bucket_alloc );
 
   expand_content( template->expand_mp, template, template->content, json,
-                  NULL, PRINT_NORMAL );
+                  NULL, NULL, PRINT_NORMAL );
 }
-
+ 
 int jxtl_template_expand_to_file( jxtl_template_t *template, json_t *json,
                                   apr_file_t *out )
 {

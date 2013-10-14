@@ -34,8 +34,6 @@ typedef enum jxtl_content_type {
   JXTL_SECTION,
   JXTL_VALUE,
   JXTL_IF,
-  JXTL_PARAM_REF,
-  JXTL_PARAM_DECL
 } jxtl_content_type;
 
 typedef struct jxtl_content_t {
@@ -45,8 +43,7 @@ typedef struct jxtl_content_t {
   jxtl_content_type type;
 
   /**
-   * A string, pointer to a jxtl_section_t, jxtl_if_t, jxtl_path_expr_t or
-   * jxtl_param_t.
+   * A string, pointer to a jxtl_section_t, jxtl_if_t or jxtl_path_expr_t.
    */
   void *value;
 
@@ -59,11 +56,6 @@ typedef struct jxtl_content_t {
    * A format to be applied.
    */
   char *format;
-
-  /**
-   * Parameters declared within this content scope.
-   */
-  apr_hash_t *params;
 } jxtl_content_t;
 
 typedef struct jxtl_if_t {
@@ -76,15 +68,20 @@ typedef struct jxtl_section_t {
   jxtl_path_expr_t *expr;
   /** Array of the content in the section. */
   apr_array_header_t *content;
+
+  /**
+   * Variables declared within this section scope.
+   */
+  apr_hash_t *vars;
 } jxtl_section_t;
 
 /**
- * Type that stores a parameter.
+ * Type that stores a variable.
  */
-typedef struct jxtl_param_t {
+typedef struct jxtl_var_t {
   char *name;
-  apr_array_header_t *content;
-} jxtl_param_t;
+  jxtl_path_expr_t *expr;
+} jxtl_var_t;
 
 typedef apr_status_t ( *brigade_flush_func )( apr_bucket_brigade *bb,
                                               void *ctx );

@@ -53,10 +53,10 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %option case-insensitive
 %option nounput
 
-%x directive ident options str unmatched path_expr comment
+%x directive options str unmatched path_expr comment
 
 identifier [a-zA-Z][a-zA-Z0-9_]*
-path_expr [a-zA-Z0-9_/.*\[\]!]+
+path_expr [a-zA-Z0-9_/.*\[\]!$]+
 
 %%
 
@@ -93,7 +93,6 @@ path_expr [a-zA-Z0-9_/.*\[\]!]+
   "#if" { return T_IF; }
   "#else" { return T_ELSE; }
   "#elseif" { return T_ELSEIF; }
-  "$" { BEGIN( ident ); return '$'; }
   {path_expr} {
     yylval->string = apr_pstrndup( PARSER_MP, yytext, yyleng );
     return T_PATH_EXPR;
@@ -103,17 +102,6 @@ path_expr [a-zA-Z0-9_/.*\[\]!]+
   [ \t\r]+
   "\n"
   . { jxtl_lex_error( "illegal character '%c' found in path expression",
-                      yytext[0] ); }
-}
-
-<ident>{
-  {identifier} {
-    yylval->string = apr_pstrndup( PARSER_MP, yytext, yyleng );
-    return T_IDENTIFIER;
-  }
-  [ \t\r]+
-  "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
-  . { jxtl_lex_error( "illegal character '%c' found in identifier",
                       yytext[0] ); }
 }
 

@@ -1,0 +1,11 @@
+{{ #section brewery ;
+     separator = "\n",
+     brewery_name = name,
+     beer_names = beer[!season]/beer_name,
+     seasonal_beers = beer[season]/beer_name }}
+{{ $brewery_name }} brewery:
+  Regular:  {{ $beer_names ; separator=", " }}
+{{   #if $seasonal_beers }}
+  Seasonal: {{ $seasonal_beers ; separator=", " }}
+{{   #end }}
+{{ #end }}

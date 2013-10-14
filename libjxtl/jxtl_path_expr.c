@@ -77,16 +77,25 @@ static void create_expr( path_data_t *data,
 /**
  * Request to lookup an identifier.
  */
-static void lookup_identifier( void *user_data, char *ident )
+static void identifier_handler( void *user_data, char *ident )
 {
   path_data_t *data = (path_data_t *) user_data;
   create_expr( data, JXTL_PATH_LOOKUP, apr_pstrdup( data->mp, ident ) );
 }
 
 /**
+ * Create an expression to lookup a variable.
+ */
+static void variable_handler( void *user_data, char *ident )
+{
+  path_data_t *data = (path_data_t *) user_data;
+  create_expr( data, JXTL_PATH_VARIABLE, apr_pstrdup( data->mp, ident ) );
+}
+
+/**
  * Request for the root object.
  */
-static void get_root_object( void *user_data )
+static void root_object_handler( void *user_data )
 {
   create_expr( user_data, JXTL_PATH_ROOT_OBJ, NULL );
 }
@@ -94,7 +103,7 @@ static void get_root_object( void *user_data )
 /**
  * Request for the parent object.
  */
-static void get_parent_object( void *user_data )
+static void parent_object_handler( void *user_data )
 {
   create_expr( user_data, JXTL_PATH_PARENT_OBJ, NULL );
 }
@@ -102,7 +111,7 @@ static void get_parent_object( void *user_data )
 /**
  * Request for the current object.
  */
-static void get_current_object( void *user_data )
+static void current_object_handler( void *user_data )
 {
   create_expr( user_data, JXTL_PATH_CURRENT_OBJ, NULL );
 }
@@ -110,7 +119,7 @@ static void get_current_object( void *user_data )
 /**
  * Request for any object.
  */
-static void get_any_object( void *user_data )
+static void any_object_handler( void *user_data )
 {
   create_expr( user_data, JXTL_PATH_ANY_OBJ, NULL );
 }
@@ -119,7 +128,7 @@ static void get_any_object( void *user_data )
  * Start a predicate.  Push the current expression node on our stack and set
  * root and curr to NULL.
  */
-static void start_predicate( void *user_data )
+static void predicate_start_handler( void *user_data )
 {
   path_data_t *data = (path_data_t *) user_data;
 
@@ -134,7 +143,7 @@ static void start_predicate( void *user_data )
  * to be this expression and reset the curr and root pointers from what we
  * popped.
  */
-static void end_predicate( void *user_data )
+static void predicate_end_handler( void *user_data )
 {
   path_data_t *data = (path_data_t *) user_data;
   jxtl_path_expr_t *expr;
@@ -148,7 +157,7 @@ static void end_predicate( void *user_data )
 /**
  * Negate the current expression.
  */
-static void negate_expression( void *user_data )
+static void negate_handler( void *user_data )
 {
   path_data_t *data = (path_data_t *) user_data;
   data->root->negate = 1;
@@ -159,14 +168,15 @@ static void initialize_callbacks( apr_pool_t *mp,
 				  jxtl_path_callback_t *callbacks,
 				  path_data_t *cb_data )
 {
-  callbacks->identifier_handler = lookup_identifier;
-  callbacks->root_object_handler = get_root_object;
-  callbacks->parent_object_handler = get_parent_object;
-  callbacks->current_object_handler = get_current_object;
-  callbacks->any_object_handler = get_any_object;
-  callbacks->predicate_start_handler = start_predicate;
-  callbacks->predicate_end_handler = end_predicate;
-  callbacks->negate_handler = negate_expression;
+  callbacks->identifier_handler = identifier_handler;
+  callbacks->variable_handler = variable_handler;
+  callbacks->root_object_handler = root_object_handler;
+  callbacks->parent_object_handler = parent_object_handler;
+  callbacks->current_object_handler = current_object_handler;
+  callbacks->any_object_handler = any_object_handler;
+  callbacks->predicate_start_handler = predicate_start_handler;
+  callbacks->predicate_end_handler = predicate_end_handler;
+  callbacks->negate_handler = negate_handler;
 
   cb_data->expr_array = apr_array_make( tmp_mp, 32,
 					sizeof(jxtl_path_expr_t *) );

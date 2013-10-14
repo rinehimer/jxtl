@@ -85,6 +85,8 @@ path_pattern
   | T_PARENT { callbacks->parent_object_handler( callbacks->user_data ); } predicate
   | '*' { callbacks->any_object_handler( callbacks->user_data ); } predicate
   | path_pattern '/' path_pattern
+  | '$' T_IDENTIFIER { callbacks->variable_handler( callbacks->user_data,
+                                                    $<string>2 ); } predicate
 ;
 
 predicate
@@ -106,6 +108,7 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
   va_list args;
   va_start( args, error_string );
   str_buf_vprintf( parser->err_buf, error_string, args );
+  str_buf_putc( parser->err_buf, '\n' );
   va_end( args );
 }
 

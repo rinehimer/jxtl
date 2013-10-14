@@ -221,12 +221,11 @@ void jxtl_free (void * ,yyscan_t yyscanner );
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
 #define directive 1
-#define ident 2
-#define options 3
-#define str 4
-#define unmatched 5
-#define path_expr 6
-#define comment 7
+#define options 2
+#define str 3
+#define unmatched 4
+#define path_expr 5
+#define comment 6
 
 #endif
 
@@ -344,9 +343,9 @@ extern int jxtl_lex \
 #undef YY_DECL
 #endif
 
-#line 196 "jxtl_lex.l"
+#line 184 "jxtl_lex.l"
 
 
-#line 351 "jxtl_lex.h"
+#line 350 "jxtl_lex.h"
 #undef jxtl_IN_HEADER
 #endif /* jxtl_HEADER_H */
