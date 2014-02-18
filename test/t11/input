@@ -1,11 +1,15 @@
+{{! Test variables. -}}
 {{ #section brewery ;
-     separator = "\n",
+     separator = "\n\n",
      brewery_name = name,
      beer_names = beer[!season]/beer_name,
-     seasonal_beers = beer[season]/beer_name }}
+     seasonal_beers = beer[season] }}
 {{ $brewery_name }} brewery:
-  Regular:  {{ $beer_names ; separator=", " }}
+  Year Round Beers:  {{ $beer_names ; separator=", " }}
 {{   #if $seasonal_beers }}
-  Seasonal: {{ $seasonal_beers ; separator=", " }}
-{{   #end }}
+  Seasonal Beers:  {{
+        #section $seasonal_beers ; separator=", " }}
+{{ beer_name }} ({{ season }})
+{{      #end }}
+{{  #end }}
 {{ #end }}

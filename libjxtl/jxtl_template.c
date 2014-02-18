@@ -561,6 +561,7 @@ static void expand_section( apr_pool_t *mp,
                             jxtl_section_t *section,
                             apr_array_header_t *separator,
                             json_t *json,
+                            apr_hash_t *vars,
                             char *format,
                             section_print_type print_type )
 {
@@ -572,7 +573,7 @@ static void expand_section( apr_pool_t *mp,
   if ( !json )
     return;
 
-  num_items = jxtl_path_compiled_eval( mp, section->expr, json, section->vars,
+  num_items = jxtl_path_compiled_eval( mp, section->expr, json, vars,
                                        &path_obj );
   for ( i = 0; i < path_obj->nodes->nelts; i++ ) {
     json_value = APR_ARRAY_IDX( path_obj->nodes, i, json_t * );
@@ -649,7 +650,7 @@ static void expand_content( apr_pool_t *mp,
     case JXTL_SECTION:
       tmp_section = (jxtl_section_t *) content->value;
       format = ( content->format ) ? content->format : prev_format;
-      expand_section( mp, template, tmp_section, content->separator, json,
+      expand_section( mp, template, tmp_section, content->separator, json, vars,
                       format, PRINT_SECTION );
       break;
       
