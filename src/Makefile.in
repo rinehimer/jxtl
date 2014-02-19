@@ -34,7 +34,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = jxtl$(EXEEXT) xml2json$(EXEEXT)
+bin_PROGRAMS = jxtl$(EXEEXT) xml2json$(EXEEXT) \
+	xml2json_static$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -62,6 +63,13 @@ xml2json_DEPENDENCIES = $(LIBJXTL)
 xml2json_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(xml2json_CFLAGS) $(CFLAGS) \
 	$(xml2json_LDFLAGS) $(LDFLAGS) -o $@
+am__objects_1 = xml2json_static-xml2json.$(OBJEXT)
+am_xml2json_static_OBJECTS = $(am__objects_1)
+xml2json_static_OBJECTS = $(am_xml2json_static_OBJECTS)
+xml2json_static_DEPENDENCIES = $(LIBJXTL)
+xml2json_static_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(xml2json_static_CFLAGS) \
+	$(CFLAGS) $(xml2json_static_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -75,8 +83,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(jxtl_SOURCES) $(xml2json_SOURCES)
-DIST_SOURCES = $(jxtl_SOURCES) $(xml2json_SOURCES)
+SOURCES = $(jxtl_SOURCES) $(xml2json_SOURCES) \
+	$(xml2json_static_SOURCES)
+DIST_SOURCES = $(jxtl_SOURCES) $(xml2json_SOURCES) \
+	$(xml2json_static_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -139,7 +149,6 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
-PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -206,6 +215,7 @@ top_srcdir = @top_srcdir@
 INCLUDES = -I${top_srcdir}/libjxtl
 jxtl_SOURCES = jxtl.c
 xml2json_SOURCES = xml2json.c
+xml2json_static_SOURCES = $(xml2json_SOURCES)
 LIBJXTL = ${top_srcdir}/libjxtl/libjxtl.la
 jxtl_CFLAGS = -g ${APR_CFLAGS} ${APU_CFLAGS}
 jxtl_LDFLAGS = ${APR_LIBS} ${APU_LIBS}
@@ -213,6 +223,9 @@ jxtl_LDADD = ${LIBJXTL}
 xml2json_CFLAGS = -g ${APR_CFLAGS} ${APU_CFLAGS}
 xml2json_LDFLAGS = ${APR_LIBS} ${APU_LIBS}
 xml2json_LDADD = ${LIBJXTL}
+xml2json_static_CFLAGS = -static $(xml2json_CFLAGS)
+xml2json_static_LDFLAGS = -static $(xml2json_LDFLAGS)
+xml2json_static_LDADD = ${LIBJXTL}
 all: all-am
 
 .SUFFIXES:
@@ -296,6 +309,9 @@ jxtl$(EXEEXT): $(jxtl_OBJECTS) $(jxtl_DEPENDENCIES)
 xml2json$(EXEEXT): $(xml2json_OBJECTS) $(xml2json_DEPENDENCIES) 
 	@rm -f xml2json$(EXEEXT)
 	$(xml2json_LINK) $(xml2json_OBJECTS) $(xml2json_LDADD) $(LIBS)
+xml2json_static$(EXEEXT): $(xml2json_static_OBJECTS) $(xml2json_static_DEPENDENCIES) 
+	@rm -f xml2json_static$(EXEEXT)
+	$(xml2json_static_LINK) $(xml2json_static_OBJECTS) $(xml2json_static_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -305,6 +321,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jxtl-jxtl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml2json-xml2json.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml2json_static-xml2json.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -354,6 +371,20 @@ xml2json-xml2json.obj: xml2json.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='xml2json.c' object='xml2json-xml2json.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xml2json_CFLAGS) $(CFLAGS) -c -o xml2json-xml2json.obj `if test -f 'xml2json.c'; then $(CYGPATH_W) 'xml2json.c'; else $(CYGPATH_W) '$(srcdir)/xml2json.c'; fi`
+
+xml2json_static-xml2json.o: xml2json.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xml2json_static_CFLAGS) $(CFLAGS) -MT xml2json_static-xml2json.o -MD -MP -MF $(DEPDIR)/xml2json_static-xml2json.Tpo -c -o xml2json_static-xml2json.o `test -f 'xml2json.c' || echo '$(srcdir)/'`xml2json.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xml2json_static-xml2json.Tpo $(DEPDIR)/xml2json_static-xml2json.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='xml2json.c' object='xml2json_static-xml2json.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xml2json_static_CFLAGS) $(CFLAGS) -c -o xml2json_static-xml2json.o `test -f 'xml2json.c' || echo '$(srcdir)/'`xml2json.c
+
+xml2json_static-xml2json.obj: xml2json.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xml2json_static_CFLAGS) $(CFLAGS) -MT xml2json_static-xml2json.obj -MD -MP -MF $(DEPDIR)/xml2json_static-xml2json.Tpo -c -o xml2json_static-xml2json.obj `if test -f 'xml2json.c'; then $(CYGPATH_W) 'xml2json.c'; else $(CYGPATH_W) '$(srcdir)/xml2json.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xml2json_static-xml2json.Tpo $(DEPDIR)/xml2json_static-xml2json.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='xml2json.c' object='xml2json_static-xml2json.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xml2json_static_CFLAGS) $(CFLAGS) -c -o xml2json_static-xml2json.obj `if test -f 'xml2json.c'; then $(CYGPATH_W) 'xml2json.c'; else $(CYGPATH_W) '$(srcdir)/xml2json.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
