@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <apr_errno.h>
 #include <apr_general.h>
+#include <apr_getopt.h>
 #include <apr_file_io.h>
 #include <apr_pools.h>
 #include <apr_strings.h>
@@ -60,4 +61,17 @@ int open_apr_output_file( apr_pool_t *mp, const char *file_name,
                             APR_BUFFERED | APR_TRUNCATE, APR_OS_DEFAULT, mp );
   }
   return ( status == APR_SUCCESS );
+}
+
+void print_usage( const char *prog_name,
+                  const apr_getopt_option_t *options )
+{
+  int i;
+
+  printf( "Usage: %s [options]\n", prog_name );
+  printf( "  Options:\n" );
+  for ( i = 0; options[i].name; i++ ) {
+    printf( "    -%c, --%s %s\n", options[i].optch, options[i].name,
+            options[i].description );
+  }
 }

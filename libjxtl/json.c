@@ -165,56 +165,57 @@ int json_parser_parse_buffer_to_obj( apr_pool_t *mp, parser_t *parser,
                                json_parser_parse_buffer, obj );
 }
 
-static void print_spaces( int num )
+static void print_spaces( apr_file_t *out, int num )
 {
   while ( num-- > 0 ) {
-    printf( " " );
+    apr_file_printf( out,  " " );
   }
 }
 
-static void print_string( char *str )
+static void print_string( apr_file_t *out, char *str )
 {
   unsigned char *c = str;
 
-  printf( "\"" );
+  apr_file_printf( out,  "\"" );
   while ( *c ) {
     if ( *c < 32 ) {
-      printf( "\\" );
+      apr_file_printf( out,  "\\" );
       switch ( *c ) {
       case '\b':
-        printf( "b" );
+        apr_file_printf( out,  "b" );
         break;
       case '\t':
-        printf( "t" );
+        apr_file_printf( out,  "t" );
         break;
       case '\n':
-        printf( "n" );
+        apr_file_printf( out,  "n" );
         break;
       case '\f':
-        printf( "f" );
+        apr_file_printf( out,  "f" );
         break;
       case '\r':
-        printf( "r" );
+        apr_file_printf( out,  "r" );
         break;
       default:
-        printf( "u%.4x", *c );
+        apr_file_printf( out,  "u%.4x", *c );
         break;
       }
     }
     else if ( *c == '\\' ) {
-      printf( "\\\\" );
+      apr_file_printf( out,  "\\\\" );
     }
     else if ( *c == '"' ) {
-      printf( "\\\"" );
+      apr_file_printf( out,  "\\\"" );
     }
     else
-      printf( "%c", *c );
+      apr_file_printf( out,  "%c", *c );
     c++;
   }
-  printf( "\"" );
+  apr_file_printf( out,  "\"" );
 }
 
-static void dump_internal( json_t *json, int first, int depth, int indent )
+static void dump_internal( apr_file_t *out, json_t *json, int first,
+                           int depth, int indent )
 {
   apr_array_header_t *arr = NULL;
   int i = 0;
@@ -222,71 +223,71 @@ static void dump_internal( json_t *json, int first, int depth, int indent )
   apr_hash_index_t *idx;
 
   if ( !first )
-    printf( "," );
+    apr_file_printf( out,  "," );
 
   if ( ( depth > 0 ) && indent ) {
-    printf( "\n" );
-    print_spaces( depth * indent );
+    apr_file_printf( out,  "\n" );
+    print_spaces( out, depth * indent );
   }
 
   if ( JSON_NAME( json ) ) {
-    print_string( JSON_NAME( json ) );
-    printf( ":" );
+    print_string( out, JSON_NAME( json ) );
+    apr_file_printf( out,  ":" );
      if ( indent )
-      print_spaces( 1 );
+       print_spaces( out, 1 );
   }
 
   switch ( json->type ) {
   case JSON_STRING:
-    print_string( json->value.string );
+    print_string( out, json->value.string );
     break;
 
   case JSON_INTEGER:
-    printf( "%d", json->value.integer );
+    apr_file_printf( out,  "%d", json->value.integer );
     break;
 
   case JSON_NUMBER:
-    printf( "%g", json->value.number );
+    apr_file_printf( out,  "%g", json->value.number );
     break;
 
   case JSON_OBJECT:
-    printf( "{" );
+    apr_file_printf( out,  "{" );
     for ( i = 0, idx = apr_hash_first( NULL, json->value.object ); idx;
           i++, idx = apr_hash_next( idx ) ) {
       apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
-      dump_internal( tmp_json, i == 0, depth + 1, indent );
+      dump_internal( out, tmp_json, i == 0, depth + 1, indent );
     }
 
     if ( indent && i > 0 ) {
-      printf( "\n" );
-      print_spaces( depth * indent );
+      apr_file_printf( out,  "\n" );
+      print_spaces( out, depth * indent );
     }
-    printf( "}" );
+    apr_file_printf( out,  "}" );
     break;
 
   case JSON_ARRAY:
     arr = json->value.array;
-    printf( "[" );
+    apr_file_printf( out,  "[" );
     for ( i = 0; arr && i < arr->nelts; i++ ) {
       tmp_json = APR_ARRAY_IDX( arr, i, json_t * );
-      dump_internal( tmp_json, i == 0, depth + 1, indent );
+      dump_internal( out, tmp_json, i == 0, depth + 1, indent );
     }
 
     if ( indent && i > 0 ) {
-      printf( "\n" );
-      print_spaces( depth * indent );
+      apr_file_printf( out,  "\n" );
+      print_spaces( out, depth * indent );
     }
 
-    printf( "]" );
+    apr_file_printf( out,  "]" );
     break;
 
   case JSON_BOOLEAN:
-    ( json->value.boolean ) ? printf( "true" ) :
-                              printf( "false" );
+    ( json->value.boolean ) ? apr_file_printf( out,  "true" ) :
+                              apr_file_printf( out,  "false" );
     break;
 
   case JSON_NULL:
-    printf( "null" );
+    apr_file_printf( out,  "null" );
     break;
 
   default:
@@ -295,16 +296,16 @@ static void dump_internal( json_t *json, int first, int depth, int indent )
   }
 
   if ( ( depth == 0 ) && indent ) {
-    printf( "\n" );
+    apr_file_printf( out,  "\n" );
   }
 }
 
 /*
  * Externally visible function that invokes the internal print function.
  */
-void json_dump( json_t *json, int indent )
+void json_dump( apr_file_t *out, json_t *json, int indent )
 {
-  dump_internal( json, 1, 0, indent );
+  dump_internal( out, json, 1, 0, indent );
 }
 
 static void print_xml_string( char *str )
@@ -323,85 +324,6 @@ static void print_xml_string( char *str )
       printf( "%c", *c );
     c++;
   }
-}
-
-static void json_to_xml_internal( json_t *json, int indent )
-{
-  json_t *tmp_json;
-  apr_array_header_t *arr;
-  char *json_name = JSON_NAME( json );
-  apr_hash_index_t *idx;
-  int i;
-
-  if ( json_name && json->type != JSON_ARRAY ) {
-    print_spaces( indent );
-    printf( "<%s>", json_name );
-  }
-
-  switch ( json->type ) {
-  case JSON_STRING:
-    print_xml_string( json->value.string );
-    break;
-
-  case JSON_INTEGER:
-    printf( "%d", json->value.integer );
-    break;
-
-  case JSON_NUMBER:
-    printf( "%lf", json->value.number );
-    break;
-
-  case JSON_OBJECT:
-    for ( idx = apr_hash_first( NULL, json->value.object ); idx;
-          idx = apr_hash_next( idx ) ) {
-      apr_hash_this( idx, NULL, NULL, (void **) &tmp_json );
-      json_to_xml_internal( tmp_json, indent + 1 );
-    }
-    break;
-
-  case JSON_ARRAY:
-    arr = json->value.array;
-
-    for ( i = 0; i < arr->nelts; i++ ) {
-      tmp_json = APR_ARRAY_IDX( arr, i, json_t * );
-      print_spaces( indent );
-      printf( "<%s>", json_name );
-      json_to_xml_internal( tmp_json, indent + 1 );
-      printf( "</%s>\n", json_name );
-    }
-    break;
-
-  case JSON_BOOLEAN:
-    ( json->value.boolean ) ?
-      printf( "true" ) :
-      printf( "false" );
-    break;
-
-  case JSON_NULL:
-    printf( "null" );
-    break;
-
-  default:
-    fprintf( stderr, "error:  unrecognized object type\n" );
-    break;
-  }
-
-  if ( json_name && json->type != JSON_ARRAY ) {
-    printf( "</%s>\n", json_name );
-  }
-}
-
-/*
- * Figure out if I really want to keep this around, it was really more for
- * debugging early on.  There could potentially be some use, but it's possible
- * the XML produced is invalid since it doesn't use an API to generate it.
- */
-void json_to_xml( json_t *json, int indent )
-{
-  printf( "<?xml version=\"1.0\"?>\n" );
-  printf( "<json>\n" );
-  json_to_xml_internal( json, 1 );
-  printf( "</json>\n" );
 }
 
 char *json_get_string_value( apr_pool_t *mp, json_t *json )
