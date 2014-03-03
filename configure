@@ -13710,7 +13710,7 @@ if $APU_CONFIG --avoid-dbm > /dev/null 2>&1 ; then
 fi
 
 if $APU_CONFIG --avoid-ldap > /dev/null 2>&1 ; then
-  AVOID_FLAGS="--avoid-ldap"
+  AVOID_FLAGS="$AVOID_FLAGS --avoid-ldap"
 fi
 
 APU_CFLAGS=`$APU_CONFIG --includes`
