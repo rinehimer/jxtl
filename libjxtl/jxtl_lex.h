@@ -51,6 +51,7 @@ typedef int16_t flex_int16_t;
 typedef uint16_t flex_uint16_t;
 typedef int32_t flex_int32_t;
 typedef uint32_t flex_uint32_t;
+typedef uint64_t flex_uint64_t;
 #else
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
@@ -161,7 +162,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	int yy_n_chars;
+	yy_size_t yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -205,7 +206,7 @@ void jxtl_pop_buffer_state (yyscan_t yyscanner );
 
 YY_BUFFER_STATE jxtl__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
 YY_BUFFER_STATE jxtl__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE jxtl__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE jxtl__scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
 
 void *jxtl_alloc (yy_size_t ,yyscan_t yyscanner );
 void *jxtl_realloc (void *,yy_size_t ,yyscan_t yyscanner );
@@ -221,10 +222,10 @@ void jxtl_free (void * ,yyscan_t yyscanner );
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
 #define directive 1
-#define options 2
-#define str 3
-#define unmatched 4
-#define path_expr 5
+#define path_expr 2
+#define options 3
+#define str 4
+#define unmatched 5
 #define comment 6
 
 #endif
@@ -266,7 +267,7 @@ FILE *jxtl_get_out (yyscan_t yyscanner );
 
 void jxtl_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-int jxtl_get_leng (yyscan_t yyscanner );
+yy_size_t jxtl_get_leng (yyscan_t yyscanner );
 
 char *jxtl_get_text (yyscan_t yyscanner );
 
@@ -343,9 +344,9 @@ extern int jxtl_lex \
 #undef YY_DECL
 #endif
 
-#line 172 "jxtl_lex.l"
+#line 211 "jxtl_lex.l"
 
 
-#line 350 "jxtl_lex.h"
+#line 351 "jxtl_lex.h"
 #undef jxtl_IN_HEADER
 #endif /* jxtl_HEADER_H */

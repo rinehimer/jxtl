@@ -53,7 +53,9 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %option case-insensitive
 %option nounput
 
-%x directive options str unmatched path_expr comment
+path_expr_chars [a-zA-Z0-9_/.*\[\]!]
+
+%x directive path_expr options str unmatched comment
 
 %%
 
@@ -80,27 +82,64 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
   "{{!" {
     BEGIN( comment );
   }
-  "{"|"\n" { str_buf_putc( PARSER_STR_BUF, yytext[0] ); }
-  [^{\n]+ { str_buf_write( PARSER_STR_BUF, yytext, yyleng ); }
+  "}}" { return T_DIRECTIVE_END; }
+  "{"|"}"|"\n" { str_buf_putc( PARSER_STR_BUF, yytext[0] ); }
+  [^{}\n]+ { str_buf_write( PARSER_STR_BUF, yytext, yyleng ); }
 }
 
 <directive>{
-  "#section" { return T_SECTION; }
-  "#end" { return T_END; }
-  "#if" { return T_IF; }
-  "#else" { return T_ELSE; }
-  "#elseif" { return T_ELSEIF; }
-  [a-zA-Z0-9_/.*\[\]!]+ {
-    yylval->string = apr_pstrndup( PARSER_MP, yytext, yyleng );
-    return T_PATH_EXPR;
+  "#section" {
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    BEGIN( path_expr );
+    return T_SECTION;
   }
-  ";" { BEGIN( options ); }
+  "#end" { return T_END; }
+  "#if" {
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    BEGIN( path_expr );
+    return T_IF;
+  }
+  "#else" { return T_ELSE; }
+  "#elseif" {
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    BEGIN( path_expr );
+    return T_ELSEIF;
+  }
+  {path_expr_chars} {
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    str_buf_putc( PARSER_STR_BUF, yytext[0] );
+    BEGIN( path_expr );
+  }
   "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
   [ \t\r]+
-  "\n"
-  . { jxtl_lex_error( "illegal character '%c' found in path expression",
+  "\n"|" "
+  . { jxtl_lex_error( "illegal character '%c' found inside directive",
                       yytext[0] ); }
 }
+
+<path_expr>{
+  {path_expr_chars}+ {
+      str_buf_write( PARSER_STR_BUF, yytext, yyleng );
+  }
+  ";" {
+    yylval->string = apr_pstrndup( PARSER_MP, PARSER_STR_BUF->data,
+                                   PARSER_STR_BUF->data_len );
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    BEGIN( options );
+    return T_PATH_EXPR;
+  }
+  "}}" {
+    yylval->string = apr_pstrndup( PARSER_MP, PARSER_STR_BUF->data,
+                                   PARSER_STR_BUF->data_len );
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    BEGIN( INITIAL );
+    PARSER_LESS( 0 );
+    return T_PATH_EXPR;
+  }
+  "\n"|" "
+  . { jxtl_lex_error( "illegal character '%c' found in path expression",
+                      yytext[0] ); }
+ }
 
 <options>{
   "separator" { return T_SEPARATOR; }
