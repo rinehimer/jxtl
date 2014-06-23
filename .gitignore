@@ -22,6 +22,8 @@ libjxtl/libjxtl.la
 libjxtl/libjxtl_la*.lo
 libjxtl/libjxtl_la*.o
 libjxtl/*_parse.output
+libjxtl/*_parse.[ch]
+libjxtl/*_lex.[ch]
 libtool
 src/.deps/
 src/.libs/

@@ -29,12 +29,12 @@
  */
 #define YY_DECL
 
+#include "parser.h"
 #include "json_parse.h"
 #include "json_lex.h"
 
 #include "json.h"
 #include "json_writer.h"
-#include "parser.h"
 
 #define callbacks ((json_callback_t *) callbacks_ptr)
 

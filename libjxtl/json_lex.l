@@ -26,12 +26,11 @@
 
 #include "apr_macros.h"
 
-#include "json_parse.h"
-
 #include "parser.h"
+#include "parser_lex_macros.h"
+#include "json_parse.h"
 #include "json.h"
 
-#include "parser_lex_macros.h"
 #include "utf.h"
 
 #define YY_DECL int json_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )

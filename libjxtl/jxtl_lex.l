@@ -26,10 +26,8 @@
 #include <apr_tables.h>
 
 #include "apr_macros.h"
-#include "jxtl_parse.h"
-
 #include "parser.h"
-
+#include "jxtl_parse.h"
 #include "parser_lex_macros.h"
 #include "utf.h"
 
