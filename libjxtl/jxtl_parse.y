@@ -70,8 +70,6 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %token <string> T_TEXT "text"  T_PATH_EXPR "path expression" T_STRING "string"
                 T_IDENTIFIER "identifier"
 
-%type <string> var_type
-
 %left T_ELSEIF T_ELSE
 
 %%
@@ -201,7 +199,7 @@ option
         callbacks->format_handler( callbacks->user_data, $<string>3 );
       }
     }
-  | T_IDENTIFIER '=' var_type
+  | T_IDENTIFIER '=' T_PATH_EXPR
     {
       if ( callbacks->var_decl_handler &&
            ! callbacks->var_decl_handler( callbacks->user_data, $<string>1,
@@ -210,12 +208,6 @@ option
                     callbacks->get_error_func( callbacks->user_data ) );        
       }
     }
-;
-
-var_type
-  : T_STRING { $$ = $<string>1; }
-  | T_PATH_EXPR { $$ = $<string>1; }
-  | T_IDENTIFIER { $$ = $<string>1; }
 ;
 
 %%
