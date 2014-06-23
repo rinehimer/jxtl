@@ -159,19 +159,6 @@ static char *format_json( json_t *json, char *format, void *format_data_ptr )
   return ret_value;
 }
 
-void jxtl_usage( const char *prog_name,
-                 const apr_getopt_option_t *options )
-{
-  int i;
-
-  printf( "Usage: %s [options]\n", prog_name );
-  printf( "  Options:\n" );
-  for ( i = 0; options[i].name; i++ ) {
-    printf( "    -%c, --%s %s\n", options[i].optch, options[i].name,
-            options[i].description );
-  }
-}
-
 /**
  * Read in the command line arguments to set the template file and the
  * data_file.
@@ -230,7 +217,7 @@ void jxtl_init( int argc, char const * const *argv, apr_pool_t *mp,
 
   if ( ( ret == APR_BADCH ) || ( *template_file == NULL ) ||
        ( ( *json_file == NULL ) && ( *xml_file == NULL ) ) ) {
-    jxtl_usage( argv[0], jxtl_options );
+    print_usage( argv[0], jxtl_options );
     exit( EXIT_FAILURE );
   }
 }

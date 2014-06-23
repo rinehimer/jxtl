@@ -33,10 +33,10 @@
 
 #include "apr_macros.h"
 #include "json.h"
+#include "parser.h"
 #include "jxtl_parse.h"
 #include "jxtl_lex.h"
 #include "jxtl.h"
-#include "parser.h"
 
 #define callbacks ((jxtl_callback_t *) callbacks_ptr)
 
@@ -181,8 +181,11 @@ section_content
 
 options
   : /* empty */
-  | option
-  | options ',' option
+  | ';' option_list
+
+option_list
+  : option
+  | option_list ',' option
 ;
 
 option

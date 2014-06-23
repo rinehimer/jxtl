@@ -1,7 +1,8 @@
 INCLUDES = -I${top_srcdir}/libjxtl
-bin_PROGRAMS = jxtl xml2json
+bin_PROGRAMS = jxtl xml2json xml2json_static
 jxtl_SOURCES = jxtl.c
 xml2json_SOURCES = xml2json.c
+xml2json_static_SOURCES = $(xml2json_SOURCES)
 
 LIBJXTL = ${top_srcdir}/libjxtl/libjxtl.la
 
@@ -12,3 +13,7 @@ jxtl_LDADD = ${LIBJXTL}
 xml2json_CFLAGS = -g ${APR_CFLAGS} ${APU_CFLAGS}
 xml2json_LDFLAGS = ${APR_LIBS} ${APU_LIBS}
 xml2json_LDADD = ${LIBJXTL}
+
+xml2json_static_CFLAGS = -static $(xml2json_CFLAGS)
+xml2json_static_LDFLAGS = -static $(xml2json_LDFLAGS)
+xml2json_static_LDADD = ${LIBJXTL}

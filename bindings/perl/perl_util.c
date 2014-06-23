@@ -9,6 +9,7 @@
 
 #include "perl_util.h"
 #include "apr_macros.h"
+#include "misc.h"
 #include "parser.h"
 #include "json_writer.h"
 #include "json.h"
@@ -224,13 +225,15 @@ SV *xml_to_hash( const char *xml_file )
 SV *json_to_hash( const char *json_file )
 {
   apr_pool_t *tmp_mp;
+  apr_file_t *in_file;
   json_t *json;
   SV *hash = &PL_sv_undef;
   parser_t *json_parser;
 
   apr_pool_create( &tmp_mp, NULL );
   json_parser = json_parser_create( tmp_mp );
-  if ( json_parser_parse_file_to_obj( tmp_mp, json_parser, json_file,
+  if ( open_apr_input_file( tmp_mp, json_file, &in_file ) &&
+       json_parser_parse_file_to_obj( tmp_mp, json_parser, in_file,
                                       &json ) ) {
     hash = json_to_perl_variable( json );
   }

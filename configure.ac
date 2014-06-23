@@ -52,13 +52,17 @@ if test "x$APU_CONFIG" = "x/bin/false" ; then
   AC_MSG_ERROR(Could not find an apu-config, [1])
 fi
 
-## Don't bother linking against dbm if our apu-config supports it.
+## Don't bother linking against dbm or ldap if our apu-config supports it.
 if $APU_CONFIG --avoid-dbm > /dev/null 2>&1 ; then
-  DBM_FLAGS="--avoid-dbm"
+  AVOID_FLAGS="--avoid-dbm"
+fi
+
+if $APU_CONFIG --avoid-ldap > /dev/null 2>&1 ; then
+  AVOID_FLAGS="$AVOID_FLAGS --avoid-ldap"
 fi
 
 APU_CFLAGS=`$APU_CONFIG --includes`
-APU_LIBS=`$APU_CONFIG $DBM_FLAGS --link-ld --libs`
+APU_LIBS=`$APU_CONFIG $AVOID_FLAGS --link-ld --libs`
 AC_SUBST(APU_CFLAGS)
 AC_SUBST(APU_LIBS)
 

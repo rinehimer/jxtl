@@ -18,7 +18,7 @@ run_test() {
 }
 
 rm -f t.json
-$xml2json t.xml > t.json
+$xml2json < t.xml > t.json
 check_status "failed to convert test XML to JSON"
 
 for dir in `find . -mindepth 1 -type d` ; do

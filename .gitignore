@@ -31,6 +31,7 @@ src/Makefile
 src/*.o
 src/jxtl
 src/xml2json
+src/xml2json_static
 stamp-h1
 test/Makefile
 test/t.json
