@@ -4,6 +4,7 @@
 #include "apr_macros.h"
 #include "json.h"
 #include "json_writer.h"
+#include "misc.h"
 #include "xml2json.h"
 
 /* Not sure what the best way to go about this is... */
@@ -225,16 +226,18 @@ PyObject *xml_to_dict( const char *xml_file )
   }
 }
 
-PyObject *json_to_dict( char *json_file )
+PyObject *json_to_dict( const char *json_file )
 {
   apr_pool_t *tmp_mp;
+  apr_file_t *in_file;
   json_t *json;
   PyObject *dict = NULL;
   parser_t *json_parser;
 
   apr_pool_create( &tmp_mp, NULL );
   json_parser = json_parser_create( tmp_mp );
-  if ( json_parser_parse_file_to_obj( tmp_mp, json_parser, json_file,
+  if ( open_apr_input_file( tmp_mp, json_file, &in_file ) &&
+       json_parser_parse_file_to_obj( tmp_mp, json_parser, in_file,
                                       &json ) ) {
     dict = json_to_py_variable( json );
   }
