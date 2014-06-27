@@ -12,27 +12,28 @@ enum utf8_byte_type {
 };
 
 #define UTF8_BYTE( byte, type, remaining ) {          \
-    if ( byte <= 0x7F ) {                             \
+    unsigned char bval = byte;                        \
+    if ( bval <= 0x7F ) {                             \
       type = UTF8_ASCII_BYTE;                         \
       remaining = 0;                                  \
     }                                                 \
-    else if ( byte >= 0x80 && byte <= 0xBF ) {        \
+    else if ( bval >= 0x80 && bval <= 0xBF ) {        \
       type = UTF8_CONTINUATION_BYTE;                  \
       remaining = 0;                                  \
     }                                                 \
-    else if ( byte == 0xC0 || byte == 0xC1 ) {        \
+    else if ( bval == 0xC0 || bval == 0xC1 ) {        \
       remaining = 0;                                  \
       type = UTF8_OVERLONG_ENCODING;                  \
     }                                                 \
-    else if ( byte >= 0xC2 && byte <= 0xDF ) {        \
+    else if ( bval >= 0xC2 && bval <= 0xDF ) {        \
       remaining = 1;                                  \
       type = UTF8_TWO_BYTE_SEQUENCE;                  \
     }                                                 \
-    else if ( byte >= 0xE0 && byte <= 0xEF ) {        \
+    else if ( bval >= 0xE0 && bval <= 0xEF ) {        \
       remaining = 2;                                  \
       type = UTF8_THREE_BYTE_SEQUENCE;                \
     }                                                 \
-    else if ( byte >= 0xF0 && byte <= 0xF4 ) {        \
+    else if ( bval >= 0xF0 && bval <= 0xF4 ) {        \
       remaining = 3;                                  \
       type = UTF8_FOUR_BYTE_SEQUENCE;                 \
     }                                                 \
@@ -42,8 +43,7 @@ enum utf8_byte_type {
     }                                                 \
   }
 
-enum utf8_byte_type utf8_check_byte( unsigned char c, int *remaining );
-void utf8_encode( int val, unsigned char *utf8_str );
-void utf8_strcpyn( unsigned char *dst, unsigned char *src, int str_len );
+void utf8_encode( int val, char *utf8_str );
+void utf8_strcpyn( char *dst, char *src, int str_len );
 
 #endif

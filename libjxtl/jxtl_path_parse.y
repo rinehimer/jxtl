@@ -58,7 +58,7 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 
 %union {
   int ival;
-  unsigned char *string;
+  char *string;
 }
 
 %token T_IDENTIFIER "identifier" T_PARENT ".."

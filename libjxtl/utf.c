@@ -2,43 +2,7 @@
 
 #include "utf.h"
 
-enum utf8_byte_type utf8_byte( unsigned char c, int *remaining )
-{
-  int chars_left_in_seq = 0;
-  enum utf8_byte_type ret_type;
-
-  if ( c <= 0x7F ) {
-    ret_type = UTF8_ASCII_BYTE;
-  }
-  else if ( c >= 0x80 && c <= 0xBF ) {
-    ret_type = UTF8_CONTINUATION_BYTE;
-  }
-  else if ( c == 0xC0 || c == 0xC1 ) {
-    ret_type = UTF8_OVERLONG_ENCODING;
-  }
-  else if ( c >= 0xC2 && c <= 0xDF ) {
-    chars_left_in_seq = 1;
-    ret_type = UTF8_TWO_BYTE_SEQUENCE;
-  }
-  else if ( c >= 0xE0 && c<= 0xEF ) {
-    chars_left_in_seq = 2;
-    ret_type = UTF8_THREE_BYTE_SEQUENCE;
-  }
-  else if ( c >= 0xF0 && c <= 0xF4 ) {
-    chars_left_in_seq = 3;
-    ret_type = UTF8_FOUR_BYTE_SEQUENCE;
-  }
-  else {
-    ret_type = UTF8_INVALID_BYTE;
-  }
-
-  if ( remaining ) {
-    *remaining = chars_left_in_seq;
-  }
-  return ret_type;
-}
-
-void utf8_encode( int val, unsigned char *utf8_str )
+void utf8_encode( int val, char *utf8_str )
 {
   int len = 0;
 
@@ -78,7 +42,7 @@ void utf8_encode( int val, unsigned char *utf8_str )
   utf8_str[len] = '\0';
 }
 
-void utf8_strcpyn( unsigned char *dst, unsigned char *src, int str_len )
+void utf8_strcpyn( char *dst, char *src, int str_len )
 {
   enum utf8_byte_type byte_type;
   int len;

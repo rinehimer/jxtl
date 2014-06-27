@@ -21,6 +21,7 @@
 #include <apr_file_io.h>
 #include <apr_pools.h>
 #include <apr_file_io.h>
+#include <apr_getopt.h>
 
 /**
  * Function that just calls free and returns APR_SUCCESS.
@@ -34,3 +35,9 @@ int open_apr_input_file( apr_pool_t *mp, const char *file_name,
                          apr_file_t **file );
 int open_apr_output_file( apr_pool_t *mp, const char *file_name,
                           apr_file_t **file );
+
+/**
+ * Generic function to print the usage of program based on its options.
+ */
+void print_usage( const char *prog_name,
+                  const apr_getopt_option_t *options );
