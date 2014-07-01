@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(jxtl, 0.1.0, rinehimer@gmail.com)
+AC_INIT(jxtl, 1.0.0, rinehimer@gmail.com)
 AC_CONFIG_SRCDIR([libjxtl/utf.c])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_AUX_DIR([config])
