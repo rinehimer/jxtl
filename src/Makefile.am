@@ -1,4 +1,4 @@
-INCLUDES = -I${top_srcdir}/libjxtl
+AM_CPPFLAGS = -I${top_srcdir}/libjxtl
 bin_PROGRAMS = jxtl xml2json xml2json_static
 jxtl_SOURCES = jxtl.c
 xml2json_SOURCES = xml2json.c

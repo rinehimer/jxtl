@@ -8,15 +8,16 @@ AC_CONFIG_HEADER([config.h])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])
+LT_INIT
 
 # Checks for programs.
-AC_PROG_LIBTOOL
 AC_PROG_AWK
 AC_PROG_YACC
 AC_PROG_CC
 AC_PROG_LEX
 
 # Checks for libraries.
+AC_CHECK_LIB([expat], [XML_ParserCreate])
 AC_CHECK_LIB([fl], [yywrap])
 
 # Checks for header files.
