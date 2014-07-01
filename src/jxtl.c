@@ -37,6 +37,7 @@
 #include "jxtl_parse.h"
 #include "jxtl_lex.h"
 #include "jxtl_template.h"
+#include "misc.h"
 #include "xml2json.h"
 
 typedef struct format_data_t {

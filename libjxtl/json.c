@@ -174,13 +174,14 @@ static void print_spaces( apr_file_t *out, int num )
 
 static void print_string( apr_file_t *out, char *str )
 {
-  unsigned char *c = str;
+  unsigned char c;
 
   apr_file_printf( out,  "\"" );
-  while ( *c ) {
-    if ( *c < 32 ) {
+  while ( *str ) {
+    c = *str;
+    if ( c < 32 ) {
       apr_file_printf( out,  "\\" );
-      switch ( *c ) {
+      switch ( c ) {
       case '\b':
         apr_file_printf( out,  "b" );
         break;
@@ -197,19 +198,19 @@ static void print_string( apr_file_t *out, char *str )
         apr_file_printf( out,  "r" );
         break;
       default:
-        apr_file_printf( out,  "u%.4x", *c );
+        apr_file_printf( out,  "u%.4x", c );
         break;
       }
     }
-    else if ( *c == '\\' ) {
+    else if ( c == '\\' ) {
       apr_file_printf( out,  "\\\\" );
     }
-    else if ( *c == '"' ) {
+    else if ( c == '"' ) {
       apr_file_printf( out,  "\\\"" );
     }
     else
-      apr_file_printf( out,  "%c", *c );
-    c++;
+      apr_file_printf( out,  "%c", c );
+    str++;
   }
   apr_file_printf( out,  "\"" );
 }
@@ -310,19 +311,20 @@ void json_dump( apr_file_t *out, json_t *json, int indent )
 
 static void print_xml_string( char *str )
 {
-  unsigned char *c = str;
+  unsigned char c;
 
-  while ( *c ) {
-    if ( ( *c < 0x20 ) && ( *c != 0x9 ) && ( *c != 0xa ) && ( *c != 0xd ) ) {
+  while ( *str ) {
+    c = *str;
+    if ( ( c < 0x20 ) && ( c != 0x9 ) && ( c != 0xa ) && ( c != 0xd ) ) {
       /*
        * XML can't handle these characters, so just store as the Unicode escape
        * sequence.
        */
-      printf( "\\u%.4x", *c );
+      printf( "\\u%.4x", c );
     }
     else
-      printf( "%c", *c );
-    c++;
+      printf( "%c", c );
+    str++;
   }
 }
 
