@@ -2,21 +2,22 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(jxtl, 0.1.0, rinehimer@gmail.com)
+AC_INIT(jxtl, 1.0.0, rinehimer@gmail.com)
 AC_CONFIG_SRCDIR([libjxtl/utf.c])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])
+LT_INIT
 
 # Checks for programs.
-AC_PROG_LIBTOOL
 AC_PROG_AWK
 AC_PROG_YACC
 AC_PROG_CC
 AC_PROG_LEX
 
 # Checks for libraries.
+AC_CHECK_LIB([expat], [XML_ParserCreate])
 AC_CHECK_LIB([fl], [yywrap])
 
 # Checks for header files.
