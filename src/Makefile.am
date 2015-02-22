@@ -1,5 +1,8 @@
 AM_CPPFLAGS = -I${top_srcdir}/libjxtl
-bin_PROGRAMS = jxtl xml2json xml2json_static
+bin_PROGRAMS = jxtl xml2json
+if BUILD_STATIC
+bin_PROGRAMS += xml2json_static
+endif
 jxtl_SOURCES = jxtl.c
 xml2json_SOURCES = xml2json.c
 xml2json_static_SOURCES = $(xml2json_SOURCES)

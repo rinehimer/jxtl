@@ -69,6 +69,15 @@ AC_SUBST(APU_LIBS)
 
 AC_CHECK_PROG(SWIG, swig, swig, [], [], [])
 
+AC_ARG_ENABLE([build-static],
+[  --build-static    Build static version of xml2json],
+[case "${enableval}" in
+  yes) build_static=true ;;
+  no)  build_static=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --build-static]) ;;
+esac],[build_static=false])
+AM_CONDITIONAL([BUILD_STATIC], [test x$build_static = xtrue])
+
 AC_CONFIG_FILES([Makefile
                  bindings/perl/Makefile.PL
                  bindings/python/setup.py
