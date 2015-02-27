@@ -98,12 +98,7 @@ value_directive
                     callbacks->get_error_func( callbacks->user_data ) );
       }
     }
-    options optional_slash T_DIRECTIVE_END
-;
-
-optional_slash
-  :  /* empty */
-  | '/'
+    options T_DIRECTIVE_END
 ;
 
 section_directive

@@ -124,7 +124,7 @@ path_expr_chars [a-zA-Z0-9_:.*\[\]!]
 
 <path_expr>{
   {path_expr_chars}+ {
-      str_buf_write( PARSER_STR_BUF, yytext, yyleng );
+    str_buf_write( PARSER_STR_BUF, yytext, yyleng );
   }
   ";" {
     yylval->string = apr_pstrndup( PARSER_MP, PARSER_STR_BUF->data,
