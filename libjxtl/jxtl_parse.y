@@ -33,10 +33,10 @@
 
 #include "apr_macros.h"
 #include "json.h"
+#include "parser.h"
 #include "jxtl_parse.h"
 #include "jxtl_lex.h"
 #include "jxtl.h"
-#include "parser.h"
 
 #define callbacks ((jxtl_callback_t *) callbacks_ptr)
 
@@ -98,7 +98,12 @@ value_directive
                     callbacks->get_error_func( callbacks->user_data ) );
       }
     }
-    options T_DIRECTIVE_END
+    options optional_slash T_DIRECTIVE_END
+;
+
+optional_slash
+  :  /* empty */
+  | '/'
 ;
 
 section_directive

@@ -4,7 +4,7 @@
 {{ foreach brewery ; separator="\n" }}
 {{ if show }}
 Show {{ name }}
-{{ elseif !show }}
+{{ elseif ! show }}
 Don't Show {{ name }}
 {{ /if }}
 {{ /foreach }}

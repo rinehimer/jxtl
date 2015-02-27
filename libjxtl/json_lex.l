@@ -26,12 +26,11 @@
 
 #include "apr_macros.h"
 
-#include "json_parse.h"
-
 #include "parser.h"
+#include "parser_lex_macros.h"
+#include "json_parse.h"
 #include "json.h"
 
-#include "parser_lex_macros.h"
 #include "utf.h"
 
 #define YY_DECL int json_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
@@ -141,7 +140,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
     int value;
     int value2;
     char tmp_str[4];
-    unsigned char utf8_str[5];
+    char utf8_str[5];
 
     memcpy( tmp_str, yytext + 2, 4 );
     value = strtol( tmp_str, NULL, 16 );

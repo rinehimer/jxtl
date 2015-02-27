@@ -79,8 +79,7 @@ json_t *json_create_array( apr_pool_t *mp );
 json_t *json_create_boolean( apr_pool_t *mp, int boolean );
 json_t *json_create_null( apr_pool_t *mp );
 
-void json_dump( json_t *node, int indent );
-void json_to_xml( json_t *json, int indent );
+void json_dump( apr_file_t *out, json_t *node, int indent );
 
 /**
  * Return the string value of a json object, or NULL if it type JSON_NULL,

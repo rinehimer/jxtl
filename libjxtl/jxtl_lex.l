@@ -4,7 +4,7 @@
  * Description
  *   The lexer for template language.
  *
- * Copyright 2010-2012 Dan Rinehimer
+ * Copyright 2010-2015 Dan Rinehimer
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,8 @@
 #include <apr_tables.h>
 
 #include "apr_macros.h"
-#include "jxtl_parse.h"
-
 #include "parser.h"
-
+#include "jxtl_parse.h"
 #include "parser_lex_macros.h"
 #include "utf.h"
 
@@ -53,9 +51,9 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %option case-insensitive
 %option nounput
 
-%x directive options str unmatched path_expr comment
+path_expr_chars [a-zA-Z0-9_:.*\[\]!]
 
-path_expr [a-zA-Z0-9_:.*\[\]!]+
+%x directive close_directive path_expr options str unmatched comment
 
 %%
 
@@ -82,27 +80,71 @@ path_expr [a-zA-Z0-9_:.*\[\]!]+
   "{{!" {
     BEGIN( comment );
   }
-  "{"|"\n" { str_buf_putc( PARSER_STR_BUF, yytext[0] ); }
-  [^{\n]+ { str_buf_write( PARSER_STR_BUF, yytext, yyleng ); }
+  "}}" { return T_DIRECTIVE_END; }
+  "{"|"}"|"\n" { str_buf_putc( PARSER_STR_BUF, yytext[0] ); }
+  [^{}\n]+ { str_buf_write( PARSER_STR_BUF, yytext, yyleng ); }
 }
 
 <directive>{
-  "foreach" { return T_FOREACH; }
-  "if" { return T_IF; }
-  "else" { return T_ELSE; }
-  "elseif" { return T_ELSEIF; }
-  {path_expr} {
-    yylval->string = apr_pstrndup( PARSER_MP, yytext, yyleng );
-    return T_PATH_EXPR;
+  "foreach" {
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    BEGIN( path_expr );
+    return T_FOREACH;
   }
-  ";" { BEGIN( options ); }
-  "/" { return '/'; }
+  "if" {
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    BEGIN( path_expr );
+    return T_IF;
+  }
+  "else" { return T_ELSE; }
+  "elseif" {
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    BEGIN( path_expr );
+    return T_ELSEIF;
+  }
+  {path_expr_chars} {
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    str_buf_putc( PARSER_STR_BUF, yytext[0] );
+    BEGIN( path_expr );
+  }
+  "/" { BEGIN( close_directive ); return '/'; }
   "}}" { BEGIN( INITIAL ); return T_DIRECTIVE_END; }
   [ \t\r]+
-  "\n"
-  . { jxtl_lex_error( "illegal character '%c' found in path expression",
+  "\n"|" "
+  . { jxtl_lex_error( "illegal character '%c' found inside directive",
                       yytext[0] ); }
 }
+
+<close_directive>{
+  "foreach" { BEGIN( directive ); return T_FOREACH; }
+  "if" { BEGIN( directive ); return T_IF; }
+  "else" { BEGIN( directive ); return T_ELSE; }
+  "elseif" { BEGIN( directive ); return T_ELSEIF; }
+}
+
+<path_expr>{
+  {path_expr_chars}+ {
+      str_buf_write( PARSER_STR_BUF, yytext, yyleng );
+  }
+  ";" {
+    yylval->string = apr_pstrndup( PARSER_MP, PARSER_STR_BUF->data,
+                                   PARSER_STR_BUF->data_len );
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    BEGIN( options );
+    return T_PATH_EXPR;
+  }
+  "}}" {
+    yylval->string = apr_pstrndup( PARSER_MP, PARSER_STR_BUF->data,
+                                   PARSER_STR_BUF->data_len );
+    STR_BUF_CLEAR( PARSER_STR_BUF );
+    BEGIN( INITIAL );
+    PARSER_LESS( 0 );
+    return T_PATH_EXPR;
+  }
+  "\n"|" "
+  . { jxtl_lex_error( "illegal character '%c' found in path expression",
+                      yytext[0] ); }
+ }
 
 <options>{
   "separator" { return T_SEPARATOR; }

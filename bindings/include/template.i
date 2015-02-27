@@ -6,6 +6,7 @@
 #include "json.h"
 #include "jxtl.h"
 #include "jxtl_template.h"
+#include "misc.h"
 #include "template.h"
 %}
 
@@ -71,10 +72,12 @@
   /**
    * Load a template from a file.
    */
-  int load( char *file )
+  int load( const char *file )
   {
-    return jxtl_parser_parse_file_to_template( self->mp, self->jxtl_parser,
-					       file, &self->template );
+    apr_file_t *input_file;
+    return ( open_apr_input_file( self->mp, file, &input_file ) &&
+             jxtl_parser_parse_file_to_template( self->mp, self->jxtl_parser,
+                                                 input_file, &self->template ) );
   }
   
   /**
@@ -109,12 +112,11 @@
    * Expand a template to a file using a language specific dictionary or the
    * existing context of the template.
    */
-  int expand_to_file( char *file, DICTIONARY_T input = NULL )
+  int expand_to_file( const char *file, DICTIONARY_T input = NULL )
   {
     apr_pool_t *tmp_mp;
     apr_file_t *out;
     int status;
-    int is_stdout;
 
     if ( !self->template ) {
       SWIG_Error( SWIG_RuntimeError,
@@ -129,17 +131,7 @@
       self->json = TO_JSON_FUNC( self->mp, input );
     }
 
-    is_stdout = ( !file || apr_strnatcasecmp( file, "-" ) == 0 );
-    if ( is_stdout ) {
-      status = apr_file_open_stdout( &out, tmp_mp );
-    }
-    else {
-      status = apr_file_open( &out, file,
-                              APR_WRITE | APR_CREATE | APR_BUFFERED |
-                              APR_TRUNCATE, APR_OS_DEFAULT, tmp_mp );
-    }
-
-    if ( status != APR_SUCCESS ) {
+    if ( ! open_apr_output_file( tmp_mp, file, &out ) ) {
       SWIG_Error( SWIG_RuntimeError,
                   "Failed to open output file." );
       return FALSE;
@@ -147,10 +139,6 @@
 
     status = ( jxtl_template_expand_to_file( self->template, self->json,
 					     out ) == 0 );
-
-    if ( !is_stdout ) {
-      apr_file_close( out );
-    }
 
     apr_pool_destroy( tmp_mp );
 
