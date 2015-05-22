@@ -69,14 +69,14 @@ AC_SUBST(APU_LIBS)
 
 AC_CHECK_PROG(SWIG, swig, swig, [], [], [])
 
-AC_ARG_ENABLE([build-static],
-[  --build-static    Build static version of xml2json],
+AC_ARG_ENABLE([static-xml2json],
+  AS_HELP_STRING([--enable-static-xml2json], [Build static version of xml2json]),
 [case "${enableval}" in
-  yes) build_static=true ;;
-  no)  build_static=false ;;
-  *) AC_MSG_ERROR([bad value ${enableval} for --build-static]) ;;
-esac],[build_static=false])
-AM_CONDITIONAL([BUILD_STATIC], [test x$build_static = xtrue])
+  yes) static_xml2json=true ;;
+  no)  static_xml2json=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-static-xml2json]) ;;
+esac],[static_xml2json=false])
+AM_CONDITIONAL([STATIC_XML2JSON], [test "x${static_xml2json}" = "xtrue"])
 
 AC_CONFIG_FILES([Makefile
                  bindings/perl/Makefile.PL

@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I${top_srcdir}/libjxtl
 bin_PROGRAMS = jxtl xml2json
-if BUILD_STATIC
+if STATIC_XML2JSON
 bin_PROGRAMS += xml2json_static
 endif
 jxtl_SOURCES = jxtl.c
