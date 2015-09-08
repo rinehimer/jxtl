@@ -172,6 +172,15 @@ static void print_spaces( apr_file_t *out, int num )
   }
 }
 
+static int is_utf8_linebreak( char *str )
+{
+  unsigned char c[3];
+  memcpy( c, str, 3 );
+  
+  return ( ( c[0] == 0xe2 ) && ( c[1] == 0x80 ) &&
+           ( ( c[2] == 0xa8 ) || ( c[2] == 0xa9 ) ) );
+}
+
 static void print_string( apr_file_t *out, char *str )
 {
   unsigned char c;
@@ -208,8 +217,14 @@ static void print_string( apr_file_t *out, char *str )
     else if ( c == '"' ) {
       apr_file_printf( out,  "\\\"" );
     }
-    else
+    else if ( is_utf8_linebreak( str ) ) {
+      apr_file_printf( out,  "\\u%.4x", utf8_decode_byte( str ) );
+      str += 2;
+    }
+    else {
       apr_file_printf( out,  "%c", c );
+    }
+
     str++;
   }
   apr_file_printf( out,  "\"" );

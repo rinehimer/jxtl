@@ -42,6 +42,49 @@ void utf8_encode( int val, char *utf8_str )
   utf8_str[len] = '\0';
 }
 
+int utf8_decode_byte( char *utf8_str )
+{
+  enum utf8_byte_type byte_type;
+  int len;
+  int val = 0;
+
+  UTF8_BYTE( utf8_str[0], byte_type, len );  
+  switch ( byte_type ) {
+  case UTF8_ASCII_BYTE:
+    val = (int) utf8_str[0];
+    break;
+
+  case UTF8_TWO_BYTE_SEQUENCE:
+    val = utf8_str[0] & 0x1f;
+    val = val << 6;
+    val |= utf8_str[1] & 0x3f;
+    break;
+
+  case UTF8_THREE_BYTE_SEQUENCE:
+    val = utf8_str[0] & 0x0F;
+    val = val << 4;
+    val |= ( ( utf8_str[1] & 0x3C ) >> 2 );
+    val = val << 4;
+    val |= ( ( ( utf8_str[1] & 0x03 ) << 2 ) |
+             ( ( utf8_str[2] & 0x30 ) >> 4 ) );
+    val = val << 4;
+    val |= ( ( utf8_str[2] & 0x0F ) );
+    break;
+
+  case UTF8_FOUR_BYTE_SEQUENCE:
+    val = utf8_str[0] & 0x07;
+    val = val << 3;
+    val |= utf8_str[1] & 0x3f;
+    val = val << 6;
+    val |= utf8_str[2] & 0x3f;
+    val = val << 6;
+    val |= utf8_str[3] & 0x3f;
+    break;
+  }
+
+  return val;
+}
+
 void utf8_strcpyn( char *dst, char *src, int str_len )
 {
   enum utf8_byte_type byte_type;
