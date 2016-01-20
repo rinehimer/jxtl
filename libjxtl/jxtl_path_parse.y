@@ -43,7 +43,7 @@ void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
                       void *callbacks_ptr, const char *error_string, ... );
 %}
 
-%name-prefix="jxtl_path_"
+%name-prefix "jxtl_path_"
 %defines
 %verbose
 %locations

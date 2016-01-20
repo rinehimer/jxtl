@@ -44,7 +44,7 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
                  void *callbacks_ptr, const char *error_string, ... );
 %}
 
-%name-prefix="json_"
+%name-prefix "json_"
 %defines
 %verbose
 %locations

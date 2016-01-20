@@ -44,6 +44,7 @@ enum utf8_byte_type {
   }
 
 void utf8_encode( int val, char *utf8_str );
+int utf8_decode_byte( char *utf8_str );
 void utf8_strcpyn( char *dst, char *src, int str_len );
 
 #endif
