@@ -5,6 +5,8 @@ This tool was born out of the desire to use XML or JSON to generate code in any 
 
 This templating language intentionally lacks features that other templating languages posess in order to enforce the model-view  separation.  If you have ever worked with PHP* or encountered XSLT being used to create a non-XML document, you probably understand how important this separation is.
 
+This library contains bindings that can be built for both Perl and Python.  See the [Language Bindings](../..//wiki/Language-Bindings) page for more information.
+
 *PHP does not inherently have this problem, but is often used in a manner that violates model-view separation.
 
 ## Examples
