@@ -42,6 +42,11 @@ void utf8_encode( int val, char *utf8_str )
   utf8_str[len] = '\0';
 }
 
+/**
+ * Return the code point of the next character.  If for some reason this
+ * function is not called at the beginning of a character sequence, it returns
+ * 0.
+ */
 int utf8_decode_byte( char *utf8_str )
 {
   enum utf8_byte_type byte_type;
@@ -79,6 +84,12 @@ int utf8_decode_byte( char *utf8_str )
     val |= utf8_str[2] & 0x3f;
     val = val << 6;
     val |= utf8_str[3] & 0x3f;
+    break;
+
+  case UTF8_CONTINUATION_BYTE:
+  case UTF8_OVERLONG_ENCODING:
+  case UTF8_INVALID_BYTE:
+    val = 0;
     break;
   }
 

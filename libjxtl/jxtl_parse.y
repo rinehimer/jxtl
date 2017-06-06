@@ -46,7 +46,7 @@ void jxtl_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
                  void *callbacks_ptr, const char *error_string, ... );
 %}
 
-%name-prefix="jxtl_"
+%name-prefix "jxtl_"
 %defines
 %verbose
 %locations
