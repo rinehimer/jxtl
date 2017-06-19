@@ -60,6 +60,7 @@ parser_t *parser_create( apr_pool_t *mp,
   parser->bison_parse = bison_parse;
 
   parser->str_buf = str_buf_create( mp, 8192 );
+  parser->lex_error = FALSE;
   parser->err_buf = str_buf_create( mp, 1024 );
   parser->flex_init( &parser->scanner );
   parser->flex_set_extra( parser, parser->scanner );
@@ -98,9 +99,11 @@ char *parser_get_error( parser_t *parser )
 
 int parser_parse_file( parser_t *parser, apr_file_t *file )
 {
+  int result;
   reset_parser( parser );
   parser->in_file = file;
-  return parser->bison_parse( parser->scanner, parser, parser->user_data ) == 0;
+  result = parser->bison_parse( parser->scanner, parser, parser->user_data );
+  return ( result == 0 && !parser->lex_error );
 }
 
 int parser_parse_buffer( parser_t *parser, const char *buffer )
@@ -120,9 +123,9 @@ int parser_parse_buffer( parser_t *parser, const char *buffer )
                                     parser->scanner );
 
   result = parser->bison_parse( parser->scanner, parser,
-                                parser->user_data ) == 0;
+                                parser->user_data );
 
   parser->flex_delete( buffer_state, parser->scanner );
 
-  return result;
+  return ( result == 0 && !parser->lex_error );
 }

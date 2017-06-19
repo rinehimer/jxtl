@@ -35,7 +35,8 @@
 
 #define YY_DECL int json_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
 
-#define json_lex_error( ... ) \
+#define json_lex_error( ... )                                   \
+  PARSER->lex_error = TRUE;                                     \
   json_error( yylloc, yyscanner, PARSER, NULL, __VA_ARGS__ )
 
 void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
@@ -61,7 +62,6 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 %%
 
 <INITIAL>{
-  "'" { STR_BUF_CLEAR( PARSER_STR_BUF ); BEGIN( squote_str ); }
   "\"" { STR_BUF_CLEAR( PARSER_STR_BUF ); BEGIN( dquote_str ); }
   "{" { return '{'; }
   "}" { return '}'; }
@@ -97,7 +97,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
 }
 
 <unmatched>{
-  [^\'\"{}\[\],:0-9\t\n\r ]+ {
+  [^\"{}\[\],:0-9\t\n\r ]+ {
     json_lex_error( "unexpected \"%.*s\"", yyleng, yytext );
     BEGIN( INITIAL );
   }
@@ -114,21 +114,6 @@ exp ("e"|"E")("+"|"-")?[0-9]+
   }
   "'" { str_buf_putc( PARSER_STR_BUF, '\'' ); }
   "\\\"" { str_buf_putc( PARSER_STR_BUF, '"' ); }
-}
-<squote_str>{
-  "'" {
-    BEGIN( INITIAL );
-    yylloc->first_column = yylloc->last_column - PARSER_STR_BUF->data_len - 1;
-    yylval->string = apr_palloc( PARSER_MP, PARSER_STR_BUF->data_len + 1 );
-    utf8_strcpyn( yylval->string, PARSER_STR_BUF->data,
-                  PARSER_STR_BUF->data_len );
-    return T_STRING;
-  }
-  "\"" { str_buf_putc( PARSER_STR_BUF, '"' ); }
-  "\\\'" { str_buf_putc( PARSER_STR_BUF, '\'' ); }
-}
-
-<squote_str,dquote_str>{
   "\\\\" { str_buf_putc( PARSER_STR_BUF, '\\' ); }
   "\\/" { str_buf_putc( PARSER_STR_BUF, '/' ); }
   "\\b" { str_buf_putc( PARSER_STR_BUF, '\b' ); }
@@ -189,7 +174,7 @@ exp ("e"|"E")("+"|"-")?[0-9]+
     str_buf_putc( PARSER_STR_BUF, yytext[0] );
     json_lex_error( "illegal control character 0x%x", yytext[0] );
   }
-  [^\"\'\\\x00-\x1f]+ {
+  [^\"\\\x00-\x1f]+ {
     str_buf_write( PARSER_STR_BUF, yytext, yyleng );
   }
   . {

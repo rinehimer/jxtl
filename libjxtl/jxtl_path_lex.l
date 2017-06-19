@@ -33,7 +33,8 @@
 
 #define YY_DECL int jxtl_path_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param, yyscan_t yyscanner )
 
-#define jxtl_lex_error( ... ) \
+#define jxtl_lex_error( ... )                                           \
+  PARSER->lex_error = TRUE;                                             \
   jxtl_path_error( yylloc, yyscanner, PARSER, NULL, __VA_ARGS__ )
 
 void jxtl_path_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,

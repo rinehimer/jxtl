@@ -71,6 +71,8 @@ struct parser_t {
   yyscan_t scanner;
   /* Current line number.  Only works if newlines are matched separately. */
   int line_num;
+  /* If an error was encountered during lexical analysis. */
+  int lex_error;
   /* If an error occurs during parsing and we want to save it. */
   str_buf_t *err_buf;
   /* User data. */
