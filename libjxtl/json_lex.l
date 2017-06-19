@@ -145,15 +145,12 @@ exp ("e"|"E")("+"|"-")?[0-9]+
           json_lex_error( "invalid unicode \\u%.4x\\u%.4x", value, value2 );
         }
       }
-      else if ( value <= 0x7F ) {
+      else {
         /* Not a surrogate pair */
         PARSER_LESS( 6 );
 
         utf8_encode( value, utf8_str );
         str_buf_append( PARSER_STR_BUF, utf8_str );
-      }
-      else {
-        json_lex_error( "invalid unicode \\u%.4x\\u%.4x", value, value2 );
       }
     }
     else if ( value >= 0xD800 && value <= 0xDFFF ) {
