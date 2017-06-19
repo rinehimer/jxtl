@@ -36,7 +36,12 @@
 #include "json.h"
 #include "json_writer.h"
 
-#define callbacks ((json_callback_t *) callbacks_ptr)
+#define callback( func, ... ) do {                                      \
+    json_callback_t *ptr = (json_callback_t *) callbacks_ptr;           \
+    if ( ptr && ptr->func ) {                                           \
+      ptr->func( ptr->user_data, ##__VA_ARGS__ );                       \
+    }                                                                   \
+ } while ( 0 )
 
 int json_lex( YYSTYPE *yylval_param, YYLTYPE *yylloc_param,
               yyscan_t yyscanner );
@@ -70,20 +75,24 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 
 %%
 
+json
+  : object_or_array
+  | value
+
 object_or_array
   : object
   | array
 ;
 
 object
-  : '{' { callbacks->object_start_handler( callbacks->user_data ); }
-    '}' { callbacks->object_end_handler( callbacks->user_data ); }
-  | '{' { callbacks->object_start_handler( callbacks->user_data ); }
+  : '{' { callback( object_start_handler ); }
+    '}' { callback( object_end_handler ); }
+  | '{' { callback( object_start_handler ); }
     members
-    '}' { callbacks->object_end_handler( callbacks->user_data ); }
-  | '{' { callbacks->object_start_handler( callbacks->user_data ); }
+    '}' { callback( object_end_handler ); }
+  | '{' { callback( object_start_handler ); }
     error
-    '}' { callbacks->object_end_handler( callbacks->user_data ); }
+    '}' { callback( object_end_handler ); }
 ;
 
 members
@@ -92,20 +101,19 @@ members
 ;
 
 pair
-  : T_STRING { callbacks->property_start_handler( callbacks->user_data,
-                                                  $<string>1 ); }
-    ':' value { callbacks->property_end_handler( callbacks->user_data ); }
+  : T_STRING { callback( property_start_handler, $<string>1 ); }
+    ':' value { callback( property_end_handler ); }
 ;
 
 array
-  : '[' { callbacks->array_start_handler( callbacks->user_data ); }
-    ']' { callbacks->array_end_handler( callbacks->user_data ); }
-  | '[' { callbacks->array_start_handler( callbacks->user_data ); }
+  : '[' { callback( array_start_handler ); }
+    ']' { callback( array_end_handler ); }
+  | '[' { callback( array_start_handler ); }
     elements
-    ']' { callbacks->array_end_handler( callbacks->user_data ); }
-  | '[' { callbacks->array_start_handler( callbacks->user_data ); }
+    ']' { callback( array_end_handler ); }
+  | '[' { callback( array_start_handler ); }
     error
-    ']' { callbacks->array_end_handler( callbacks->user_data ); }
+    ']' { callback( array_end_handler ); }
 ;
 
 elements
@@ -114,15 +122,14 @@ elements
 ;
 
 value
-  : T_STRING { callbacks->string_handler( callbacks->user_data, $<string>1 ); }
-  | T_INTEGER { callbacks->integer_handler( callbacks->user_data,
-                                            $<integer>1 ); }
-  | T_NUMBER { callbacks->number_handler( callbacks->user_data, $<number>1 ); }
+  : T_STRING { callback( string_handler, $<string>1 ); }
+  | T_INTEGER { callback( integer_handler, $<integer>1 ); }
+  | T_NUMBER { callback( number_handler, $<number>1 ); }
   | object
   | array
-  | T_TRUE { callbacks->boolean_handler( callbacks->user_data, 1 ); }
-  | T_FALSE { callbacks->boolean_handler( callbacks->user_data, 0 ); }
-  | T_NULL { callbacks->null_handler( callbacks->user_data ); }
+  | T_TRUE { callback( boolean_handler, 1 ); }
+  | T_FALSE { callback( boolean_handler, 0 ); }
+  | T_NULL { callback( null_handler ); }
 ;
 
 %%
