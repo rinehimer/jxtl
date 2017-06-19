@@ -1,11 +1,12 @@
 AM_CPPFLAGS = -I${top_srcdir}/libjxtl
-bin_PROGRAMS = jxtl xml2json
+bin_PROGRAMS = jxtl xml2json json_verify
 if STATIC_XML2JSON
 bin_PROGRAMS += xml2json_static
 endif
 jxtl_SOURCES = jxtl.c
 xml2json_SOURCES = xml2json.c
 xml2json_static_SOURCES = $(xml2json_SOURCES)
+json_verify_SOURCES = json_verify.c
 
 LIBJXTL = ${top_srcdir}/libjxtl/libjxtl.la
 
@@ -20,3 +21,7 @@ xml2json_LDADD = ${LIBJXTL}
 xml2json_static_CFLAGS = -static $(xml2json_CFLAGS)
 xml2json_static_LDFLAGS = -static $(xml2json_LDFLAGS)
 xml2json_static_LDADD = ${LIBJXTL}
+
+json_verify_CFLAGS = -g ${APR_CFLAGS} ${APU_CFLAGS}
+json_verify_LDFLAGS = ${APR_LIBS} ${APU_LIBS}
+json_verify_LDADD = ${LIBJXTL}
