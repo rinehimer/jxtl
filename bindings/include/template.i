@@ -98,7 +98,7 @@
     FORMAT_FUNC_T func_ptr = VERIFY_FUNC( format_func );
 
     if ( func_ptr ) {
-      apr_hash_set( self->formats, format, APR_HASH_KEY_STRING, func_ptr );
+      apr_hash_set( self->formats, apr_pstrdup( self->mp, format ), APR_HASH_KEY_STRING, func_ptr );
     }
     else {
       snprintf( error_buf, sizeof(error_buf),
