@@ -6,6 +6,7 @@
 #include "json_writer.h"
 #include "misc.h"
 #include "xml2json.h"
+#include "py_util.h"
 
 /* Not sure what the best way to go about this is... */
 #if !defined(HAVE_SSIZE_T) || SIZEOF_VOID_P != SIZEOF_SIZE_T

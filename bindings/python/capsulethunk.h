@@ -1,0 +1,165 @@
+/*
+ * capsulethunk.h
+ *
+ * Included in Python 3 documentation:
+ *   https://docs.python.org/3/howto/cporting.html
+ *
+ * Copyright (c) 2011, Larry Hastings
+ * Copyright (c) 2015, py3c contributors
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015, py3c contributors
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#ifndef __CAPSULETHUNK_H
+#define __CAPSULETHUNK_H
+
+#if (    (PY_VERSION_HEX <  0x02070000) \
+     || ((PY_VERSION_HEX >= 0x03000000) \
+      && (PY_VERSION_HEX <  0x03010000)) )
+
+#define __PyCapsule_GetField(capsule, field, error_value) \
+    ( PyCapsule_CheckExact(capsule) \
+        ? (((PyCObject *)capsule)->field) \
+        : (PyErr_SetString(PyExc_TypeError, "CObject required"), (error_value)) \
+    ) \
+
+#define __PyCapsule_SetField(capsule, field, value) \
+    ( PyCapsule_CheckExact(capsule) \
+        ? (((PyCObject *)capsule)->field = value), 0 \
+        : (PyErr_SetString(PyExc_TypeError, "CObject required"), 1) \
+    ) \
+
+
+#define PyCapsule_Type PyCObject_Type
+
+#define PyCapsule_CheckExact(capsule) (PyCObject_Check(capsule))
+#define PyCapsule_IsValid(capsule, name) (PyCObject_Check(capsule))
+
+
+#define PyCapsule_New(pointer, name, destructor) \
+    (PyCObject_FromVoidPtr(pointer, (void (*)(void*)) (destructor)))
+
+
+#define PyCapsule_GetPointer(capsule, name) \
+    (PyCObject_AsVoidPtr(capsule))
+
+/* Don't call PyCObject_SetPointer here, it fails if there's a destructor */
+#define PyCapsule_SetPointer(capsule, pointer) \
+    __PyCapsule_SetField(capsule, cobject, pointer)
+
+
+#define PyCapsule_GetDestructor(capsule) \
+    __PyCapsule_GetField(capsule, destructor, (void (*)(void*)) NULL)
+
+#define PyCapsule_SetDestructor(capsule, dtor) \
+    __PyCapsule_SetField(capsule, destructor, (void (*)(void*)) dtor)
+
+
+/*
+ * Sorry, there's simply no place
+ * to store a Capsule "name" in a CObject.
+ */
+#define PyCapsule_GetName(capsule) NULL
+
+static int
+PyCapsule_SetName(PyObject *capsule, const char *unused)
+{
+    unused = unused;
+    PyErr_SetString(PyExc_NotImplementedError,
+        "can't use PyCapsule_SetName with CObjects");
+    return 1;
+}
+
+
+
+#define PyCapsule_GetContext(capsule) \
+    __PyCapsule_GetField(capsule, desc, (void*) NULL)
+
+#define PyCapsule_SetContext(capsule, context) \
+    __PyCapsule_SetField(capsule, desc, context)
+
+
+static void *
+PyCapsule_Import(const char *name, int no_block)
+{
+    PyObject *object = NULL;
+    void *return_value = NULL;
+    char *trace;
+    size_t name_length = (strlen(name) + 1) * sizeof(char);
+    char *name_dup = (char *)PyMem_MALLOC(name_length);
+
+    if (!name_dup) {
+        return NULL;
+    }
+
+    memcpy(name_dup, name, name_length);
+
+    trace = name_dup;
+    while (trace) {
+        char *dot = strchr(trace, '.');
+        if (dot) {
+            *dot++ = '\0';
+        }
+
+        if (object == NULL) {
+            if (no_block) {
+                object = PyImport_ImportModuleNoBlock(trace);
+            } else {
+                object = PyImport_ImportModule(trace);
+                if (!object) {
+                    PyErr_Format(PyExc_ImportError,
+                        "PyCapsule_Import could not "
+                        "import module \"%s\"", trace);
+                }
+            }
+        } else {
+            PyObject *object2 = PyObject_GetAttrString(object, trace);
+            Py_DECREF(object);
+            object = object2;
+        }
+        if (!object) {
+            goto EXIT;
+        }
+
+        trace = dot;
+    }
+
+    if (PyCObject_Check(object)) {
+        PyCObject *cobject = (PyCObject *)object;
+        return_value = cobject->cobject;
+    } else {
+        PyErr_Format(PyExc_AttributeError,
+            "PyCapsule_Import \"%s\" is not valid",
+            name);
+    }
+
+EXIT:
+    Py_XDECREF(object);
+    if (name_dup) {
+        PyMem_FREE(name_dup);
+    }
+    return return_value;
+}
+
+#endif /* #if PY_VERSION_HEX < 0x02070000 */
+
+#endif /* __CAPSULETHUNK_H */
