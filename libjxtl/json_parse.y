@@ -76,28 +76,19 @@ void json_error( YYLTYPE *yylloc, yyscan_t scanner, parser_t *parser,
 %%
 
 json
-  : object_or_array
-  | value
-
-object_or_array
-  : object
-  | array
-;
+  : value
 
 object
   : '{' { callback( object_start_handler ); }
-    '}' { callback( object_end_handler ); }
-  | '{' { callback( object_start_handler ); }
     members
-    '}' { callback( object_end_handler ); }
-  | '{' { callback( object_start_handler ); }
-    error
     '}' { callback( object_end_handler ); }
 ;
 
 members
-  : pair
+  : /* empty */
+  | pair
   | members ',' pair
+  | error
 ;
 
 pair
@@ -107,18 +98,15 @@ pair
 
 array
   : '[' { callback( array_start_handler ); }
-    ']' { callback( array_end_handler ); }
-  | '[' { callback( array_start_handler ); }
     elements
-    ']' { callback( array_end_handler ); }
-  | '[' { callback( array_start_handler ); }
-    error
     ']' { callback( array_end_handler ); }
 ;
 
 elements
-  : value
+  : /* empty */
+  | value
   | elements ',' value
+  | error
 ;
 
 value
