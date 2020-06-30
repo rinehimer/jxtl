@@ -20,7 +20,7 @@ install-swig-perl:
 
 swig-python:
 	${SWIG} -I${top_srcdir}/libjxtl -I${top_srcdir}/bindings/include -python ${PYTHON_BINDINGS_DIR}/libjxtl.i
-	cd ${PYTHON_BINDINGS_DIR} && python setup.py build_ext --inplace
+	cd ${PYTHON_BINDINGS_DIR} && python3 setup.py build_ext --inplace
 
 install-swig-python:
-	cd ${PYTHON_BINDINGS_DIR} && python setup.py install
+	cd ${PYTHON_BINDINGS_DIR} && python3 setup.py install

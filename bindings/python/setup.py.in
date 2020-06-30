@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
-#  $Id$
+#  setup.py.in
 #
 #  Description
 #    A python script that uses distutils to build the SWIG bindings.
