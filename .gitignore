@@ -38,7 +38,7 @@ src/*.o
 src/jxtl
 src/xml2json
 src/xml2json_static
-src/json_verify
+src/jxtl-json-verify
 stamp-h1
 test/Makefile
 test/Makefile.in
