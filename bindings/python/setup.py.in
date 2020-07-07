@@ -57,10 +57,10 @@ libjxtl_module = Extension('_libjxtl',
                            libraries = libraries);
 
 setup(name = 'libjxtl',
-      version = '0.1',
+      version = '@PACKAGE_VERSION@',
       description = "SWIG interface to LibJXTL",
       author = "Dan Rinehimer",
       author_email="rinehimer@gmail.com",
-      url="http://code.google.com/p/jxtl/",
+      url="https://github.com/rinehimer/jxtl",
       ext_modules = [libjxtl_module],
       py_modules = ["libjxtl"]);
