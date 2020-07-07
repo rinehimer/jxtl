@@ -8,7 +8,7 @@ xml2json_SOURCES = xml2json.c
 xml2json_static_SOURCES = $(xml2json_SOURCES)
 jxtl_json_verify_SOURCES = json_verify.c
 
-LIBJXTL = ${top_srcdir}/libjxtl/libjxtl.la
+LIBJXTL = ${top_srcdir}/libjxtl/libjxtl-1.0.la
 
 jxtl_CFLAGS = -g ${APR_CFLAGS} ${APU_CFLAGS}
 jxtl_LDFLAGS = ${APR_LIBS} ${APU_LIBS}

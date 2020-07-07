@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libjxtl.la
+lib_LTLIBRARIES = libjxtl-1.0.la
 
 libjxtlincdir = $(includedir)/libjxtl
 
@@ -21,7 +21,7 @@ libjxtlinc_HEADERS = apr_macros.h \
                      utf.h \
                      xml2json.h
 
-libjxtl_la_SOURCES = json.c \
+libjxtl_1_0_la_SOURCES = json.c \
                      json_lex.l \
                      json_parse.y \
                      jxtl_lex.l \
@@ -41,13 +41,13 @@ libjxtl_la_SOURCES = json.c \
                      utf.c \
                      xml2json.c
 
-$(libjxtl_la_OBJECTS): json_parse.c json_parse.h json_lex.c json_lex.h \
+$(libjxtl_1_0_la_OBJECTS): json_parse.c json_parse.h json_lex.c json_lex.h \
                        jxtl_parse.c jxtl_parse.h jxtl_lex.c jxtl_lex.h \
                        jxtl_path_parse.c jxtl_path_parse.h jxtl_path_lex.c \
                        jxtl_path_lex.h
 
-libjxtl_la_CFLAGS = ${APR_CFLAGS} ${APU_CFLAGS}
-libjxtl_la_LDFLAGS = ${APR_LIBS} ${APU_LIBS}
+libjxtl_1_0_la_CFLAGS = ${APR_CFLAGS} ${APU_CFLAGS}
+libjxtl_1_0_la_LDFLAGS = ${APR_LIBS} ${APU_LIBS} -version-info 1:0:0
 
 YFLAGS =
 
