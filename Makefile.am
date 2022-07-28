@@ -47,12 +47,7 @@ install-python-bindings:
 	cd ${PYTHON_BINDINGS_DIR} && python3 setup.py install
 
 python-rpm: python-bindings
-	rm -rf "${TMP_DEST_DIR}"
-	mkdir "${TMP_DEST_DIR}"
-	cd ${PYTHON_BINDINGS_DIR} && python3 setup.py build_ext --inplace
-	cd ${PYTHON_BINDINGS_DIR} && python3 setup.py install --prefix /usr --root ${TMP_DEST_DIR}
-	fpm -f -s dir -t rpm -d "${PACKAGE_NAME}" -n "python3-libjxtl" -C tmp_dest_dir
-	rm -rf "${TMP_DEST_DIR}"
+	cd ${PYTHON_BINDINGS_DIR} && python3 setup.py bdist_rpm --requires "${PACKAGE_NAME}"
 
 rpm:
 	rm -rf "${TMP_DEST_DIR}"
