@@ -43,3 +43,4 @@ stamp-h1
 test/Makefile
 test/Makefile.in
 test/t.json
+packages/
