@@ -6,7 +6,7 @@ ENV container docker
 # and a series of instructions for anyone wanting to
 # build this repository
 
-RUN yum update && \
+RUN yum update -y && \
     yum install -y \
     epel-release automake autoconf libtool \
     git-core wget gcc make rpm-build \
