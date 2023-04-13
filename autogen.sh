@@ -1,3 +1,4 @@
 #!/bin/bash
 
-autoreconf -fi
+autoreconf -fiv
+./configure --prefix=/usr --libdir=/usr/lib64
