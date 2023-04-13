@@ -69,6 +69,9 @@ AC_SUBST(APU_CFLAGS)
 AC_SUBST(APU_LIBS)
 
 AC_CHECK_PROG(SWIG, swig, swig, [], [], [])
+if test "x$SWIG" = "x" ; then
+  AC_MSG_ERROR(Could not find swig, [1])
+fi
 
 AC_ARG_ENABLE([static-xml2json],
   AS_HELP_STRING([--enable-static-xml2json], [Build static version of xml2json]),
