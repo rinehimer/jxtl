@@ -1,4 +1,7 @@
+*-
 **/*~
+*.patch
+*.rpm
 aclocal.m4
 config.h.in
 configure
@@ -15,6 +18,8 @@ bindings/perl/pm_to_blib
 bindings/python/setup.py
 bindings/python/_libjxtl*.so
 bindings/python/build
+bindings/python/dist/
+bindings/python/libjxtl.egg-info/
 bindings/python/libjxtl.py
 bindings/python/libjxtl_wrap.c
 config.h
