@@ -50,9 +50,14 @@ static void py_variable_to_json_internal( PyObject *obj,
   }
   else if ( PyUnicode_CheckExact( obj ) ) {
     /* Create a new string object that is UTF-8 encoded. */
+    /* PyUnicode_AS_UNICODE is deprecated in 3.3 and removed in 3.12 */
+#if (PY_MAJOR_VERSION * 100) + PY_MINOR_VERSION >= 312
+    PyObject *str_obj = PyUnicode_AsUTF8String( obj );
+#else
     Py_UNICODE *unicode = PyUnicode_AS_UNICODE( obj );
     Py_ssize_t size = PyUnicode_GET_SIZE( obj );
     PyObject *str_obj = PyUnicode_EncodeUTF8( unicode, size, NULL );
+#endif
     py_variable_to_json_internal( str_obj, writer );
     PyObject_Free( str_obj );
   }
