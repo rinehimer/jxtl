@@ -35,10 +35,10 @@ static void write_xml_strn( json_writer_t *writer, const char *str, int len )
        compare the strings. */
     json_writer_write_strn( writer, str, len );
   }
-  else if ( strncasecmp( str, "true", len ) == 0 ) {
+  else if ( ( len == 4 ) && ( strncasecmp( str, "true", len ) == 0 ) ) {
     json_writer_write_boolean( writer, TRUE );
   }
-  else if ( strncasecmp( str, "false", len ) == 0 ) {
+  else if ( ( len == 5 ) && ( strncasecmp( str, "false", len ) == 0 ) ) {
     json_writer_write_boolean( writer, FALSE );
   }
   else {
