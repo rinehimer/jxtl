@@ -19,9 +19,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
-top_srcdir = "@top_srcdir@";
+top_srcdir = "@abs_srcdir@";
 apr_cflags = "@APR_CFLAGS@";
 apr_libs = "@APR_LIBS@";
 apu_cflags = "@APU_CFLAGS@";
@@ -30,9 +30,9 @@ apu_libs = "@APU_LIBS@";
 all_flags = apr_cflags + " " + apr_libs + " " + apu_cflags + " " + apu_libs;
 
 define_macros = [];
-include_dirs = [top_srcdir + "/libjxtl", top_srcdir + "/bindings/include"];
-library_dirs = ["@prefix@/lib"];
-libraries = ["jxtl"];
+include_dirs = [top_srcdir, top_srcdir + "/../../libjxtl", top_srcdir + "/../../bindings/include"];
+library_dirs = ["@libdir@"];
+libraries = ["jxtl-1.0"];
 extra_compile_args = [];
 
 # Parse the flags
@@ -62,5 +62,7 @@ setup(name = 'libjxtl',
       author = "Dan Rinehimer",
       author_email="rinehimer@gmail.com",
       url="https://github.com/rinehimer/jxtl",
+      python_requires = ">=3",
       ext_modules = [libjxtl_module],
-      py_modules = ["libjxtl"]);
+      py_modules = ["libjxtl"]
+);

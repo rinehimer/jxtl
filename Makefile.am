@@ -3,7 +3,7 @@ SUBDIRS = libjxtl \
           test
 
 ACLOCAL_AMFLAGS = -I m4
-TMP_DEST_DIR = $(shell pwd)/tmp_dest_dir
+TMP_DEST_DIR = $(shell pwd)/build
 
 bindings: perl-bindings python-bindings
 install-bindings: install-perl-bindings install-python-bindings
@@ -41,39 +41,33 @@ ${PYTHON_SWIG_FILES}: ${PYTHON_BINDINGS_DIR}/libjxtl.i ${BINDINGS_DIR}/include/t
 	${SWIG} -I${top_srcdir}/libjxtl -I${BINDINGS_DIR}/include -python ${PYTHON_BINDINGS_DIR}/libjxtl.i
 
 python-bindings: ${PYTHON_SWIG_FILES}
-	cd ${PYTHON_BINDINGS_DIR} && python3 setup.py build_ext --inplace
+	cd ${PYTHON_BINDINGS_DIR} && python3 -m pip install --upgrade build
 
 install-python-bindings:
 	cd ${PYTHON_BINDINGS_DIR} && python3 setup.py install
 
 python-rpm: python-bindings
-	rm -rf "${TMP_DEST_DIR}"
-	mkdir "${TMP_DEST_DIR}"
-	cd ${PYTHON_BINDINGS_DIR} && python3 setup.py build_ext --inplace
-	cd ${PYTHON_BINDINGS_DIR} && python3 setup.py install --prefix /usr --root ${TMP_DEST_DIR}
-	fpm -f -s dir -t rpm -d "${PACKAGE_NAME}" -n "python3-libjxtl" -C tmp_dest_dir
-	rm -rf "${TMP_DEST_DIR}"
+	cd ${PYTHON_BINDINGS_DIR} && python3 -m build --sdist --wheel
 
 rpm:
 	rm -rf "${TMP_DEST_DIR}"
 	mkdir "${TMP_DEST_DIR}"
 	make clean
-	./configure --prefix=/usr
 	${MAKE}
 	${MAKE} install DESTDIR="${TMP_DEST_DIR}"
+	chmod 755 ${TMP_DEST_DIR}${libdir}/{*.so.*,*.so}
 	fpm -f -s dir -t rpm -n "${PACKAGE_NAME}" -v "${PACKAGE_VERSION}" \
 		-d "apr-util" \
 		-d "apr" \
 		-d "expat" \
-		-C tmp_dest_dir \
+		-C ${TMP_DEST_DIR} \
 		${libdir}/=${libdir} \
 		${bindir}/=${bindir}
-	ln -s ${TMP_DEST_DIR}${libdir}/libjxtl-1.0.0.so ${TMP_DEST_DIR}${libdir}/libjxtl.so
 	fpm -f -s dir -t rpm -n "${PACKAGE_NAME}-devel" -v "${PACKAGE_VERSION}" \
 		-d "apr-util-devel" \
 		-d "apr-devel" \
 		-d "expat-devel" \
-		-C tmp_dest_dir \
+		-C ${TMP_DEST_DIR} \
 		${libdir}/libjxtl-1.0.so=${libdir}/libjxtl.so \
 		${includedir}/=${includedir}
 	rm -rf "${TMP_DEST_DIR}"

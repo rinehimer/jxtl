@@ -9,6 +9,18 @@ This library contains bindings that can be built for both Perl and Python.  See 
 
 *PHP does not inherently have this problem, but is often used in a manner that violates model-view separation.
 
+## Builds
+
+Local builds can be made by running `./containerbuild.sh`. This will run whichever 
+container build system is configured using the environment variable `$CONTAINER_BUILDER`,
+which defaults to `podman`.
+
+Builds are otherwise made whenever there is a tagged release on github, using the
+build-package action. The artifacts for these builds are automatically placed into a
+draft release.
+
+A manual build can be achieved by following the steps given in `Containerfile` or `.github/workflows/build-package.yml`.
+
 ## Examples
 All examples will use the following simple XML file, which models some beers:
 ```
